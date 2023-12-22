@@ -44,7 +44,7 @@ def get_top_news(news_api_key, todays_date):
 
 
 def write_news_to_file(news_information, todays_date):
-    dir_path = "automation/news/news_summary"
+    dir_path = "hestia/news/news_summary"
     os.makedirs(dir_path, exist_ok=True)
     file_path = os.path.join(dir_path, f"news_summary {todays_date}.txt")
     try:

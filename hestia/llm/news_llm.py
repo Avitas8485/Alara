@@ -1,4 +1,5 @@
 from llama_cpp import Llama
+import yaml
 
 
 llm = Llama(model_path="C:/Users/avity/Projects/models/mistral-7b-instruct-v0.1.Q4_K_M.gguf",
@@ -25,9 +26,17 @@ def chat_completion(sytem_prompt: str, user_prompt: str):
     )
     return output
 
+def load_news_prompt():
+    with open("hestia/llm/prompts/prompts.yaml", "r") as file:
+        prompts = yaml.load(file, Loader=yaml.FullLoader)
+    return prompts["news_debrief_prompt"]
+
+
+
+
         
 if __name__ == "__main__":
-    system_prompt = """You are a news reporter. You are writing a brief summary of the news for the day."""
+    system_prompt = """You are an AI assistant named Hestia. Your task is to give me a brief overview of today's news."""
     user_prompt = """News:
     Scientists spot recent volcanic activity on Earths neighbour Mars - WION.
 China's Space Plane Deployed 6 "Mysterious Wingmen" In Orbit, Claims Amateur Astronomer - NDTV.

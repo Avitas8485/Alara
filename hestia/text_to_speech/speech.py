@@ -1,7 +1,6 @@
 # Description: This file contains the code for the TextToSpeechSystem class.
 import os
 import re
-import subprocess
 from pydub import AudioSegment
 import wave
 from TTS.tts.configs.xtts_config import XttsConfig
@@ -14,7 +13,7 @@ class TextToSpeechSystem:
         self.config.load_json("C:/Users/avity/Projects/models/tts/xtts_v2-001/config.json")
         self.model = Xtts.init_from_config(self.config)
         self.vocab_path = "C:/Users/avity/Projects/models/tts/xtts_v2-001/vocab.json"
-        self.speaker_path = "automation/text_to_speech/voice_samples/output_00000017.wav"
+        self.speaker_path = "hestia/text_to_speech/voice_samples/output_00000017.wav"
         self.model_dir = "C:/Users/avity/Projects/models/tts/xtts_v2-001/"
         self.model.load_checkpoint(config=self.config, checkpoint_dir=self.model_dir, vocab_path=self.vocab_path)
         
@@ -144,10 +143,9 @@ class TextToSpeechSystem:
         sentences = self.split_into_sentences_using_nlp(text)
         soundbite_filepaths = self.convert_sentences_to_wav_files(output_filename, output_dir, sentences)
         self.merge_wav_files_into_one("wav", output_dir, output_filename, soundbite_filepaths)
-        self.play_audio(f"{output_dir}/{output_filename}.wav")
+        # delete the individual soundbite files
+        for soundbite_filepath in soundbite_filepaths:
+            os.remove(soundbite_filepath)
+        #self.play_audio(f"{output_dir}/{output_filename}.wav")
         
-
-if __name__ == "__main__":
-    tts = TextToSpeechSystem()
-    text = tts.load_txt_from_file("input.txt")
-    tts.convert_text_to_speech_using_nlp(text, "automation/text_to_speech/outputs", "output")
+ 
