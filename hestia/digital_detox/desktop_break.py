@@ -1,1 +1,0 @@
-# TODO: Extract data from activity log and use it to inform user when to take a break

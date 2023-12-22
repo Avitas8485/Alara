@@ -4,6 +4,8 @@ import sys
 import os
 from dotenv import load_dotenv
 from typing import Optional
+
+
 load_dotenv()
 sys.path.append('/home/avity/Automation')
 from system_and_utility.ip_geolocation import get_geolocation

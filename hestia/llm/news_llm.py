@@ -31,30 +31,3 @@ def load_news_prompt():
         prompts = yaml.load(file, Loader=yaml.FullLoader)
     return prompts["news_debrief_prompt"]
 
-
-
-
-        
-if __name__ == "__main__":
-    system_prompt = """You are an AI assistant named Hestia. Your task is to give me a brief overview of today's news."""
-    user_prompt = """News:
-    Scientists spot recent volcanic activity on Earths neighbour Mars - WION.
-China's Space Plane Deployed 6 "Mysterious Wingmen" In Orbit, Claims Amateur Astronomer - NDTV.
-Bad Weather Delays Intuitive Machines Lunar Lander Mission - Aviation Week.
-NASA's moon landing mission will include a non-American, Harris will announce - POLITICO.
-How to Spot Your Favorite Constellations | Star Gazers - South Florida PBS.
-Meet 'Coscientist,' your AI lab partner: System succeeds in planning and carrying out real-world chemistry experiments - Phys.org.
-From dog to tortoise, 5 strange animals that were sent to space - IndiaTimes.
-Spectacular Celestial Geminid Meteor Shower 2023 Captured by Hanle - Kashmir Life.
-Adorable Cat Video Reaches Earth After 19-Million-Mile Journey from Deep Space - Gizmodo.
-Microplastics Are the Not-So-Secret Ingredient in Marine Snow - Eos.
-NASAs Mars Reconnaissance Orbiter Has Captured Images of Something Odd Carved into the Martian Landscape - The Debrief.
-SETI has discovered a new 'slide whistle' like fast radio burst signal - Interesting Engineering.
-NASA discovers "Christmas Tree Cluster" of stars glowing in space: "It's beginning to look a lot like cosmos" - CBS News.
-Chinese Spaceplane Trailed By Six Mysterious Objects Transmitting Repeating Pattern - IFLScience.
-ESA - Pinhole propulsion for satellites - European Space Agency.
-"""
-    output = chat_completion(system_prompt, user_prompt)
-    print(output)
-    
-    

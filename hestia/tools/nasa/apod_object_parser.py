@@ -1,10 +1,8 @@
 import requests
-import json
 import os
 from PIL import Image
 from dotenv import load_dotenv
-import pprint
-import datetime
+
 
 load_dotenv()
 API_KEY = os.getenv('NASA_API_KEY')
@@ -52,12 +50,3 @@ def get_apod_data() -> dict:
         print(f"Error fetching APOD data: {e}")
         return {}
 
-def main():
-    apod_data = get_apod_data()
-    apod = APOD(apod_data)
-    pprint.pprint(apod_data)
-    apod.download_image(apod.get_data('url'), apod.get_data('date'))
-    apod.convert_image(f"{apod.get_data('date')}.jpg")
-    
-if __name__ == '__main__':
-    main()

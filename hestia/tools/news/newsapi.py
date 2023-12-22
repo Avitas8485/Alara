@@ -7,6 +7,7 @@ from newspaper import Config
 from datetime import datetime
 import nltk
 import logging
+
 TODAYS_DATE = datetime.now().strftime("%b %d, %Y")
 def get_top_news(news_api_key, todays_date):
     news_information = dict()
@@ -62,5 +63,3 @@ def news_today():
     write_news_to_file(news_information, TODAYS_DATE)
     
     
-if __name__ == "__main__":
-    news_today()
