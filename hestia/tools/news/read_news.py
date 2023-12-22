@@ -1,12 +1,12 @@
 from hestia.tools.news.newsapi import news_today, TODAYS_DATE
 import json
-from hestia.llm.news_llm import load_news_prompt, chat_completion
+from hestia.llm.llama_chat_completion import load_news_prompt, chat_completion
 from hestia.text_to_speech.speech import TextToSpeechSystem
 
-NEWS_SUMMARY_PATH = f"hestia/news/news_summary/news_summary {TODAYS_DATE}.txt"
-CLEAN_NEWS_PATH = f"hestia/news/news_summary/ {TODAYS_DATE}clean.txt"
-SIMPLIFIED_NEWS_PATH = f"hestia/news/news_summary/ {TODAYS_DATE}simplified.txt"
-NEWS_SUMMARY_SPEECH_PATH = f"hestia/news/news_summary/ {TODAYS_DATE}summary.txt"
+NEWS_SUMMARY_PATH = f"hestia/tools/news/news_summary/news_summary {TODAYS_DATE}.txt"
+CLEAN_NEWS_PATH = f"hestia/tools/news/news_summary/ {TODAYS_DATE}clean.txt"
+SIMPLIFIED_NEWS_PATH = f"hestia/tools/news/news_summary/ {TODAYS_DATE}simplified.txt"
+NEWS_SUMMARY_SPEECH_PATH = f"hestia/tools/news/news_summary/ {TODAYS_DATE}summary.txt"
 
 def read_json_file(path):
     try:
@@ -82,7 +82,7 @@ def convert_news_summary_to_speech():
 
     tts.convert_text_to_speech_using_nlp(
         text=news_summary,
-        output_dir="hestia/news/news_tts",
+        output_dir="hestia/text_to_speech/outputs/news_summary",
         output_filename=f"{TODAYS_DATE}summary"
     )
 

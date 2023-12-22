@@ -1,4 +1,6 @@
-import datetime as dt
+     
+# we are going to use visualcrossing.com for weather data
+
 import requests
 import sys
 import os
@@ -7,27 +9,32 @@ from typing import Optional
 
 
 load_dotenv()
-sys.path.append('/home/avity/Automation')
-from system_and_utility.ip_geolocation import get_geolocation
+sys.path.insert(1,'C:/Users/avity/Projects/HESTIA/hestia')
+from tools.system_and_utility.ip_geolocation import get_geolocation
 
-API_KEY = os.getenv('OPEN_WEATHER_API_KEY')
+API_KEY = os.getenv('VISUAL_CROSSING_API_KEY')
 if not API_KEY:
-    raise ValueError('Missing OPEN_WEATHER_API_KEY environment variable')
-BASE_URL = 'https://api.openweathermap.org/data/2.5/weather?'
+    raise ValueError('Missing VISUAL_CROSSING_API_KEY environment variable')
 
+BASE_URL = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/'
 
 def get_city() -> str:
     """Returns city name"""
     location = get_geolocation()
     return location['city']
 
-
-
 def get_weather_data(city: str) -> dict:
     """Returns weather data"""
     params = {
-        'q': city,
-        'appid': API_KEY
+        'aggregateHours': '24',
+        'combinationMethod': 'aggregate',
+        'contentType': 'json',
+        'includeAstronomy': 'true',
+        'includeCurrent': 'true',
+        'includeForecast': 'true',
+        'locationMode': 'single',
+        'key': API_KEY,
+        'location': city
     }
     try:
         response = requests.get(BASE_URL, params=params)
@@ -36,16 +43,7 @@ def get_weather_data(city: str) -> dict:
     except requests.exceptions.HTTPError as e:
         print(f"Error fetching weather data: {e}")
         return None
-
-def kelvin_to_celsius(kelvin_temp: float) -> float:
-    """Converts kelvin to celsius"""
-    return round((kelvin_temp - 273.15), 2)
-
-def celsius_to_fahrenheit(celsius_temp: float) -> float:
-    """Converts celsius to fahrenheit"""
-    # two decimal places
-    return round((celsius_temp * 9/5) + 32, 2)
-
+    
 def get_weather_report() -> Optional[str]:
     """Returns weather report"""
     city = get_city()
@@ -54,21 +52,29 @@ def get_weather_report() -> Optional[str]:
         return None
     weather_report = f"""Weather report for {city}:\n"""
     report_items = {
-        'Temperature': kelvin_to_celsius(weather_data['main']['temp']),
-        'Feels like': kelvin_to_celsius(weather_data['main']['feels_like']),
-        'Weather description': weather_data['weather'][0]['description'],
-        'Wind speed': weather_data['wind']['speed'],
-        'Sunrise time': dt.datetime.fromtimestamp(weather_data['sys']['sunrise']).strftime('%H:%M:%S'),
-        'Sunset time': dt.datetime.fromtimestamp(weather_data['sys']['sunset']).strftime('%H:%M:%S'),
-        'Humidity': weather_data['main']['humidity'],
-        'Pressure': weather_data['main']['pressure'],
-        'Visibility': weather_data['visibility']
-    }
+        'Address': weather_data['address'],
+        'Description': weather_data['description'],
+        'Day': weather_data['days'][0]['datetime'],
+        'Max Temperature': weather_data['days'][0]['tempmax'],
+        'Min Temperature': weather_data['days'][0]['tempmin'],
+        'Current Temperature': weather_data['currentConditions']['temp'],
+        'Humidity': weather_data['days'][0]['humidity'],
+        'Pressure': weather_data['days'][0]['pressure'],
+        'Wind Speed': weather_data['days'][0]['windspeed'],
+        'Wind Gust': weather_data['days'][0]['windgust'],
+        'Sunrise Time': weather_data['days'][0]['sunrise'],
+        'Sunset Time': weather_data['days'][0]['sunset'],
+        'Conditions': weather_data['days'][0]['conditions'],
+        'Conditions Description': weather_data['days'][0]['icon']
+        }
     for key, value in report_items.items():
         weather_report += f"{key}: {value}\n"
     return weather_report
 
-
+    
+    
+    
+    
 if __name__ == '__main__':
     report = get_weather_report()
     if report:
