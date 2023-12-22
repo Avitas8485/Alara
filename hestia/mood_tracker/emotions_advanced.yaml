@@ -1,0 +1,210 @@
+# Description: This file contains the emotions and sub-emotions that are used in the mood tracker.
+Emotions:
+  - emotion: Happy
+    sub_emotions:
+      - emotion: Playful
+        sub_emotions:
+          - emotion: Aroused
+          - emotion: Cheeky
+      - emotion: Content
+        sub_emotions:
+          - emotion: Free
+          - emotion: Joyful
+      - emotion: Interested
+        sub_emotions:
+          - emotion: Curious
+          - emotion: Inquisitive
+      - emotion: Proud
+        sub_emotions:
+          - emotion: Successful
+          - emotion: Confident
+      - emotion: Powerful
+        sub_emotions:
+          - emotion: Courageous
+          - emotion: Creative
+      - emotion: Peaceful
+        sub_emotions:
+          - emotion: Loving
+          - emotion: Thankful
+      - emotion: Trusting
+        sub_emotions:
+          - emotion: Intimate
+          - emotion: Sensitive
+      - emotion: Optimistic
+        sub_emotions:
+          - emotion: Hopeful
+          - emotion: Inspired  
+  - emotion: Sad
+    sub_emotions:
+      - emotion: Lonely
+        sub_emotions:
+          - emotion: Isolated
+          - emotion: Abandoned
+      - emotion: Depressed
+        sub_emotions:
+          - emotion: Inferior
+          - emotion: Empty
+      - emotion: Despair
+        sub_emotions:
+          - emotion: Grief
+          - emotion: Powerless
+      - emotion: Hurt
+        sub_emotions:
+          - emotion: Embarrassed
+          - emotion: Disappointed
+      - emotion: Guilty
+        sub_emotions:
+          - emotion: Ashamed
+          - emotion: Remorseful
+      - emotion: Vulnerable
+        sub_emotions:
+          - emotion: Fragile
+          - emotion: Victimized
+  - emotion: Disgusted
+    sub_emotions:
+      - emotion: Disapproving
+        sub_emotions:
+          - emotion: Judgemental
+          - emotion: Embarrassed
+      - emotion: Disappointed
+        sub_emotions:
+          - emotion: Appalled
+          - emotion: Revolted
+      - emotion: Awful
+        sub_emotions:
+          - emotion: Nauseated
+          - emotion: Detestable
+      - emotion: Repelled
+        sub_emotions:
+          - emotion: Hesitant
+          - emotion: Horrified
+  - emotion: Angry
+    sub_emotions:
+      - emotion: Let Down
+        sub_emotions:
+          - emotion: Betrayed
+          - emotion: Resentful
+      - emotion: Humiliated
+        sub_emotions:
+          - emotion: Disrespected
+          - emotion: Ridiculed
+      - emotion: Bitter
+        sub_emotions:
+          - emotion: Violated
+          - emotion: Indignant
+      - emotion: Mad
+        sub_emotions:
+          - emotion: Furious
+          - emotion: Jealous
+      - emotion: Aggressive
+        sub_emotions:
+          - emotion: Provoked
+          - emotion: Hostile
+      - emotion: Frustrated
+        sub_emotions:
+          - emotion: Infuriated
+          - emotion: Annoyed
+      - emotion: Distant
+        sub_emotions:
+          - emotion: Withdrawn
+          - emotion: Numb
+      - emotion: Critical
+        sub_emotions:
+          - emotion: Skeptical
+          - emotion: Dismissive
+  - emotion: Afraid
+    sub_emotions:
+      - emotion: Scared
+        sub_emotions:
+          - emotion: Helpless
+          - emotion: Frightened
+      - emotion: Anxious
+        sub_emotions:
+          - emotion: Overwhelmed
+          - emotion: Worried
+      - emotion: Insecure
+        sub_emotions:
+          - emotion: Inadequate
+          - emotion: Inferior
+      - emotion: Weak
+        sub_emotions:
+          - emotion: Worthless
+          - emotion: Insignificant
+      - emotion: Rejected
+        sub_emotions:
+          - emotion: Excluded
+          - emotion: Persecuted
+      - emotion: Threatened
+        sub_emotions:
+          - emotion: Nervous
+          - emotion: Exposed
+  - emotion: Bad
+    sub_emotions:
+      - emotion: Tired
+        sub_emotions:
+          - emotion: Sleepy
+          - emotion: Unfocused
+      - emotion: Stressed
+        sub_emotions:
+          - emotion: Out of control
+          - emotion: Overwhelmed
+      - emotion: Busy
+        sub_emotions:
+          - emotion: Pressured
+          - emotion: Rushed
+      - emotion: Bored
+        sub_emotions:
+          - emotion: Apathetic
+          - emotion: Indifferent
+      - emotion: Stuck
+        sub_emotions:
+          - emotion: Trapped
+          - emotion: Desperate
+  - emotion: Surprised
+    sub_emotions:
+      - emotion: Startled
+        sub_emotions:
+          - emotion: Shocked
+          - emotion: Dismayed
+      - emotion: Confused
+        sub_emotions:
+          - emotion: Disillusioned
+          - emotion: Perplexed
+      - emotion: Amazed
+        sub_emotions:
+          - emotion: Astonished
+          - emotion: Awe
+      - emotion: Excited
+        sub_emotions:
+          - emotion: Energetic
+          - emotion: Eager
+      - emotion: Delighted
+        sub_emotions:
+          - emotion: Happy
+          - emotion: Glad
+      - emotion: Pleased
+        sub_emotions:
+          - emotion: Relieved
+          - emotion: Satisfied
+      - emotion: Hopeful
+        sub_emotions:
+          - emotion: Optimistic
+          - emotion: Expectant
+      - emotion: Intrigued
+        sub_emotions:
+          - emotion: Curious
+          - emotion: Interested
+  - emotion: Neutral
+    sub_emotions:
+      - emotion: Calm
+        sub_emotions:
+          - emotion: Relaxed
+          - emotion: At ease
+      - emotion: Focused
+        sub_emotions:
+          - emotion: Clear headed
+          - emotion: Alert
+      - emotion: Mid
+        sub_emotions:
+          - emotion: Ok
+          - emotion: Fine

@@ -1,0 +1,57 @@
+[
+    {
+        "name": "Joy",
+        "color": "#f1c40f",
+        "feelings":["Ecstasy", "Joy", "Serenity"]
+    },
+    {
+        "name": "Trust",
+        "color": "#3498db",
+        "feelings":["Admiration", "Acceptance", "Trust"]
+    },
+    {
+        "name": "Fear",
+        "color": "#8a6eaf",
+        "feelings":["Terror", "Fear", "Apprehension"]
+    },
+    {
+        "name": "Surprise",
+        "color": "#e67e22",
+        "feelings":["Amazement", "Surprise", "Distraction"]
+    },
+    {
+        "name": "Sadness",
+        "color": "#34495e",
+        "feelings":["Grief", "Sadness", "Pensiveness"]
+    },
+    {
+        "name": "Disgust",
+        "color": "#2ecc71",
+        "feelings":["Loathing", "Disgust", "Boredom"]
+    },
+    {
+        "name": "Anger",
+        "color": "#e74c3c",
+        "feelings":["Rage", "Anger", "Annoyance"]
+    },
+    {
+        "name": "Anticipation",
+        "color": "#9b59b6",
+        "feelings":["Vigilance", "Anticipation", "Interest"]
+    },
+    {
+        "name": "Love",
+        "color": "#e91e63",
+        "feelings":["Adoration", "Love", "Sentimentality"]
+    },
+    {
+        "name": "Neutral",
+        "color": "#95a5a6",
+        "feelings":["Neutral"]
+    },
+    {
+        "name": "Mid",
+        "color": "#7f8c8d",
+        "feelings": ["Ok", "Fine", "Meh"]
+    }
+]

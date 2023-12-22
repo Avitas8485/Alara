@@ -1,0 +1,24 @@
+# ignore environment variables
+.env
+.env.*
+# ignore python cache files
+__pycache__/
+# ignore python virtual environment
+venv/
+
+# ignore news summary folder
+news_summary/
+
+# ignore apod_images folder
+apod_images/
+
+
+# ignore mood_tracker.db file
+mood_tracker.db
+
+# ignore model folder
+model/
+
+# ignore output folder
+output/
+outputs/
