@@ -1,7 +1,6 @@
 import os
 import requests
-import json
-from dotenv import load_dotenv, find_dotenv
+from dotenv import load_dotenv
 from newspaper import Article
 from newspaper import Config
 from datetime import datetime
@@ -13,16 +12,11 @@ from base_report_generator import BaseReportGenerator
 load_dotenv()
 
 
-TODAYS_DATE = datetime.now().strftime("%b %d, %Y")
-DIR_PATH = "hestia/tools/news/news_summary"
-NEWS_SUMMARY_PATH = os.path.join(DIR_PATH, f"news_summary {TODAYS_DATE}.txt")
-SIMPLIFIED_NEWS_PATH = os.path.join(DIR_PATH, f"{TODAYS_DATE}simplified.txt")
-NEWS_SUMMARY_SPEECH_PATH = os.path.join(DIR_PATH, f"{TODAYS_DATE}summary.txt")
-NEWS_API_KEY = os.getenv('NEWS_API_KEY')
+
 
 # hestia/tools/news/newsapi.py
 class NewsReport(BaseReportGenerator):
-    DIR_PATH = "hestia/tools/news/news_summary"
+    DIR_PATH = "hestia/tools/reports/news"
     NEWS_API_KEY = os.getenv('NEWS_API_KEY')
     
     def __init__(self):
@@ -30,7 +24,7 @@ class NewsReport(BaseReportGenerator):
         self.news_summary_path = os.path.join(self.DIR_PATH, f"news_summary {self.todays_date}.txt")
         self.simplified_news_path = os.path.join(self.DIR_PATH, f"{self.todays_date}simplified.txt")
         self.news_summary_speech_path = os.path.join(self.DIR_PATH, f"{self.todays_date}summary.txt")
-        nltk.download('punkt')
+        nltk.download('punkt', quiet=True)
         
     def read_file(self, file_path):
         with open(file_path, "r") as f:
