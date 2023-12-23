@@ -4,7 +4,7 @@
 #  - then, at wake up time, hestia will now read the news
 
 from hestia.tools.news.newsapi import news_today, TODAYS_DATE
-from hestia.tools.news.read_news import(
+from hestia.tools.news.newsapi import(
     clean_news_summary, 
     extract_simplified_news, 
     generate_news_summary, 

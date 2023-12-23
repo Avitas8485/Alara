@@ -6,6 +6,8 @@ import sys
 import os
 from dotenv import load_dotenv
 from typing import Optional
+from hestia.llm.llama_chat_completion import chat_completion, load_weather_prompt
+from hestia.text_to_speech.speech import TextToSpeechSystem
 
 
 load_dotenv()
@@ -70,6 +72,14 @@ def get_weather_report() -> Optional[str]:
     for key, value in report_items.items():
         weather_report += f"{key}: {value}\n"
     return weather_report
+
+def generate_weather_report() -> Optional[str]:
+    """Generates weather report"""
+    weather_report = get_weather_report()
+    if not weather_report:
+        return None
+    return chat_completion(sytem_prompt=load_weather_prompt(), user_prompt=weather_report)["choices"][0]["message"]["content"]
+
 
     
     
