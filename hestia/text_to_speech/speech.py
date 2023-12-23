@@ -17,12 +17,24 @@ class TextToSpeechSystem:
         self.model_dir = "C:/Users/avity/Projects/models/tts/xtts_v2-001/"
         self.model.load_checkpoint(config=self.config, checkpoint_dir=self.model_dir, vocab_path=self.vocab_path)
         
-    def split_into_sentences_using_nlp(self,text):
+    def split_into_sentences_using_nlp(self, text):
         import nltk
         nltk.download('punkt', quiet=True)
         from nltk.tokenize import sent_tokenize
         sentences = sent_tokenize(text)
-        return sentences
+        import re
+        # in case the sentence tokenizer splits a number into two sentences.
+        merged_sentences = []
+        i = 0
+        while i < len(sentences):
+            if re.search(r'\d\.$', sentences[i]):
+                merged_sentences.append(sentences[i] + ' ' + sentences[i+1])
+                i += 2
+            else:
+                merged_sentences.append(sentences[i])
+                i += 1
+                
+        return merged_sentences
     
     def load_txt_from_file(self,file_path):
         with open(file_path, "r") as file:
