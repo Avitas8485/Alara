@@ -50,3 +50,14 @@ def get_apod_data() -> dict:
         print(f"Error fetching APOD data: {e}")
         return {}
 
+
+
+if __name__ == "__main__":
+    apod_data = get_apod_data()
+    apod = APOD(apod_data)
+    date = apod.get_data('date')
+    url = apod.get_data('url')
+    apod.download_image(url, date)
+    apod.convert_image(f'{date}.jpg')
+    print(apod_data)
+    

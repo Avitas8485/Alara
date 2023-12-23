@@ -39,21 +39,6 @@ class NewsReport(BaseReportGenerator):
 
 
         
-    def get_information(self, news_api_key):
-        news_information = dict()
-        params = self.get_news_params(news_api_key)
-        response = self.make_news_request(params)
-        news_articles = self.parse_news_response(response)
-        config = self.get_config()
-    
-        for article_info in news_articles:
-            try:
-                article = self.download_and_parse_article(article_info, config)
-            except Exception as e:
-                logging.error(f"Error fetching article: {e}")
-                continue
-            news_information[article_info["source"]["name"]] = self.get_article_info(article_info, article)
-        return news_information
         
     def get_news_params(self, news_api_key):
         return {
@@ -90,6 +75,23 @@ class NewsReport(BaseReportGenerator):
         summary = self.encode_to_ascii(article.summary.replace("\n", ""))
         title = self.encode_to_ascii(article_info["title"])
         return {"title": title, "summary": summary, "url": article_info["url"], "date": f"{self.todays_date}"}
+    
+    def get_information(self, news_api_key):
+        news_information = dict()
+        params = self.get_news_params(news_api_key)
+        response = self.make_news_request(params)
+        news_articles = self.parse_news_response(response)
+        config = self.get_config()
+    
+        for article_info in news_articles:
+            try:
+                article = self.download_and_parse_article(article_info, config)
+            except Exception as e:
+                logging.error(f"Error fetching article: {e}")
+                continue
+            news_information[article_info["source"]["name"]] = self.get_article_info(article_info, article)
+        return news_information
+    
 
     def parse_information(self):
         news_information = self.get_information(self.NEWS_API_KEY)
@@ -108,7 +110,7 @@ class NewsReport(BaseReportGenerator):
         news = self.read_file(self.simplified_news_path)
         news_prompt = load_news_prompt()
         news_summary = chat_completion(sytem_prompt=news_prompt, user_prompt=news)
-        news_summary = news_summary["choices"][0]["message"]["content"]
+        news_summary = news_summary
         self.write_file(self.news_summary_path, news_summary)
 
 

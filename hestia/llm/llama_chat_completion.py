@@ -24,7 +24,7 @@ def chat_completion(sytem_prompt: str, user_prompt: str):
         ], max_tokens=1024
         
     )
-    return output
+    return output["choices"][0]["message"]["content"]
 
 def load_news_prompt():
     with open("hestia/llm/prompts/prompts.yaml", "r") as file:
@@ -39,20 +39,3 @@ def load_weather_prompt():
 
 
 
-if __name__ == '__main__':
-    weather = """Weather report for Buford:
-                Address: Buford
-                Description: Cooling down with a chance of rain Monday & Tuesday.
-                Day: 2023-12-22
-                Max Temperature: 56.9
-                Min Temperature: 36.7
-                Current Temperature: 56.5
-                Humidity: 50.1
-                Pressure: 1027.8
-                Wind Speed: 4.7
-                Wind Gust: 8.1
-                Sunrise Time: 07:38:23
-                Sunset Time: 17:30:53
-                Conditions: Clear
-                Conditions Description: clear-day"""
-    print(chat_completion(sytem_prompt=load_weather_prompt(), user_prompt=weather))

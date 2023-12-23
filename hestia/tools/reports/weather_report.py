@@ -20,6 +20,7 @@ class WeatherReport(BaseReportGenerator):
     def __init__(self):
         self.todays_date = datetime.now().strftime("%b %d, %Y")
         self.DIR_PATH = "hestia/tools/reports/weather"
+        self.simplified_weather_path = os.path.join(self.DIR_PATH, f"{self.todays_date}simplified.txt")
         self.weather_report_path = os.path.join(self.DIR_PATH, f"weather_report {self.todays_date}.txt")
 
     def write_file(self, file_path, content):
@@ -54,10 +55,11 @@ class WeatherReport(BaseReportGenerator):
             return response.json()
         except requests.exceptions.HTTPError as e:
             print(f"Error fetching weather data: {e}")
-            return None
+            return {}
 
-    def parse_information(self, weather_data):
+    def parse_information(self):
         """Returns weather report"""
+        weather_data = self.get_information()
         if not weather_data:
             return None
         weather_report = f"""Weather report for {self.get_city()}:\n"""
@@ -79,14 +81,13 @@ class WeatherReport(BaseReportGenerator):
         }
         for key, value in report_items.items():
             weather_report += f"{key}: {value}\n"
-        return weather_report
-
+        self.write_file(self.simplified_weather_path, weather_report)
+        
     def generate_report_summary(self):
-        weather_data = self.get_information()
-        weather_report = self.parse_information(weather_data)
+        weather = self.read_file(self.simplified_weather_path)
         weather_prompt = load_weather_prompt()[0]
-        weather_report = chat_completion(sytem_prompt=weather_prompt, user_prompt=weather_report)
-        self.write_file(self.weather_report_path, weather_report["choices"][0]["message"]["content"])
+        weather_report = chat_completion(sytem_prompt=weather_prompt, user_prompt=weather)
+        self.write_file(self.weather_report_path, weather_report)
 
     def convert_summary_to_audio(self):
         weather = self.read_file(self.weather_report_path)
