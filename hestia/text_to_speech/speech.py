@@ -19,7 +19,7 @@ class TextToSpeechSystem:
         
     def split_into_sentences_using_nlp(self,text):
         import nltk
-        nltk.download('punkt')
+        nltk.download('punkt', quiet=True)
         from nltk.tokenize import sent_tokenize
         sentences = sent_tokenize(text)
         return sentences

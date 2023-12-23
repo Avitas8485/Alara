@@ -8,7 +8,7 @@ import nltk
 import logging
 from hestia.llm.llama_chat_completion import load_news_prompt, chat_completion
 from hestia.text_to_speech.speech import TextToSpeechSystem
-from base_report_generator import BaseReportGenerator
+from hestia.tools.reports.base_report_generator import BaseReportGenerator
 load_dotenv()
 
 
@@ -39,7 +39,7 @@ class NewsReport(BaseReportGenerator):
 
 
         
-    def get_information(self, news_api_key, todays_date):
+    def get_information(self, news_api_key):
         news_information = dict()
         params = self.get_news_params(news_api_key)
         response = self.make_news_request(params)
@@ -52,7 +52,7 @@ class NewsReport(BaseReportGenerator):
             except Exception as e:
                 logging.error(f"Error fetching article: {e}")
                 continue
-            news_information[article_info["source"]["name"]] = self.get_article_info(article_info, article, todays_date)
+            news_information[article_info["source"]["name"]] = self.get_article_info(article_info, article)
         return news_information
         
     def get_news_params(self, news_api_key):
@@ -92,7 +92,7 @@ class NewsReport(BaseReportGenerator):
         return {"title": title, "summary": summary, "url": article_info["url"], "date": f"{self.todays_date}"}
 
     def parse_information(self):
-        news_information = self.get_information(self.NEWS_API_KEY, self.todays_date)
+        news_information = self.get_information(self.NEWS_API_KEY)
         news_information = {k: v for k, v in news_information.items() if k != "[Removed]"}
         for key, value in news_information.items():
             value.pop("url", None)
@@ -112,7 +112,7 @@ class NewsReport(BaseReportGenerator):
         self.write_file(self.news_summary_path, news_summary)
 
 
-    def generate_report_summary_speech(self):
+    def convert_summary_to_audio(self):
         news = self.read_file(self.news_summary_path)
         tts = TextToSpeechSystem()
         if news is None:

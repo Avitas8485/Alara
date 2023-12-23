@@ -22,3 +22,6 @@ model/
 # ignore output folder
 output/
 outputs/
+
+news/
+weather/

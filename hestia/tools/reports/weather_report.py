@@ -1,4 +1,4 @@
-from base_report_generator import BaseReportGenerator
+from hestia.tools.reports.base_report_generator import BaseReportGenerator
 import requests
 import sys
 import os
@@ -63,19 +63,19 @@ class WeatherReport(BaseReportGenerator):
         weather_report = f"""Weather report for {self.get_city()}:\n"""
         report_items = {
             'Address': weather_data['address'],
-            'Description': weather_data['description'],
-            'Day': weather_data['days'][0]['datetime'],
-            'Max Temperature': weather_data['days'][0]['tempmax'],
-            'Min Temperature': weather_data['days'][0]['tempmin'],
-            'Current Temperature': weather_data['currentConditions']['temp'],
-            'Humidity': weather_data['currentConditions']['humidity'],
-            'Pressure': weather_data['currentConditions']['pressure'],
-            'Wind Speed': weather_data['currentConditions']['windspeed'],
-            'Wind Gust': weather_data['currentConditions']['windgust'],
-            'Sunrise Time': weather_data['days'][0]['sunrise'],
-            'Sunset Time': weather_data['days'][0]['sunset'],
-            'Conditions': weather_data['currentConditions']['conditions'],
-            'Conditions Description': weather_data['currentConditions']['description'],
+        'Description': weather_data['description'],
+        'Day': weather_data['days'][0]['datetime'],
+        'Max Temperature': weather_data['days'][0]['tempmax'],
+        'Min Temperature': weather_data['days'][0]['tempmin'],
+        'Current Temperature': weather_data['currentConditions']['temp'],
+        'Humidity': weather_data['days'][0]['humidity'],
+        'Pressure': weather_data['days'][0]['pressure'],
+        'Wind Speed': weather_data['days'][0]['windspeed'],
+        'Wind Gust': weather_data['days'][0]['windgust'],
+        'Sunrise Time': weather_data['days'][0]['sunrise'],
+        'Sunset Time': weather_data['days'][0]['sunset'],
+        'Conditions': weather_data['days'][0]['conditions'],
+        'Conditions Description': weather_data['days'][0]['icon'],
         }
         for key, value in report_items.items():
             weather_report += f"{key}: {value}\n"
@@ -84,11 +84,11 @@ class WeatherReport(BaseReportGenerator):
     def generate_report_summary(self):
         weather_data = self.get_information()
         weather_report = self.parse_information(weather_data)
-        weather_prompt = load_weather_prompt()
+        weather_prompt = load_weather_prompt()[0]
         weather_report = chat_completion(sytem_prompt=weather_prompt, user_prompt=weather_report)
         self.write_file(self.weather_report_path, weather_report["choices"][0]["message"]["content"])
 
-    def generate_report_audio(self):
+    def convert_summary_to_audio(self):
         weather = self.read_file(self.weather_report_path)
         tts = TextToSpeechSystem()
         if weather is None:
