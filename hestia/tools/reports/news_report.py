@@ -5,7 +5,7 @@ from newspaper import Article
 from newspaper import Config
 from datetime import datetime
 import nltk
-import logging
+from hestia.lib.hestia_logger import HestiaLogger
 from hestia.llm.llama_chat_completion import load_news_prompt, chat_completion
 from hestia.text_to_speech.speech import TextToSpeechSystem
 from hestia.tools.reports.base_report_generator import BaseReportGenerator
@@ -13,7 +13,7 @@ load_dotenv()
 
 
 
-
+logger = HestiaLogger().logger
 # hestia/tools/news/newsapi.py
 class NewsReport(BaseReportGenerator):
     DIR_PATH = "hestia/tools/reports/news"
@@ -51,7 +51,7 @@ class NewsReport(BaseReportGenerator):
         try:
             return requests.get("https://newsapi.org/v2/top-headlines", params=params)
         except Exception as e:
-            logging.error(f"Error fetching news: {e}")
+            logger.error(f"Error making news request: {e}")
             raise
         
     def parse_news_response(self, response):
@@ -87,7 +87,7 @@ class NewsReport(BaseReportGenerator):
             try:
                 article = self.download_and_parse_article(article_info, config)
             except Exception as e:
-                logging.error(f"Error fetching article: {e}")
+                logger.error(f"Error downloading and parsing article: {e}")
                 continue
             news_information[article_info["source"]["name"]] = self.get_article_info(article_info, article)
         return news_information

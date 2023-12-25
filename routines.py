@@ -1,5 +1,4 @@
-import os
-import logging
+from hestia.lib.hestia_logger import HestiaLogger
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -7,8 +6,7 @@ from hestia.routines.morning_routine import morning_preparation, morning_present
 from decouple import config
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = HestiaLogger().logger
 
 # Get settings from environment variables
 db_url = config('DB_URL', default='sqlite:///jobs.sqlite')
@@ -43,7 +41,7 @@ def schedule_jobs():
         scheduler.add_job(remove_job, 'cron' , hour=7, minute=5, args=["morning_preparation"])
         scheduler.add_job(remove_job, 'cron' , hour=7, minute=5, args=["morning_presentation"])
     except Exception as e:
-        logger.error(f"Error adding job: {e}")
+        logger.error(f"Error scheduling jobs: {e}")
 
 if __name__ == "__main__":
     schedule_jobs()

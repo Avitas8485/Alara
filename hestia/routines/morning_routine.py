@@ -3,6 +3,9 @@ from hestia.tools.reports.weather_report import WeatherReport
 from hestia.text_to_speech.tts_utils import play_audio
 from datetime import datetime
 import os
+from hestia.lib.hestia_logger import HestiaLogger
+
+logger = HestiaLogger().logger
 
 WAKE_UP_TIME = datetime.now().replace(hour=7, minute=0, second=0, microsecond=0)
 def generate_report(report_class):
@@ -12,7 +15,7 @@ def generate_report(report_class):
         report.generate_report_summary()
         report.convert_summary_to_audio()
     except Exception as e:
-        print(f"Error generating report: {e}")
+        logger.error(f"Error generating report: {e}")
     
 def news_report():
     generate_report(NewsReport)
