@@ -1,65 +1,46 @@
 
-from hestia.tools.reports.news_report import NewsReport
-from hestia.tools.reports.weather_report import WeatherReport
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from apscheduler.schedulers.blocking import BlockingScheduler
-from hestia.text_to_speech.tts_utils import play_audio
-from datetime import timedelta, datetime
-import os
+from hestia.routines.morning_routine import morning_preparation, morning_presentation
+import logging
 # for now, lets assume that the user wants to wake up at 7:00 AM, and that the alarm is not needed
 # so, we will set the wake up time to 7:00 AM
-WAKE_UP_TIME = datetime.now().replace(hour=7, minute=0, second=0, microsecond=0)
 
 
-scheduler = BlockingScheduler()
-
-
+logging.basicConfig(filename='scheduler.log', level=logging.INFO)
 
     
-def generate_report(report_class):
-    try:
-        report = report_class()
-        report.parse_information()
-        report.generate_report_summary()
-        report.convert_summary_to_audio()
-    except Exception as e:
-        print(f"Error generating report: {e}")
-    
-def news_report():
-    generate_report(NewsReport)
-    
-def weather_report():
-    generate_report(WeatherReport)
-    
-def morning_preparation():
-    news_report()
-    weather_report()
-    
-def play_report(report_type):
-    todays_date = datetime.now().strftime("%b %d, %Y")
-    report_path = f"hestia/text_to_speech/outputs/{report_type}/{todays_date}{report_type}.wav"
-    play_audio(report_path)
-    
-def play_weather():
-    play_report("weather_report")
-    
-def play_news_details():
-    play_report("news_report")
-    
-def morning_presentation():
-    play_weather()
-    play_news_details()
-    
+jobstore = {
+    'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
+}
+
+executors = {
+    'default': ThreadPoolExecutor(20),
+    'processpool': ProcessPoolExecutor(5)
+}
+
+job_defaults = {
+    'coalesce': False,
+    'max_instances': 3,
+    'misfire_grace_time': 500
+}
+
+scheduler = BlockingScheduler(jobstores=jobstore, executors=executors, job_defaults=job_defaults)
 
 def remove_job(job_id):
     try:
         scheduler.remove_job(job_id)
     except Exception as e:
         print(f"Error removing job: {e}")
-
-scheduler.add_job(morning_preparation, 'cron' , hour=6, minute=30, id="morning_preparation")
-scheduler.add_job(morning_presentation, 'cron' , hour=7, minute=0)
-scheduler.add_job(remove_job, 'cron' , hour=7, minute=5, args=["morning_preparation", "morning_presentation"])
-
+try:
+    scheduler.add_job(morning_preparation, 'cron' , hour=6, minute=30, id="morning_preparation")
+    scheduler.add_job(morning_presentation, 'cron' , hour=7, minute=0, id="morning_presentation")
+    scheduler.add_job(remove_job, 'cron' , hour=7, minute=5, args=["morning_preparation"])
+    scheduler.add_job(remove_job, 'cron' , hour=7, minute=5, args=["morning_presentation"])
+except Exception as e:
+    logging.error(f"Error adding job: {e}")
+    
 if __name__ == "__main__":
     scheduler.start()
 
