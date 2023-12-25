@@ -122,5 +122,5 @@ class NewsReport(BaseReportGenerator):
         tts.convert_text_to_speech_using_nlp(
             text=news,
             output_dir="hestia/text_to_speech/outputs/news_summary",
-            output_filename=f"{self.todays_date}summary"
+            output_filename=f"{self.todays_date}news_report"
         )
