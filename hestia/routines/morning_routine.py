@@ -1,7 +1,7 @@
 from hestia.tools.reports.news_report import NewsReport
 from hestia.tools.reports.weather_report import WeatherReport
 from hestia.text_to_speech.tts_utils import play_audio
-from datetime import timedelta, datetime
+from datetime import datetime
 import os
 
 WAKE_UP_TIME = datetime.now().replace(hour=7, minute=0, second=0, microsecond=0)

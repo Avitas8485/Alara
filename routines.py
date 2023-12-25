@@ -1,50 +1,50 @@
-
+import os
+import logging
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from apscheduler.schedulers.blocking import BlockingScheduler
 from hestia.routines.morning_routine import morning_preparation, morning_presentation
-import logging
-# for now, lets assume that the user wants to wake up at 7:00 AM, and that the alarm is not needed
-# so, we will set the wake up time to 7:00 AM
+from decouple import config
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-logging.basicConfig(filename='scheduler.log', level=logging.INFO)
+# Get settings from environment variables
+db_url = config('DB_URL', default='sqlite:///jobs.sqlite')
+thread_pool_size = config('THREAD_POOL_SIZE', default=20, cast=int)
+process_pool_size = config('PROCESS_POOL_SIZE', default=5, cast=int)
 
-    
-jobstore = {
-    'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
-}
-
+# Set up job store, executors and job defaults
+jobstore = {'default': SQLAlchemyJobStore(url=db_url)}
 executors = {
-    'default': ThreadPoolExecutor(20),
-    'processpool': ProcessPoolExecutor(5)
+    'default': ThreadPoolExecutor(thread_pool_size),
+    'processpool': ProcessPoolExecutor(process_pool_size)
 }
-
 job_defaults = {
     'coalesce': False,
     'max_instances': 3,
     'misfire_grace_time': 500
 }
 
+# Create scheduler
 scheduler = BlockingScheduler(jobstores=jobstore, executors=executors, job_defaults=job_defaults)
 
 def remove_job(job_id):
     try:
         scheduler.remove_job(job_id)
     except Exception as e:
-        print(f"Error removing job: {e}")
-try:
-    scheduler.add_job(morning_preparation, 'cron' , hour=6, minute=30, id="morning_preparation")
-    scheduler.add_job(morning_presentation, 'cron' , hour=7, minute=0, id="morning_presentation")
-    scheduler.add_job(remove_job, 'cron' , hour=7, minute=5, args=["morning_preparation"])
-    scheduler.add_job(remove_job, 'cron' , hour=7, minute=5, args=["morning_presentation"])
-except Exception as e:
-    logging.error(f"Error adding job: {e}")
-    
+        logger.error(f"Error removing job: {e}")
+
+def schedule_jobs():
+    try:
+        scheduler.add_job(morning_preparation, 'cron' , hour=6, minute=30, id="morning_preparation")
+        scheduler.add_job(morning_presentation, 'cron' , hour=7, minute=0, id="morning_presentation")
+        scheduler.add_job(remove_job, 'cron' , hour=7, minute=5, args=["morning_preparation"])
+        scheduler.add_job(remove_job, 'cron' , hour=7, minute=5, args=["morning_presentation"])
+    except Exception as e:
+        logger.error(f"Error adding job: {e}")
+
 if __name__ == "__main__":
+    schedule_jobs()
     scheduler.start()
-
-    
-
-
-
