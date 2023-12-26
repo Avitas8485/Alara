@@ -2,13 +2,13 @@ from hestia.tools.reports.news_report import NewsReport
 from hestia.tools.reports.weather_report import WeatherReport
 from hestia.text_to_speech.tts_utils import play_audio
 from datetime import datetime
-from prefect import task,flow
-import os
+
 from hestia.lib.hestia_logger import HestiaLogger
+
 
 logger = HestiaLogger().logger
 
-WAKE_UP_TIME = datetime.now().replace(hour=7, minute=0, second=0, microsecond=0)
+
 def generate_report(report_class):
     try:
         report = report_class()
@@ -23,30 +23,24 @@ def play_report(report_type):
     report_path = f"hestia/text_to_speech/outputs/{report_type}/{todays_date}{report_type}.wav"
     play_audio(report_path)
 
-@task    
 def news_report():
     generate_report(NewsReport)
     
-@task    
 def weather_report():
     generate_report(WeatherReport)
 
-@flow
 def morning_preparation():
     news_report()
     weather_report()
 
     
 
-@task    
 def play_weather():
     play_report("weather_report")
-@task    
 def play_news_details():
     play_report("news_report")
     
 
-@flow   
 def morning_presentation():
     play_weather()
     play_news_details()
