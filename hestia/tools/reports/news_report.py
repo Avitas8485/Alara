@@ -119,7 +119,7 @@ class NewsReport(BaseReportGenerator):
         tts = TextToSpeechSystem()
         if news is None:
             return
-        tts.convert_text_to_speech_using_nlp(
+        tts.convert_text_to_speech(
             text=news,
             output_dir="hestia/text_to_speech/outputs/news_summary",
             output_filename=f"{self.todays_date}news_report"

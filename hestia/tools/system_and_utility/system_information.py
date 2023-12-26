@@ -263,14 +263,14 @@ def main() -> None:
     gpus = get_gpu_info()
     print_header("GPU Information")
     headers = ("GPU ID", "GPU Name", "GPU Load", "GPU Free Memory", "GPU Used Memory", "GPU Total Memory", "GPU Temperature", "GPU UUID")
-    tabulate_data(gpus, list(headers))
+    tabulate_data(gpus, list(headers)) # type: ignore
     print()
     
     # Users Information
     users = get_users_info()
     print_header("Users Information")
     headers = ("Username", "Terminal", "Host")
-    tabulate_data(users, list(headers))
+    tabulate_data(users, list(headers)) # type: ignore
     print()
     
     

@@ -94,7 +94,7 @@ class WeatherReport(BaseReportGenerator):
         tts = TextToSpeechSystem()
         if weather is None:
             return
-        tts.convert_text_to_speech_using_nlp(
+        tts.convert_text_to_speech(
             text=weather,
             output_dir="hestia/text_to_speech/outputs/weather_report",
             output_filename=f"{self.todays_date}weather_report"

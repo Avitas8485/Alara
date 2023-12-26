@@ -24,7 +24,7 @@ def chat_completion(sytem_prompt: str, user_prompt: str):
         ], max_tokens=1024
         
     )
-    return output["choices"][0]["message"]["content"]
+    return output["choices"][0]["message"]["content"] # type: ignore
 
 def load_news_prompt():
     with open("hestia/llm/prompts/prompts.yaml", "r") as file:

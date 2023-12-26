@@ -7,7 +7,7 @@ def get_ip_address() -> str:
     response = requests.request("GET", url)
     return response.json()['ip']
 
-def get_geolocation(ip_address: str=None) -> dict:
+def get_geolocation(ip_address: str = "") -> dict:
     """Returns geolocation of the IP address"""
     if not ip_address:
         ip_address = get_ip_address()
@@ -18,7 +18,7 @@ def get_geolocation(ip_address: str=None) -> dict:
 
 if __name__ == '__main__':
     ip_address = sys.argv[1] if len(sys.argv) > 1 else None
-    geolocation = get_geolocation(ip_address)
+    geolocation = get_geolocation(ip_address or "")
     print(f"""Geolocation for {geolocation['query']}:
     Country: {geolocation['country']}
     City: {geolocation['city']}
