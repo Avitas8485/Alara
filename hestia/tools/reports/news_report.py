@@ -5,7 +5,7 @@ from newspaper import Article
 from newspaper import Config
 from datetime import datetime
 import nltk
-from hestia.lib.hestia_logger import HestiaLogger
+from hestia.lib.hestia_logger import logger
 from hestia.llm.llama_chat_completion import load_news_prompt, chat_completion
 from hestia.text_to_speech.speech import TextToSpeechSystem
 from hestia.tools.reports.base_report_generator import BaseReportGenerator
@@ -13,7 +13,7 @@ load_dotenv()
 
 
 
-logger = HestiaLogger().logger
+
 # hestia/tools/news/newsapi.py
 class NewsReport(BaseReportGenerator):
     DIR_PATH = "hestia/tools/reports/news"
@@ -121,6 +121,6 @@ class NewsReport(BaseReportGenerator):
             return
         tts.convert_text_to_speech(
             text=news,
-            output_dir="hestia/text_to_speech/outputs/news_summary",
+            output_dir="hestia/text_to_speech/outputs/news_report",
             output_filename=f"{self.todays_date}news_report"
         )

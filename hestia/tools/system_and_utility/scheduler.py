@@ -24,7 +24,6 @@ JOB_DEFAULTS = {
 class SchedulerManager:
     def __init__(self):
         self.scheduler = BackgroundScheduler(jobstores=JOBSTORES, executors=EXECUTORS, job_defaults=JOB_DEFAULTS)
-        self.scheduler.start()
 
                 
     def add_job(self, job_function: Any, job_id: Optional[str] = None, trigger: Optional[str] = None, **kwargs: Any) -> None:

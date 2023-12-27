@@ -4,8 +4,8 @@ from hestia.lib.hestia_logger import logger
 
 
 llm = Llama(model_path="C:/Users/avity/Projects/models/mistral-7b-instruct-v0.1.Q4_K_M.gguf",
-            n_threads=4,
-            n_threads_batch=4,
+            n_threads=2,
+            n_threads_batch=2,
             n_ctx=2048)
 
 

@@ -34,7 +34,6 @@ def weather_report():
     generate_report(WeatherReport)
 
 def morning_preparation():
-    logger.info("Generating reports...")
     news_report()
     weather_report()
 
@@ -58,17 +57,20 @@ def morning_presentation():
     
 def cleanup():
     for file in os.listdir("hestia/text_to_speech/outputs"):
-        os.remove(f"hestia/text_to_speech/outputs/{file}")
+        if file.endswith(".wav"):
+            os.remove(f"hestia/text_to_speech/outputs/{file}")
     for file in os.listdir("hestia/tools/reports/news"):
-        os.remove(f"hestia/tools/reports/news/{file}")
+        if file.endswith(".txt"):
+            os.remove(f"hestia/tools/reports/news/{file}")
     for file in os.listdir("hestia/tools/reports/weather"):
-        os.remove(f"hestia/tools/reports/weather/{file}")
+        if file.endswith(".txt"):
+            os.remove(f"hestia/tools/reports/weather/{file}")
         
     
 
 def schedule_morning_routine():
-    scheduler.add_job(morning_preparation, trigger="cron", hour=6, minute=0, second=0)
-    scheduler.add_job(morning_presentation, trigger="cron", hour=7, minute=0, second=0)
+    scheduler.add_job(morning_preparation)
+    scheduler.add_job(morning_presentation)
     
     
     

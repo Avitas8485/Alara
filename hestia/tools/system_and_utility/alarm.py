@@ -42,7 +42,7 @@ class Alarm:
             # increase volume
             with self.lock:
                 current_volume = volume.GetMasterVolumeLevel() #type: ignore
-                volume.SetMasterVolumeLevel(min(current_volume + increase_volume, volume.GetVolumeRange()[1]), None) #type: ignore
+                volume.SetMasterVolumeLevel(current_volume + increase_volume, None) #type: ignore
                 increase_volume += 1
                 if increase_volume > 10:
                     increase_volume = 0

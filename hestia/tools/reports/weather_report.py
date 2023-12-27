@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from hestia.llm.llama_chat_completion import chat_completion, load_weather_prompt
 from hestia.text_to_speech.speech import TextToSpeechSystem
+from hestia.lib.hestia_logger import logger
 from datetime import datetime
 
 load_dotenv()
@@ -54,7 +55,7 @@ class WeatherReport(BaseReportGenerator):
             response.raise_for_status()
             return response.json()
         except requests.exceptions.HTTPError as e:
-            print(f"Error fetching weather data: {e}")
+            logger.error(f"Error making weather request: {e}")
             return {}
 
     def parse_information(self):
