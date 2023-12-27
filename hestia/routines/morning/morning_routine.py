@@ -2,12 +2,14 @@ from hestia.tools.reports.news_report import NewsReport
 from hestia.tools.reports.weather_report import WeatherReport
 from hestia.text_to_speech.tts_utils import play_audio
 from datetime import datetime
-
+import os
+from hestia.tools.system_and_utility.scheduler import SchedulerManager
 from hestia.lib.hestia_logger import HestiaLogger
 
 
 logger = HestiaLogger().logger
 
+scheduler = SchedulerManager()
 
 def generate_report(report_class):
     try:
@@ -45,4 +47,17 @@ def morning_presentation():
     play_weather()
     play_news_details()
     
+def cleanup():
+    for file in os.listdir("hestia/text_to_speech/outputs"):
+        os.remove(f"hestia/text_to_speech/outputs/{file}")
+    for file in os.listdir("hestia/tools/reports/news"):
+        os.remove(f"hestia/tools/reports/news/{file}")
+    for file in os.listdir("hestia/tools/reports/weather"):
+        os.remove(f"hestia/tools/reports/weather/{file}")
+        
+    
 
+def schedule_morning_preparation():
+    scheduler.add_job(morning_preparation, trigger="cron", hour=6, minute=0, second=0)
+    scheduler.add_job(morning_presentation, trigger="cron", hour=7, minute=0, second=0)
+    

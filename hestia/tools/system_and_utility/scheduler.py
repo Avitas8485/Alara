@@ -3,6 +3,7 @@ from typing import Optional, Any, List
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from hestia.lib.hestia_logger import HestiaLogger
+from uuid import uuid4
 
 logger = HestiaLogger().logger
 
@@ -24,55 +25,56 @@ JOB_DEFAULTS = {
 class SchedulerManager:
     def __init__(self):
         self.scheduler = BackgroundScheduler(jobstores=JOBSTORES, executors=EXECUTORS, job_defaults=JOB_DEFAULTS)
+        self.scheduler.start()
 
                 
-    def add_job(self, job_function: Any, job_id: str, trigger, args: List[Any]):
+    def add_job(self, job_function: Any, job_id: Optional[str] = None, trigger: Optional[str] = None, **kwargs: Any) -> None:
+        # generate a job id if one is not provided
+        if job_id is None:
+            job_id = str(uuid4())
+        # get all jobs from the scheduler
+        if self.scheduler.get_job(job_id):
+            logger.info(f"Job with id {job_id} already exists.")
+            return 
+        # add the job to the scheduler
         try:
-            self.scheduler.remove_job(job_id)
-        except Exception:
-            pass
-        try:
-            self.scheduler.add_job(job_function, trigger=trigger, id=job_id, args=args)
+            self.scheduler.add_job(job_function, trigger=trigger, id=job_id, **kwargs)
         except Exception as e:
             logger.error(f"Error adding job: {e}")
-            raise
+
         
-    def remove_job(self, job_id: str):
+    def remove_job(self, job_id: str) -> None:
         try:
             self.scheduler.remove_job(job_id)
         except Exception as e:
             logger.error(f"Error removing job: {e}")
-            raise
         
-    def pause_job(self, job_id: str):
+    def get_jobs(self) -> List[Any]:
+        try:
+            return self.scheduler.get_jobs()
+        except Exception as e:
+            logger.error(f"Error getting jobs: {e}")
+            return []        
+    def modify_job(self, job_id: str, **changes: Any) -> None:
+        try:
+            self.scheduler.modify_job(job_id, **changes)
+        except Exception as e:
+            logger.error(f"Error modifying job: {e}")
+            return
+        
+    def pause_job(self, job_id: str) -> None:
         try:
             self.scheduler.pause_job(job_id)
         except Exception as e:
             logger.error(f"Error pausing job: {e}")
-            raise
+            return
         
-    def resume_job(self, job_id: str):
+    def resume_job(self, job_id: str) -> None:
         try:
             self.scheduler.resume_job(job_id)
         except Exception as e:
             logger.error(f"Error resuming job: {e}")
-            raise
-        
-    def list_jobs(self) -> str:
-        try:
-            jobs = self.scheduler.get_jobs()
-            return "\n".join([f"{job.id} {job.next_run_time}" for job in jobs]) if jobs else "No jobs"
-        except Exception as e:
-            logger.error(f"Error listing jobs: {e}")
-            raise
-        
-    def modify_job(self, job_id: str, job_function: Optional[Any] = None, trigger=None, args=None):
-        try:
-            modifications = {key: value for key, value in [('job_function', job_function), ('trigger', trigger), ('args', args)] if value is not None}
-            self.scheduler.modify_job(job_id, **modifications)
-        except Exception as e:
-            logger.error(f"Error modifying job: {e}")
-            raise
+            return
         
     def stop_scheduler(self):
         if self.scheduler.running:
@@ -84,6 +86,9 @@ class SchedulerManager:
     
     def __del__(self):
         self.stop_scheduler()
+        
+
+
         
 
     
