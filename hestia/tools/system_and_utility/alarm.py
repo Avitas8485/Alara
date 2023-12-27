@@ -71,6 +71,7 @@ class Alarm:
         self.input_thread.start()
         
     
+    
 if __name__ == "__main__":
     alarm = Alarm()
     alarm.start()
