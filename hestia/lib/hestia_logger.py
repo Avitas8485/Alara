@@ -38,3 +38,6 @@ class HestiaLogger(metaclass=Singleton):
 
     def critical(self, message, *args):
         self.logger.critical(message, *args)
+        
+        
+logger = HestiaLogger().logger

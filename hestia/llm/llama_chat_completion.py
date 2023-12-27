@@ -1,7 +1,6 @@
 from llama_cpp import Llama
 import yaml
-from hestia.lib.hestia_logger import HestiaLogger
-logger = HestiaLogger().logger
+from hestia.lib.hestia_logger import logger
 
 
 llm = Llama(model_path="C:/Users/avity/Projects/models/mistral-7b-instruct-v0.1.Q4_K_M.gguf",

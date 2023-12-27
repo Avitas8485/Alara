@@ -2,10 +2,9 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from typing import Optional, Any, List
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
-from hestia.lib.hestia_logger import HestiaLogger
+from hestia.lib.hestia_logger import logger
 from uuid import uuid4
 
-logger = HestiaLogger().logger
 
 JOBSTORES = {
     'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
@@ -84,8 +83,9 @@ class SchedulerManager:
         if not self.scheduler.running:
             self.scheduler.start()
     
-    def __del__(self):
-        self.stop_scheduler()
+
+
+
         
 
 

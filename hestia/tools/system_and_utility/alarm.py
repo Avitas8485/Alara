@@ -5,8 +5,8 @@ import threading
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-from hestia.lib.hestia_logger import HestiaLogger
-logger = HestiaLogger().logger
+from hestia.lib.hestia_logger import logger
+
 
 # get default audio device using PyCAW
 devices = AudioUtilities.GetSpeakers()

@@ -6,8 +6,8 @@ import wave
 from TTS.tts.configs.xtts_config import XttsConfig
 from TTS.tts.models.xtts import Xtts
 import soundfile as sf
-from hestia.lib.hestia_logger import HestiaLogger
-logger = HestiaLogger().logger
+from hestia.lib.hestia_logger import logger
+
 
 class TextToSpeechSystem:
     def __init__(self):

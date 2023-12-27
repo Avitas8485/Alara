@@ -1,12 +1,21 @@
 from hestia.routines.morning.morning_routine import schedule_morning_routine
-from hestia.lib.hestia_logger import HestiaLogger
+from hestia.tools.system_and_utility.scheduler import SchedulerManager
+from hestia.lib.hestia_logger import logger
 
-logger = HestiaLogger().logger
 
 
 
 
 if __name__ == "__main__":
-    logger.info("Starting morning routine...")
+    scheduler = SchedulerManager()
     schedule_morning_routine()
+    logger.info("Hestia is now running. Press Ctrl+C to stop.")
+    try:
+        while True:
+            pass
+    except KeyboardInterrupt:
+        logger.info("Stopping Hestia...")
+        scheduler.stop_scheduler()
+        logger.info("Hestia stopped.")
+        
     

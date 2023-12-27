@@ -4,12 +4,12 @@ from hestia.text_to_speech.tts_utils import play_audio
 from datetime import datetime
 import os
 from hestia.tools.system_and_utility.scheduler import SchedulerManager
-from hestia.lib.hestia_logger import HestiaLogger
+from hestia.lib.hestia_logger import logger
 from hestia.tools.system_and_utility.alarm import Alarm
 
 
 
-logger = HestiaLogger().logger
+
 alarm = Alarm()
 scheduler = SchedulerManager()
 
