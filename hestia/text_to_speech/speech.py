@@ -6,6 +6,8 @@ import wave
 from TTS.tts.configs.xtts_config import XttsConfig
 from TTS.tts.models.xtts import Xtts
 import soundfile as sf
+from hestia.lib.hestia_logger import HestiaLogger
+logger = HestiaLogger().logger
 
 class TextToSpeechSystem:
     def __init__(self):
@@ -71,7 +73,7 @@ class TextToSpeechSystem:
             else:
                 combined_sounds=combined_sounds+some_sound
 
-        combined_sounds.export(output_filepath, format=format)
+        combined_sounds.export(output_filepath, format=format) #type: ignore
 
     def get_output_files(self,output_dir,soundbite_filename):
         soundbite_filepaths=[]
@@ -104,7 +106,7 @@ class TextToSpeechSystem:
                     data = wf.readframes(chunk)
                 stream.close()
         except Exception as e:
-            print(f"Error: {e}")
+            logger.error(f"Error playing audio: {e}")
             
 
     def convert_text_to_speech(self, text: str, output_dir: str, output_filename: str):

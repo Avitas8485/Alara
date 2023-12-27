@@ -5,6 +5,8 @@ import threading
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+from hestia.lib.hestia_logger import HestiaLogger
+logger = HestiaLogger().logger
 
 # get default audio device using PyCAW
 devices = AudioUtilities.GetSpeakers()
@@ -30,7 +32,7 @@ class Alarm:
         try:
             sound = AudioSegment.from_mp3(self.sound_path)
         except FileNotFoundError:
-            print(f"File not found: {self.sound_path}")
+            logger.error(f"Sound file not found: {self.sound_path}")
             return
 
         print(f"Time to wake up!")
@@ -72,9 +74,7 @@ class Alarm:
         
     
     
-if __name__ == "__main__":
-    alarm = Alarm()
-    alarm.start()
+
     
     
     
