@@ -1,6 +1,5 @@
 # Description: This file contains the code for the TextToSpeechSystem class.
 import os
-import re
 from pydub import AudioSegment
 import wave
 from TTS.tts.configs.xtts_config import XttsConfig
@@ -13,11 +12,10 @@ class TextToSpeechSystem:
     def __init__(self):
         self.config = XttsConfig()
         self.config.load_json("C:/Users/avity/Projects/models/tts/xtts_v2-001/config.json")
-        self.model = Xtts.init_from_config(self.config)
         self.vocab_path = "C:/Users/avity/Projects/models/tts/xtts_v2-001/vocab.json"
         self.speaker_path = "hestia/text_to_speech/voice_samples/output_00000017.wav"
         self.model_dir = "C:/Users/avity/Projects/models/tts/xtts_v2-001/"
-        self.model.load_checkpoint(config=self.config, checkpoint_dir=self.model_dir, vocab_path=self.vocab_path)
+        self.model = None
         
     def split_into_sentences_using_nlp(self, text):
         import nltk
@@ -45,6 +43,8 @@ class TextToSpeechSystem:
     
     
     def convert_sentences_to_wav_files(self,filename: str, output_dir: str, sentences: list):
+        self.model = Xtts.init_from_config(self.config)
+        self.model.load_checkpoint(config=self.config, checkpoint_dir=self.model_dir, vocab_path=self.vocab_path)
         soundbite_filepaths = []
         for i, sentence in enumerate(sentences):
             soundbite_filepath = f"{output_dir}/{filename}_{i}.wav"
@@ -57,6 +57,7 @@ class TextToSpeechSystem:
             )
             sf.write(soundbite_filepath, out["wav"], 24000)
             soundbite_filepaths.append(soundbite_filepath)
+        self.model = None
         return soundbite_filepaths
     
     def merge_wav_files_into_one(self,format: str,output_dir:str,output_filename:str,soundbite_filepaths:list):
@@ -116,7 +117,6 @@ class TextToSpeechSystem:
         # delete the individual soundbite files
         for soundbite_filepath in soundbite_filepaths:
             os.remove(soundbite_filepath)
-        #self.play_audio(f"{output_dir}/{output_filename}.wav")
         
         
  
