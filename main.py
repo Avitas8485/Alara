@@ -1,20 +1,14 @@
-from hestia.routines.morning.morning_routine import schedule_morning_routine
-from hestia.tools.system_and_utility.scheduler import SchedulerManager
-from hestia.lib.hestia_logger import logger
+from flask import Flask, render_template
+from datetime import datetime
 
 
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 
 
 if __name__ == "__main__":
-    scheduler = SchedulerManager()
-    while True:
-        try:
-            schedule_morning_routine()
-            logger.info("Hestia is now running. Press Ctrl+C to stop.")
-            scheduler.start_scheduler()
-        except KeyboardInterrupt:
-            logger.info("Stopping Hestia...")
-            scheduler.stop_scheduler()
-            break
-            
+    app.run(debug=True, host="localhost", port=5000)

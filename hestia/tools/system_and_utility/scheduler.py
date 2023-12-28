@@ -36,7 +36,7 @@ class SchedulerManager:
             return 
         # add the job to the scheduler
         try:
-            self.scheduler.add_job(job_function, trigger=trigger, id=job_id, **kwargs)
+            self.scheduler.add_job(job_function, trigger=trigger, id=job_id,replace_existing=True, **kwargs)
         except Exception as e:
             logger.error(f"Error adding job: {e}")
 
