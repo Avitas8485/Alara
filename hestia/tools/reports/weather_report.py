@@ -87,7 +87,7 @@ class WeatherReport(BaseReportGenerator):
     def generate_report_summary(self):
         weather = self.read_file(self.simplified_weather_path)
         weather_prompt = load_weather_prompt()[0]
-        weather_report = chat_completion(sytem_prompt=weather_prompt, user_prompt=weather)
+        weather_report = chat_completion(system_prompt=weather_prompt, user_prompt=weather)
         self.write_file(self.weather_report_path, weather_report)
 
     def convert_summary_to_audio(self):

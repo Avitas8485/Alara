@@ -109,7 +109,7 @@ class NewsReport(BaseReportGenerator):
     def generate_report_summary(self):
         news = self.read_file(self.simplified_news_path)
         news_prompt = load_news_prompt()
-        news_summary = chat_completion(sytem_prompt=news_prompt, user_prompt=news)
+        news_summary = chat_completion(system_prompt=news_prompt, user_prompt=news)
         news_summary = news_summary
         self.write_file(self.news_summary_path, news_summary)
 

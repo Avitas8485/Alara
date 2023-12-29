@@ -1,6 +1,7 @@
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from typing import Optional, Any, List
 from apscheduler.schedulers.background import BackgroundScheduler
+from flask_apscheduler import APScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from hestia.lib.hestia_logger import logger
 from uuid import uuid4

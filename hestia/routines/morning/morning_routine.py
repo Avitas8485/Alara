@@ -6,7 +6,7 @@ import os
 from hestia.tools.system_and_utility.scheduler import SchedulerManager
 from hestia.lib.hestia_logger import logger
 from hestia.tools.system_and_utility.alarm import Alarm
-
+import time
 
 
 
@@ -50,6 +50,8 @@ def play_news_details():
 def morning_presentation():
     logger.info("Starting morning presentation...")
     alarm.start()
+    while alarm.is_active():
+        time.sleep(1)
     play_weather()
     play_news_details()
     logger.info("Morning presentation complete. Cleaning up...")
@@ -69,8 +71,8 @@ def cleanup():
     
 
 def schedule_morning_routine():
-    scheduler.add_job(morning_preparation)
-    scheduler.add_job(morning_presentation)
+    scheduler.add_job(morning_preparation,trigger="cron",hour=7,minute=0,second=0)
+    scheduler.add_job(morning_presentation,trigger="cron",hour=7,minute=30,second=0)
     
     
     
