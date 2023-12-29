@@ -28,3 +28,6 @@ weather/
 
 # ignore jobs.sqlite file
 jobs.sqlite
+
+# ignore playground.ipynb file
+playground.ipynb
