@@ -25,3 +25,6 @@ outputs/
 
 news/
 weather/
+
+# ignore jobs.sqlite file
+jobs.sqlite
