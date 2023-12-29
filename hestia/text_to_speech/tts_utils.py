@@ -1,6 +1,10 @@
 import pyaudio
 import wave
+
+
+
 def play_audio(audio_path):
+        """Play the audio."""   
         chunk = 1024
         try:
             with wave.open(audio_path, 'rb') as wf:

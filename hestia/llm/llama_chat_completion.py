@@ -6,6 +6,7 @@ from contextlib import contextmanager
 
 @contextmanager
 def load_llama_model():
+    """Load the Llama model, and unload it when done."""
     logger.info("Loading LLM...")
     llm =  Llama(model_path="C:/Users/avity/Projects/models/mistral-7b-instruct-v0.1.Q4_K_M.gguf",
             n_threads=2,
@@ -21,7 +22,8 @@ def load_llama_model():
 
 
 # now to turn this into a function
-def chat_completion(system_prompt: str, user_prompt: str, **kwargs):
+def chat_completion(system_prompt: str, user_prompt: str, **kwargs)->str:
+    """Generate a chat completion from the Llama model."""
     logger.info("Generating chat completion...")
     with load_llama_model() as llm:
         output = llm.create_chat_completion(
@@ -40,12 +42,14 @@ def chat_completion(system_prompt: str, user_prompt: str, **kwargs):
 
 
 def load_news_prompt():
+    """Load the news prompt from prompts.yaml."""
     logger.info("Loading news prompt...")
     with open("hestia/llm/prompts/prompts.yaml", "r") as file:
         prompts = yaml.load(file, Loader=yaml.FullLoader)
     return prompts["news_debrief_prompt"]
 
 def load_weather_prompt():
+    """Load the weather prompt from prompts.yaml."""
     logger.info("Loading weather prompt...")
     with open("hestia/llm/prompts/prompts.yaml", "r") as file:
         prompts = yaml.load(file, Loader=yaml.FullLoader)

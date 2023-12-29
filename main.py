@@ -1,9 +1,7 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template
 from hestia.tools.system_and_utility.scheduler import SchedulerManager
-from hestia.lib.hestia_logger import logger
-from flask_apscheduler import APScheduler
-from datetime import datetime, timedelta
-from hestia.routines.morning.morning_routine import schedule_morning_routine, morning_preparation, morning_presentation
+
+from hestia.routines.morning.morning_routine import schedule_morning_routine
 app = Flask(__name__)
 
 scheduler = SchedulerManager()

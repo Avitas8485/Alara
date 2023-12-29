@@ -12,13 +12,21 @@ if not API_KEY:
 BASE_URL = 'https://api.nasa.gov/planetary/apod?'
 
 class APOD:
+    """A class to represent the Astronomy Picture of the Day."""
     def __init__(self, response):
         self.response = response
 
     def get_data(self, key):
+        """Get the data from the response.
+        Args:
+            key: The key of the data to get."""
         return self.response.get(key, None)
 
     def download_image(self, url, date):
+        """Download the image.
+        Args:
+            url: The url of the image.
+            date: The date of the image."""
         if not os.path.isfile(f'{date}.png'):
             try:
                 raw_image = requests.get(url).content
@@ -29,6 +37,9 @@ class APOD:
                 return None
 
     def convert_image(self, image_path):
+        """Convert the image to png.
+        Args:
+            image_path: The path to the image."""
         try:
             path_to_image = os.path.normpath(image_path)
             basename = os.path.basename(path_to_image)
@@ -41,6 +52,7 @@ class APOD:
             print(f"Error converting image: {e}")
 
 def get_apod_data() -> dict:
+    """Get the APOD data."""
     params = {'api_key': API_KEY}
     try:
         response = requests.get(BASE_URL, params=params)
@@ -52,12 +64,3 @@ def get_apod_data() -> dict:
 
 
 
-if __name__ == "__main__":
-    apod_data = get_apod_data()
-    apod = APOD(apod_data)
-    date = apod.get_data('date')
-    url = apod.get_data('url')
-    apod.download_image(url, date)
-    apod.convert_image(f'{date}.jpg')
-    print(apod_data)
-    

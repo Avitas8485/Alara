@@ -22,11 +22,20 @@ JOB_DEFAULTS = {
 }
 
 class SchedulerManager:
+    """Class to manage the scheduler.
+    Attributes:
+        scheduler: APscheduler instance"""
     def __init__(self):
         self.scheduler = BackgroundScheduler(jobstores=JOBSTORES, executors=EXECUTORS, job_defaults=JOB_DEFAULTS)
 
                 
     def add_job(self, job_function: Any, job_id: Optional[str] = None, trigger: Optional[str] = None, **kwargs: Any) -> None:
+        """Add a job to the scheduler.
+        Args:
+            job_function: The function to run.
+            job_id: The id of the job.
+            trigger: The trigger for the job.
+            kwargs: The keyword arguments for the job."""
         # generate a job id if one is not provided
         if job_id is None:
             job_id = str(uuid4())
@@ -42,18 +51,28 @@ class SchedulerManager:
 
         
     def remove_job(self, job_id: str) -> None:
+        """Remove a job from the scheduler.
+        Args:
+            job_id: The id of the job."""
         try:
             self.scheduler.remove_job(job_id)
         except Exception as e:
             logger.error(f"Error removing job: {e}")
         
     def get_jobs(self) -> List[Any]:
+        """Get all jobs from the scheduler.
+        Returns:
+            List[Any]: The jobs."""
         try:
             return self.scheduler.get_jobs()
         except Exception as e:
             logger.error(f"Error getting jobs: {e}")
             return []        
     def modify_job(self, job_id: str, **changes: Any) -> None:
+        """Modify a job.
+        Args:
+            job_id: The id of the job.
+            changes: The changes to make to the job."""
         try:
             self.scheduler.modify_job(job_id, **changes)
         except Exception as e:
@@ -61,6 +80,9 @@ class SchedulerManager:
             return
         
     def pause_job(self, job_id: str) -> None:
+        """Pause a job.
+        Args:
+            job_id: The id of the job."""
         try:
             self.scheduler.pause_job(job_id)
         except Exception as e:
@@ -68,6 +90,9 @@ class SchedulerManager:
             return
         
     def resume_job(self, job_id: str) -> None:
+        """Resume a job.
+        Args:
+            job_id: The id of the job."""
         try:
             self.scheduler.resume_job(job_id)
         except Exception as e:
@@ -75,10 +100,12 @@ class SchedulerManager:
             return
         
     def stop_scheduler(self):
+        """Stop the scheduler."""
         if self.scheduler.running:
             self.scheduler.shutdown()
         
     def start_scheduler(self):
+        """Start the scheduler."""
         if not self.scheduler.running:
             self.scheduler.start()
     

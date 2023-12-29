@@ -1,34 +1,52 @@
 from hestia.tools.reports.base_report_generator import BaseReportGenerator
 import requests
-import sys
 import os
 from dotenv import load_dotenv
 from hestia.llm.llama_chat_completion import chat_completion, load_weather_prompt
 from hestia.text_to_speech.speech import TextToSpeechSystem
+from hestia.tools.system_and_utility.ip_geolocation import get_geolocation
 from hestia.lib.hestia_logger import logger
 from datetime import datetime
 
 load_dotenv()
-sys.path.insert(1,'C:/Users/avity/Projects/HESTIA/hestia')
 
-from tools.system_and_utility.ip_geolocation import get_geolocation
 
 
 class WeatherReport(BaseReportGenerator):
-    WEATHER_API_KEY = os.getenv('VISUAL_CROSSING_API_KEY')
+    """A class to represent a WeatherReport.
+    Attributes:
+        WEATHER_API_KEY: The API key for the Visual Crossing Weather API.
+        BASE_URL: The base URL for the Visual Crossing Weather API."""
+    WEATHER_API_KEY = os.getenv('VISUAL_CROSSING_API_KEY', '')
     BASE_URL = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/'
 
     def __init__(self):
+        """Initialize the WeatherReport.
+        Attributes:
+            todays_date: The date of the weather report.
+            DIR_PATH: The path to the directory where the weather report is stored.
+            simplified_weather_path: The path to the simplified weather.
+            weather_report_path: The path to the weather report."""
+            
         self.todays_date = datetime.now().strftime("%b %d, %Y")
         self.DIR_PATH = "hestia/tools/reports/weather"
         self.simplified_weather_path = os.path.join(self.DIR_PATH, f"{self.todays_date}simplified.txt")
         self.weather_report_path = os.path.join(self.DIR_PATH, f"weather_report {self.todays_date}.txt")
 
-    def write_file(self, file_path, content):
+    def write_file(self, file_path: str, content):
+        """Write to a file.
+        Args:
+            file_path: The path to the file.
+            content: The content to write to the file."""
         with open(file_path, "w") as f:
             f.write(content)
 
-    def read_file(self, file_path):
+    def read_file(self, file_path: str)->str:
+        """Read a file.
+        Args:
+            file_path: The path to the file.
+        Returns:
+            str: The content of the file."""
         with open(file_path, "r") as f:
             return f.read()
 
@@ -38,7 +56,9 @@ class WeatherReport(BaseReportGenerator):
         return location['city']
 
     def get_information(self)-> dict:
-        """Returns weather data"""
+        """Returns weather data
+        Returns:
+            dict: The weather data."""
         params = {
             'aggregateHours': '24',
             'combinationMethod': 'aggregate',
@@ -85,12 +105,14 @@ class WeatherReport(BaseReportGenerator):
         self.write_file(self.simplified_weather_path, weather_report)
         
     def generate_report_summary(self):
+        """Generate the weather report summary."""
         weather = self.read_file(self.simplified_weather_path)
         weather_prompt = load_weather_prompt()[0]
         weather_report = chat_completion(system_prompt=weather_prompt, user_prompt=weather)
         self.write_file(self.weather_report_path, weather_report)
 
     def convert_summary_to_audio(self):
+        """Convert the weather report summary to audio using text to speech."""
         weather = self.read_file(self.weather_report_path)
         tts = TextToSpeechSystem()
         if weather is None:

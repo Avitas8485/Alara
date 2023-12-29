@@ -8,17 +8,25 @@ from hestia.lib.hestia_logger import logger
 import time
 
 class VolumeMute:
+    """Class to mute and unmute the volume."""
     
     def __init__(self):
+        """Initialize the VolumeMute.
+        Attributes:
+            volume: The volume."""
         devices = AudioUtilities.GetSpeakers()
         interface = devices.Activate(
             IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
         self.volume = cast(interface, POINTER(IAudioEndpointVolume))
         
     def get_mute_status(self):
+        """Get the mute status."""
         return self.volume.GetMute() #type: ignore
     
     def set_mute_status(self, mute_status):
+        """Set the mute status.
+        Args:
+            mute_status: The mute status."""
         try:
             self.volume.SetMute(mute_status, None) #type: ignore
         except Exception as e:
@@ -26,18 +34,24 @@ class VolumeMute:
             pass
         
     def mute(self):
+        """Mute the speaker."""
         self.set_mute_status(True)
         
     def unmute(self):
+        """Unmute the speaker."""
         self.set_mute_status(False)
         
 
 
-
-
-   
-
 class Alarm:
+    """Class to handle the alarm.
+    Attributes:
+        sound_path: The path to the sound file.
+        alarm_active: Whether the alarm is active.
+        alarm_thread: The thread for the alarm.
+        input_thread: The thread for the input.
+        lock: The lock for the alarm.
+        volume_mute: The volume mute."""
     def __init__(self, sound_path: str="hestia/tools/system_and_utility/rain_alarm.mp3"):
         self.sound_path = sound_path
         self.alarm_active = False
@@ -47,6 +61,7 @@ class Alarm:
         self.volume_mute = VolumeMute()
 
     def trigger_alarm(self):
+        """Trigger the alarm."""
         pygame.mixer.init()
         try:
             pygame.mixer.music.load(self.sound_path)
@@ -72,6 +87,7 @@ class Alarm:
             
             
     def handle_input(self):
+        """Handle the input."""
         try:
             while True:
                 user_input = input("Press 'q' to stop alarm: ").lower()
@@ -88,6 +104,7 @@ class Alarm:
             self.reset_volume()
             
     def reset_volume(self):
+        """Reset the volume."""
         # set volume to 20%
         self.volume_mute.volume.SetMasterVolumeLevel(-20.0, None) #type: ignore
             
@@ -102,6 +119,7 @@ class Alarm:
             pass
         
     def is_active(self):
+        """Check if the alarm is active."""
         with self.lock:
             return self.alarm_active
         

@@ -6,9 +6,17 @@ from TTS.tts.configs.xtts_config import XttsConfig
 from TTS.tts.models.xtts import Xtts
 import soundfile as sf
 from hestia.lib.hestia_logger import logger
+from typing import List
 
 
 class TextToSpeechSystem:
+    """This class contains the code for the TextToSpeechSystem.
+    Attributes:
+        config: The configuration for the TextToSpeechSystem.
+        vocab_path: The path to the vocabulary file.
+        speaker_path: The path to the speaker file.
+        model_dir: The path to the model directory.
+        model: The model to use for the TextToSpeechSystem."""
     def __init__(self):
         self.config = XttsConfig()
         self.config.load_json("C:/Users/avity/Projects/models/tts/xtts_v2-001/config.json")
@@ -17,7 +25,12 @@ class TextToSpeechSystem:
         self.model_dir = "C:/Users/avity/Projects/models/tts/xtts_v2-001/"
         self.model = None
         
-    def split_into_sentences_using_nlp(self, text):
+    def split_into_sentences_using_nlp(self, text)->List[str]:
+        """Split the text into sentences using NLP.
+        Args:
+            text: The text to split into sentences.
+        Returns:
+            List[str]: The sentences."""
         import nltk
         nltk.download('punkt', quiet=True)
         from nltk.tokenize import sent_tokenize
@@ -36,13 +49,25 @@ class TextToSpeechSystem:
                 
         return merged_sentences
     
-    def load_txt_from_file(self,file_path):
+    def load_txt_from_file(self,file_path)->str:
+        """Load text from a file.
+        Args:
+            file_path: The path to the file.
+        Returns:
+            str: The text from the file."""
         with open(file_path, "r") as file:
             text = file.read()
         return text
     
     
-    def convert_sentences_to_wav_files(self,filename: str, output_dir: str, sentences: list):
+    def convert_sentences_to_wav_files(self,filename: str, output_dir: str, sentences: list)->List[str]:
+        """Convert the sentences to wav files.
+        Args:
+            filename(str): The name of the file.
+            output_dir(str): The directory to output the wav files to.
+            sentences(list): The sentences to convert to wav files.
+        Returns:
+            List[str]: The paths to the wav files."""
         self.model = Xtts.init_from_config(self.config)
         self.model.load_checkpoint(config=self.config, checkpoint_dir=self.model_dir, vocab_path=self.vocab_path)
         soundbite_filepaths = []
@@ -61,6 +86,12 @@ class TextToSpeechSystem:
         return soundbite_filepaths
     
     def merge_wav_files_into_one(self,format: str,output_dir:str,output_filename:str,soundbite_filepaths:list):
+        """Merge the wav files into one.
+        Args:
+            format(str): The format to merge the wav files into.
+            output_dir(str): The directory to output the merged wav file to.
+            output_filename(str): The name of the merged wav file.
+            soundbite_filepaths(list): The paths to the wav files to merge."""
         if format not in ["mp3","wav"]:
             raise Exception(f"Format:{format} not supported.")
         output_filepath=f"{output_dir}/{output_filename}.{format}"
@@ -76,7 +107,13 @@ class TextToSpeechSystem:
 
         combined_sounds.export(output_filepath, format=format) #type: ignore
 
-    def get_output_files(self,output_dir,soundbite_filename):
+    def get_output_files(self,output_dir,soundbite_filename)->List[str]:
+        """Get the output files.
+        Args:
+            output_dir: The directory to output the files to.
+            soundbite_filename: The name of the soundbite file.
+        Returns:
+            List[str]: The paths to the output files."""
         soundbite_filepaths=[]
         for i in range(0,10000):
             soundbite_filepath=f"{output_dir}/{soundbite_filename}_{i}.wav"
@@ -85,6 +122,14 @@ class TextToSpeechSystem:
         return soundbite_filepaths
     
     def merge_without_converting(self,extension, output_dir,output_filename,soundbite_filename):
+        """Merge the wav files without converting them.
+        Args:
+            extension: The extension of the files to merge.
+            output_dir: The directory to output the merged file to.
+            output_filename: The name of the merged file.
+            soundbite_filename: The name of the soundbite file.
+        Returns:
+            None"""
         soundbite_filepaths=self.get_output_files(output_dir,soundbite_filename)
         print(f'soundbite_filepaths={soundbite_filepaths}')
         self.merge_wav_files_into_one(extension,output_dir,output_filename,soundbite_filepaths)
@@ -92,6 +137,9 @@ class TextToSpeechSystem:
         
             
     def play_audio(self, audio_path):
+        """Play the audio.
+        Args:
+            audio_path: The path to the audio file."""
         import pyaudio
         chunk = 1024
         try:
@@ -111,6 +159,11 @@ class TextToSpeechSystem:
             
 
     def convert_text_to_speech(self, text: str, output_dir: str, output_filename: str):
+        """Convert the text to speech.
+        Args:
+            text: The text to convert to speech.
+            output_dir: The directory to output the speech to.
+            output_filename: The name of the output file."""
         sentences = self.split_into_sentences_using_nlp(text)
         soundbite_filepaths = self.convert_sentences_to_wav_files(output_filename, output_dir, sentences)
         self.merge_wav_files_into_one("wav", output_dir, output_filename, soundbite_filepaths)
