@@ -58,6 +58,7 @@ def morning_presentation():
     cleanup()
     
 def cleanup():
+    logger.info("Cleaning up...")
     for file in os.listdir("hestia/text_to_speech/outputs"):
         if file.endswith(".wav"):
             os.remove(f"hestia/text_to_speech/outputs/{file}")
@@ -67,12 +68,15 @@ def cleanup():
     for file in os.listdir("hestia/tools/reports/weather"):
         if file.endswith(".txt"):
             os.remove(f"hestia/tools/reports/weather/{file}")
+    logger.info("Cleanup complete.")
         
     
 
 def schedule_morning_routine():
+    logger.info("Scheduling morning routine...")
     scheduler.add_job(morning_preparation,trigger="cron",hour=7,minute=0,second=0)
     scheduler.add_job(morning_presentation,trigger="cron",hour=7,minute=30,second=0)
+    logger.info("Morning routine scheduled.")
     
     
     
