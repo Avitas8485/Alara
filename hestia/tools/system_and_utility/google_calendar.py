@@ -10,43 +10,41 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+TOKEN_FILE = "token.json"
+SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
+CREDENTIALS_FILE = "HESTIA/hestia/tools/system_and_utility/credentials.json"
+CALENDAR_SERVICE = "calendar"
+CALENDAR_VERSION = "v3"
 class GoogleCalendar:
     def __init__(self):
-        self.TOKEN_FILE = "token.json"
-        self.SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
-        self.CREDENTIALS_FILE = "HESTIA/hestia/tools/system_and_utility/credentials.json"
-        self.CALENDAR_SERVICE = "calendar"
-        self.CALENDAR_VERSION = "v3"
         self.creds = self.get_credentials()
         if self.creds is not None:
-            self.service = build(self.CALENDAR_SERVICE, self.CALENDAR_VERSION, credentials=self.creds)
+            self.service = build(CALENDAR_SERVICE, CALENDAR_VERSION, credentials=self.creds)
         
-    def get_credentials(self):
-        creds = None
+    def load_credentials(self, file, scopes):
         try:
-            if os.path.exists(self.TOKEN_FILE):
-                creds = Credentials.from_authorized_user_file(self.TOKEN_FILE, self.SCOPES)
+            if os.path.exists(file):
+                return Credentials.from_authorized_user_file(file, scopes)
         except (FileNotFoundError, OSError) as error:
-            logging.error(f"Failed to load token file: {error}")
-            return None
+            logging.error(f"Failed to load file {file}: {error}")
+            raise
+
+    def get_credentials(self):
+        creds = self.load_credentials(TOKEN_FILE, SCOPES)
 
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                try:
-                    flow = InstalledAppFlow.from_client_secrets_file(self.CREDENTIALS_FILE, self.SCOPES)
-                    creds = flow.run_local_server(port=0)
-                except (FileNotFoundError, OSError) as error:
-                    logging.error(f"Failed to load credentials file: {error}")
-                    return None
+                creds = self.load_credentials(CREDENTIALS_FILE, SCOPES)
+                creds = flow.run_local_server(port=0) # type: ignore
 
             try:
-                with open(self.TOKEN_FILE, "w") as token:
+                with open(TOKEN_FILE, "w") as token:
                     token.write(creds.to_json())
             except OSError as error:
                 logging.error(f"Failed to write token file: {error}")
-                return None
+                raise
 
         return creds
     
