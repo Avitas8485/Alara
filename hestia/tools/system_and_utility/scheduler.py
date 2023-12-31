@@ -1,14 +1,11 @@
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from typing import Optional, Any, List
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from hestia.lib.hestia_logger import logger
+import os
 from uuid import uuid4
+import logging
 
-
-JOBSTORES = {
-    'default': SQLAlchemyJobStore(url='sqlite:///hestia/routines/jobs.sqlite')
-}
 
 EXECUTORS = {
     'default': ThreadPoolExecutor(20),
@@ -26,7 +23,9 @@ class SchedulerManager:
     Attributes:
         scheduler: APscheduler instance"""
     def __init__(self):
-        self.scheduler = BackgroundScheduler(jobstores=JOBSTORES, executors=EXECUTORS, job_defaults=JOB_DEFAULTS)
+        self.scheduler = BackgroundScheduler(executors=EXECUTORS, job_defaults=JOB_DEFAULTS, daemon=True)
+        # assuming all jobs are rescheduled every time I start the app
+        self.scheduler.remove_all_jobs()
 
                 
     def add_job(self, job_function: Any, job_id: Optional[str] = None, trigger: Optional[str] = None, **kwargs: Any) -> None:
@@ -40,7 +39,7 @@ class SchedulerManager:
         if job_id is None:
             job_id = str(uuid4())
         # get all jobs from the scheduler
-        if self.scheduler.get_job(job_id):
+        if self.scheduler.get_job(job_id=job_id):
             logger.info(f"Job with id {job_id} already exists.")
             return 
         # add the job to the scheduler
@@ -115,7 +114,8 @@ class SchedulerManager:
         
 
 
-        
+
+
 
     
     

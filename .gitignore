@@ -31,3 +31,4 @@ jobs.sqlite
 
 # ignore playground.ipynb file
 playground.ipynb
+playground.py
