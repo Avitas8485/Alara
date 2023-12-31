@@ -6,6 +6,7 @@ from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from hestia.lib.hestia_logger import logger
 import time
+import pythoncom
 
 class VolumeMute:
     """Class to mute and unmute the volume."""
@@ -14,6 +15,7 @@ class VolumeMute:
         """Initialize the VolumeMute.
         Attributes:
             volume: The volume."""
+        pythoncom.CoInitialize()
         devices = AudioUtilities.GetSpeakers()
         interface = devices.Activate(
             IAudioEndpointVolume._iid_, CLSCTX_ALL, None)

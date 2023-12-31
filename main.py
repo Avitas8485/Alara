@@ -1,11 +1,23 @@
 from flask import Flask, render_template
 from hestia.tools.system_and_utility.scheduler import SchedulerManager
+from hestia.lib.hestia_logger import logger
+from hestia.routines.morning.morning_routine import morning_preparation, morning_presentation
 
-from hestia.routines.morning.morning_routine import schedule_morning_routine
+import os
 app = Flask(__name__)
 
 scheduler = SchedulerManager()
+scheduler.start_scheduler()
+def schedule_morning_routine():
+    """Schedule the morning routine."""
+    logger.info("Scheduling morning routine...")
+    scheduler.add_job(morning_preparation,trigger="cron",hour=7,minute=00)
+    scheduler.add_job(morning_presentation,trigger="cron",hour=7,minute=30)
+    logger.info("Morning routine scheduled.")
+
+
 schedule_morning_routine()
+
 
 
 @app.route("/")
@@ -19,6 +31,6 @@ def home():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
     
     
