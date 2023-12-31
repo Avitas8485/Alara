@@ -56,5 +56,3 @@ def load_weather_prompt():
     return prompts["weather_report_prompt"]
 
 
-
-
