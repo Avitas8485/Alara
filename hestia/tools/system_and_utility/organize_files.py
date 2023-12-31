@@ -35,3 +35,16 @@ def organize_files():
 class MyHandler(FileSystemEventHandler):
     def on_modified(self, event):
         organize_files()
+        
+
+if __name__ == "__main__":
+    event_handler = MyHandler()
+    observer = Observer()
+    observer.schedule(event_handler, root_dir, recursive=True)
+    observer.start()
+    try:
+        while True:
+            pass
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
