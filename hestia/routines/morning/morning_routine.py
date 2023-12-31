@@ -10,7 +10,7 @@ import time
 
 
 
-alarm = Alarm()
+
 scheduler = SchedulerManager()
 
 def generate_report(report_class):
@@ -62,9 +62,11 @@ def play_news_details():
 def morning_presentation():
     """Play the morning presentation."""
     logger.info("Starting morning presentation...")
+    alarm = Alarm()
     alarm.start()
     while alarm.is_active():
         time.sleep(1)
+    time.sleep(5)
     play_weather()
     play_news_details()
     logger.info("Morning presentation complete. Cleaning up...")
@@ -86,12 +88,6 @@ def cleanup():
         
     
 
-def schedule_morning_routine():
-    """Schedule the morning routine."""
-    logger.info("Scheduling morning routine...")
-    scheduler.add_job(morning_preparation,trigger="cron",hour=7,minute=0,second=0)
-    scheduler.add_job(morning_presentation,trigger="cron",hour=7,minute=30,second=0)
-    logger.info("Morning routine scheduled.")
-    
+
     
     
