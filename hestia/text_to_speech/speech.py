@@ -24,6 +24,7 @@ class TextToSpeechSystem:
         self.speaker_path = "hestia/text_to_speech/voice_samples/output_00000017.wav"
         self.model_dir = "C:/Users/avity/Projects/models/tts/xtts_v2-001/"
         self.model = None
+        logger.info("TextToSpeechSystem initialized.")
         
     def split_into_sentences_using_nlp(self, text)->List[str]:
         """Split the text into sentences using NLP.
@@ -31,6 +32,7 @@ class TextToSpeechSystem:
             text: The text to split into sentences.
         Returns:
             List[str]: The sentences."""
+        logger.info("Processing text...")
         import nltk
         nltk.download('punkt', quiet=True)
         from nltk.tokenize import sent_tokenize
@@ -46,6 +48,7 @@ class TextToSpeechSystem:
             else:
                 merged_sentences.append(sentences[i])
                 i += 1
+        logger.info("Text processed.")
                 
         return merged_sentences
     
@@ -68,7 +71,9 @@ class TextToSpeechSystem:
             sentences(list): The sentences to convert to wav files.
         Returns:
             List[str]: The paths to the wav files."""
+        logger.info("Converting sentences to wav files...")
         self.model = Xtts.init_from_config(self.config)
+        logger.info("Loading TTS model...")
         self.model.load_checkpoint(config=self.config, checkpoint_dir=self.model_dir, vocab_path=self.vocab_path)
         soundbite_filepaths = []
         for i, sentence in enumerate(sentences):
@@ -82,7 +87,9 @@ class TextToSpeechSystem:
             )
             sf.write(soundbite_filepath, out["wav"], 24000)
             soundbite_filepaths.append(soundbite_filepath)
+        logger.info("Unloading TTS model...")
         self.model = None
+        logger.info("Sentences converted to wav files.")
         return soundbite_filepaths
     
     def merge_wav_files_into_one(self,format: str,output_dir:str,output_filename:str,soundbite_filepaths:list):
@@ -92,6 +99,7 @@ class TextToSpeechSystem:
             output_dir(str): The directory to output the merged wav file to.
             output_filename(str): The name of the merged wav file.
             soundbite_filepaths(list): The paths to the wav files to merge."""
+        logger.info("Processing wav files...")
         if format not in ["mp3","wav"]:
             raise Exception(f"Format:{format} not supported.")
         output_filepath=f"{output_dir}/{output_filename}.{format}"
