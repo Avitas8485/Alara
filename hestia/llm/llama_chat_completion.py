@@ -1,8 +1,9 @@
 from llama_cpp import Llama
 import yaml
-from hestia.lib.hestia_logger import logger
+#from hestia.lib.hestia_logger import logger
 from contextlib import contextmanager
-
+import logging
+logger = logging.getLogger(__name__)
 
 @contextmanager
 def load_llama_model():
@@ -38,6 +39,7 @@ def chat_completion(system_prompt: str, user_prompt: str, **kwargs)->str:
                 }
             ], max_tokens=1024, **kwargs
         )
+    logger.info("Generation complete.")
     return output["choices"][0]["message"]["content"] # type: ignore
 
 
@@ -54,5 +56,15 @@ def load_weather_prompt():
     with open("hestia/llm/prompts/prompts.yaml", "r") as file:
         prompts = yaml.load(file, Loader=yaml.FullLoader)
     return prompts["weather_report_prompt"]
+
+def load_schedule_prompt():
+    """Load the schedule prompt from prompts.yaml."""
+    logger.info("Loading schedule prompt...")
+    with open("hestia/llm/prompts/prompts.yaml", "r") as file:
+        prompts = yaml.load(file, Loader=yaml.FullLoader)
+    return prompts["schedule_report_prompt"]
+
+
+
 
 
