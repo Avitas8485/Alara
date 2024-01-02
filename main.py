@@ -11,8 +11,8 @@ scheduler.start_scheduler()
 def schedule_morning_routine():
     """Schedule the morning routine."""
     logger.info("Scheduling morning routine...")
-    scheduler.add_job(morning_preparation,trigger="cron",hour=7,minute=00)
-    scheduler.add_job(morning_presentation,trigger="cron",hour=7,minute=30)
+    scheduler.add_job(morning_preparation,trigger="cron",hour=00,minute=7)
+    scheduler.add_job(morning_presentation,trigger="cron",hour=00,minute=42)
     logger.info("Morning routine scheduled.")
 
 
