@@ -67,7 +67,7 @@ class ScheduleReport(BaseReportGenerator):
         """Generate a schedule report."""
         schedule = self.read_file(self.schedule_report_path)
         schedule_prompt = load_schedule_prompt()
-        schedule_summary = chat_completion(system_prompt=schedule_prompt, user_prompt=schedule)
+        schedule_summary = chat_completion(system_prompt=schedule_prompt, user_prompt=f"Beginning of schedule\n\nSchedule for {self.todays_date}: [{schedule}]\n\nEnd of schedule.")
         self.write_file(self.summary_path, schedule_summary)
         
     
