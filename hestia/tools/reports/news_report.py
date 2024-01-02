@@ -171,7 +171,7 @@ class NewsReport(BaseReportGenerator):
         """Generate the news report summary."""
         news = self.read_file(self.simplified_news_path)
         news_prompt = load_news_prompt()
-        news_summary = chat_completion(system_prompt=news_prompt, user_prompt=news)
+        news_summary = chat_completion(system_prompt=news_prompt, user_prompt=f"The news for {self.todays_date}:\n\n{news}")
         self.write_file(self.news_summary_path, news_summary)
 
 
