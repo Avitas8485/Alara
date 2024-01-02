@@ -25,6 +25,7 @@ outputs/
 
 news/
 weather/
+schedule/
 
 # ignore jobs.sqlite file
 jobs.sqlite
@@ -40,3 +41,6 @@ token.json
 
 testing_shit.py
 playground.py
+
+
+.vscode/

@@ -80,7 +80,13 @@ class Alarm:
         while self.alarm_active:  
             # increase volume by 5% every 5 seconds
             new_volume_level = max(-20.0 + increase_volume, -20.0)
-            self.volume_mute.volume.SetMasterVolumeLevel(new_volume_level, None) #type: ignore
+            if new_volume_level > 0.0:
+                new_volume_level = 0.0
+            try:
+                self.volume_mute.volume.SetMasterVolumeLevel(new_volume_level, None) #type: ignore
+            except Exception as e:
+                logger.error(f"Error setting volume: {e}")
+                pass
             increase_volume += 5
             time.sleep(5)
         pygame.mixer.music.stop()

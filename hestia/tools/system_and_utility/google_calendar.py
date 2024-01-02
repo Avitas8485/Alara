@@ -9,8 +9,12 @@ from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import InstalledAppFlow
 from hestia.lib.hestia_logger import logger
 
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
 TOKEN_FILE = "C:/Users/avity/Projects/credentials/googel_cal/token.json"
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
+CREDENTIALS_FILE = "C:/Users/avity/Projects/credentials/googel_cal/credentials.json"
 CREDENTIALS_FILE = "C:/Users/avity/Projects/credentials/googel_cal/credentials.json"
 CALENDAR_SERVICE = "calendar"
 CALENDAR_VERSION = "v3"
@@ -91,6 +95,56 @@ class GoogleCalendar:
                 raise
         return all_events
     
+    def get_events_for_today(self):
+        today = datetime.datetime.utcnow().date().isoformat() + "T00:00:00Z"
+        tomorrow = (datetime.datetime.utcnow().date() + datetime.timedelta(days=1)).isoformat() + "T00:00:00Z"
+        logging.info("Getting today's events")
+        all_events = []
+        for calendar_id in self.get_all_calendars():
+            try:
+                events_result = (
+                    self.service.events()
+                    .list(
+                        calendarId=calendar_id,
+                        timeMin=today,
+                        timeMax=tomorrow,
+                        singleEvents=True,
+                        orderBy="startTime",
+                    )
+                    .execute()
+                )
+                all_events.extend(events_result.get("items", []))
+            except HttpError as error:
+                logging.error(f"Failed to get events: {error}")
+                raise
+        return all_events
+        
+    
+    def get_events_for_today(self):
+        today = datetime.datetime.utcnow().date().isoformat() + "T00:00:00Z"
+        tomorrow = (datetime.datetime.utcnow().date() + datetime.timedelta(days=1)).isoformat() + "T00:00:00Z"
+        logging.info("Getting today's events")
+        all_events = []
+        for calendar_id in self.get_all_calendars():
+            try:
+                events_result = (
+                    self.service.events()
+                    .list(
+                        calendarId=calendar_id,
+                        timeMin=today,
+                        timeMax=tomorrow,
+                        singleEvents=True,
+                        orderBy="startTime",
+                    )
+                    .execute()
+                )
+                all_events.extend(events_result.get("items", []))
+            except HttpError as error:
+                logging.error(f"Failed to get events: {error}")
+                raise
+        return all_events
+        
+    
     def print_events(self, events):
         if not events:
             logger.info("No upcoming events found.")
@@ -119,6 +173,23 @@ if __name__ == "__main__":
     from datetime import timedelta
     events = calendar.get_events_list()
     for event in events:
+        # check if the event has a time associated with it
+        if "dateTime" in event["start"]:
+            event_start = datetime.datetime.fromisoformat(event["start"]["dateTime"])
+            notification_time = event_start - timedelta(minutes=60)
+            print(notification_time)
+            print(event["summary"])
+            print(event["start"])
+            print(event["end"])
+            print()
+        else:
+            print("all day event")
+            print(event["summary"])
+            print(event["start"])
+            print(event["end"])
+            print()
+    today_events = calendar.get_events_for_today()
+    for event in today_events:
         # check if the event has a time associated with it
         if "dateTime" in event["start"]:
             event_start = datetime.datetime.fromisoformat(event["start"]["dateTime"])
