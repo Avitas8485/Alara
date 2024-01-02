@@ -7,12 +7,14 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import InstalledAppFlow
+from hestia.lib.hestia_logger import logger
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 TOKEN_FILE = "C:/Users/avity/Projects/credentials/googel_cal/token.json"
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
+CREDENTIALS_FILE = "C:/Users/avity/Projects/credentials/googel_cal/credentials.json"
 CREDENTIALS_FILE = "C:/Users/avity/Projects/credentials/googel_cal/credentials.json"
 CALENDAR_SERVICE = "calendar"
 CALENDAR_VERSION = "v3"
@@ -33,7 +35,7 @@ class GoogleCalendar:
             if os.path.exists(file):
                 return Credentials.from_authorized_user_file(file, scopes)
         except (FileNotFoundError, OSError) as error:
-            logging.error(f"Failed to load file {file}: {error}")
+            logger.error(f"Failed to load credentials: {error}")
             return None
     
     def refresh_credentials(self, creds):
@@ -54,7 +56,7 @@ class GoogleCalendar:
                 with open(TOKEN_FILE, "w") as token:
                     token.write(creds.to_json())
             except OSError as error:
-                logging.error(f"Failed to write token file: {error}")
+                logger.error(f"Failed to write credentials: {error}")
                 return None
 
         return creds
@@ -64,9 +66,7 @@ class GoogleCalendar:
         while True:
             calendar_list = self.service.calendarList().list(pageToken=page_token).execute()
             for calendar_list_entry in calendar_list["items"]:
-                logging.info(
-                    f"{calendar_list_entry['summary']} - {calendar_list_entry['id']}"
-                )
+                logger.info(f"{calendar_list_entry['summary']}, {calendar_list_entry['id']}")
                 yield calendar_list_entry['id']
             page_token = calendar_list.get("nextPageToken")
             if not page_token:
@@ -91,7 +91,7 @@ class GoogleCalendar:
                 )
                 all_events.extend(events_result.get("items", []))
             except HttpError as error:
-                logging.error(f"Failed to get events: {error}")
+                logger.error(f"Failed to get events: {error}")
                 raise
         return all_events
     
@@ -120,13 +120,38 @@ class GoogleCalendar:
         return all_events
         
     
+    def get_events_for_today(self):
+        today = datetime.datetime.utcnow().date().isoformat() + "T00:00:00Z"
+        tomorrow = (datetime.datetime.utcnow().date() + datetime.timedelta(days=1)).isoformat() + "T00:00:00Z"
+        logging.info("Getting today's events")
+        all_events = []
+        for calendar_id in self.get_all_calendars():
+            try:
+                events_result = (
+                    self.service.events()
+                    .list(
+                        calendarId=calendar_id,
+                        timeMin=today,
+                        timeMax=tomorrow,
+                        singleEvents=True,
+                        orderBy="startTime",
+                    )
+                    .execute()
+                )
+                all_events.extend(events_result.get("items", []))
+            except HttpError as error:
+                logging.error(f"Failed to get events: {error}")
+                raise
+        return all_events
+        
+    
     def print_events(self, events):
         if not events:
-            logging.info("No upcoming events found.")
+            logger.info("No upcoming events found.")
             return
         for event in events:
             start = event["start"].get("dateTime", event["start"].get("date"))
-            logging.info(f"{start}, {event['summary']}")
+            logger.info(f"{start} - {event['summary']}")
             
     def get_events_list(self):
         with self.lock:
