@@ -68,3 +68,8 @@ def load_schedule_prompt():
 
 
 
+if __name__ == '__main__':
+    system_prompt = "You are an AI assistant named Hestia. As part of your morning routine, you are to give me a comprehensive summary of today's schedule. Do not add any extra information. If there is no anything scheduled for the day, say so."
+    user_prompt = "Beginning of schedule\n\nSchedule for 2021-08-09: [All Day: New year's day]\n\n End of schedule."
+    output = chat_completion(system_prompt=system_prompt, user_prompt=user_prompt)
+    print(output)
