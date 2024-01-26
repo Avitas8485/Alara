@@ -2,7 +2,7 @@ from hestia.tools.reports.base_report_generator import BaseReportGenerator
 import requests
 import os
 from dotenv import load_dotenv
-from hestia.llm.llama_chat_completion import chat_completion, load_weather_prompt
+from hestia.llm.llama_chat_completion import chat_completion, load_prompt
 from hestia.text_to_speech.speech import TextToSpeechSystem
 from hestia.tools.system_and_utility.ip_geolocation import get_geolocation
 from hestia.lib.hestia_logger import logger
@@ -30,7 +30,7 @@ class WeatherReport(BaseReportGenerator):
             
         self.todays_date = datetime.now().strftime("%b %d, %Y")
         self.DIR_PATH = "hestia/tools/reports/weather"
-        self.simplified_weather_path = os.path.join(self.DIR_PATH, f"{self.todays_date}simplified.txt")
+        self.simplified_weather_path = os.path.join(self.DIR_PATH, f"{self.todays_date}weather_report.txt")
         self.weather_report_path = os.path.join(self.DIR_PATH, f"weather_report {self.todays_date}.txt")
 
     def write_file(self, file_path: str, content):
@@ -107,7 +107,7 @@ class WeatherReport(BaseReportGenerator):
     def generate_report_summary(self):
         """Generate the weather report summary."""
         weather = self.read_file(self.simplified_weather_path)
-        weather_prompt = load_weather_prompt()[0]
+        weather_prompt = load_prompt(prompt_name="weather_report")
         weather_report = chat_completion(system_prompt=weather_prompt, user_prompt=weather)
         self.write_file(self.weather_report_path, weather_report)
 

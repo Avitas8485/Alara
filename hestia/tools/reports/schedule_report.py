@@ -1,5 +1,5 @@
 from hestia.tools.reports.base_report_generator import BaseReportGenerator
-from hestia.llm.llama_chat_completion import chat_completion, load_schedule_prompt
+from hestia.llm.llama_chat_completion import chat_completion, load_prompt
 from hestia.text_to_speech.speech import TextToSpeechSystem
 from hestia.tools.system_and_utility.google_calendar import GoogleCalendar
 from datetime import datetime
@@ -66,7 +66,7 @@ class ScheduleReport(BaseReportGenerator):
     def generate_report_summary(self):
         """Generate a schedule report."""
         schedule = self.read_file(self.schedule_report_path)
-        schedule_prompt = load_schedule_prompt()
+        schedule_prompt = load_prompt("schedule_report")
         schedule_summary = chat_completion(system_prompt=schedule_prompt, user_prompt=f"Beginning of schedule\n\nSchedule for {self.todays_date}: [{schedule}]\n\nEnd of schedule.")
         self.write_file(self.summary_path, schedule_summary)
         

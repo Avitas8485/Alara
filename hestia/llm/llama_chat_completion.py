@@ -10,8 +10,8 @@ def load_llama_model():
     """Load the Llama model, and unload it when done."""
     logger.info("Loading LLM...")
     llm =  Llama(model_path="C:/Users/avity/Projects/models/mistral-7b-instruct-v0.1.Q4_K_M.gguf",
-            n_threads=2,
-            n_threads_batch=2,
+            n_threads=4,
+            n_threads_batch=4,
             n_ctx=2048)
     try:
         yield llm
@@ -37,34 +37,19 @@ def chat_completion(system_prompt: str, user_prompt: str, **kwargs)->str:
                     "role": "user",
                     "content": f"{user_prompt}"
                 }
-            ], max_tokens=1024, **kwargs
+            ], max_tokens=2048, **kwargs
         )
     logger.info("Generation complete.")
-    return output["choices"][0]["message"]["content"] # type: ignore
+    # to prevent situations where the model outputs nothing
+    if output["choices"][0]["message"]["content"] == "":
+        return chat_completion(system_prompt, user_prompt, **kwargs)
+    return output["choices"][0]["message"]["content"]
 
-
-def load_news_prompt():
-    """Load the news prompt from prompts.yaml."""
-    logger.info("Loading news prompt...")
+def load_prompt(prompt_name: str):
+    """Load a prompt from prompts.yaml."""
+    logger.info(f"Loading {prompt_name} prompt...")
     with open("hestia/llm/prompts/prompts.yaml", "r") as file:
         prompts = yaml.load(file, Loader=yaml.FullLoader)
-    return prompts["news_debrief_prompt"]
-
-def load_weather_prompt():
-    """Load the weather prompt from prompts.yaml."""
-    logger.info("Loading weather prompt...")
-    with open("hestia/llm/prompts/prompts.yaml", "r") as file:
-        prompts = yaml.load(file, Loader=yaml.FullLoader)
-    return prompts["weather_report_prompt"]
-
-def load_schedule_prompt():
-    """Load the schedule prompt from prompts.yaml."""
-    logger.info("Loading schedule prompt...")
-    with open("hestia/llm/prompts/prompts.yaml", "r") as file:
-        prompts = yaml.load(file, Loader=yaml.FullLoader)
-    return prompts["schedule_report_prompt"]
-
-
-
+    return prompts[f"{prompt_name}"][0]
 
 
