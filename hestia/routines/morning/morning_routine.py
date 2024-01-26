@@ -6,7 +6,10 @@ import os
 from hestia.tools.system_and_utility.scheduler import SchedulerManager
 from hestia.lib.hestia_logger import logger
 from hestia.tools.system_and_utility.alarm import Alarm
-from hestia.tools.reports.schedule_report import ScheduleReport
+from hestia.llm.llama_chat_completion import load_prompt, chat_completion
+from hestia.tools.random_scripts.advice import get_advice
+from hestia.text_to_speech.speech import TextToSpeechSystem
+
 import time
 
 
@@ -22,10 +25,33 @@ def generate_report(report_class):
     try:
         report = report_class()
         report.parse_information()
-        report.generate_report_summary()
-        report.convert_summary_to_audio()
+        
     except Exception as e:
         logger.error(f"Error generating report: {e}")
+
+def morning_greeting():
+    today = datetime.now().strftime("%b %d, %Y")
+    logger.info(f"Generating morning greeting for {today}...")
+    with open(f"hestia/tools/reports/news/{today}news_report.txt", "r") as file:
+        news = file.read()
+    with open(f"hestia/tools/reports/weather/{today}weather_report.txt", "r") as file:
+        weather = file.read()
+    
+    prompt = load_prompt("morning_greeting")
+    greeting = chat_completion(
+        system_prompt=prompt,
+        user_prompt=f"""Today's information:
+        Day of the week: {datetime.now().strftime("%A")} Time is: {datetime.now().strftime("%I:%M %p")}
+        Date: {today},
+        News headlines:\n{news}\n,
+        Today's weather:\n{weather}\n,
+        Advice of the day:\n{get_advice()}\n
+        """
+    )
+    tts = TextToSpeechSystem()
+    tts.convert_text_to_speech(greeting,
+                               output_dir="hestia/text_to_speech/outputs/morning_greeting",
+                               output_filename=f"{today}morning_greeting")
         
 def play_report(report_type):
     """Play a report.
@@ -35,40 +61,23 @@ def play_report(report_type):
     report_path = f"hestia/text_to_speech/outputs/{report_type}/{todays_date}{report_type}.wav"
     play_audio(report_path)
 
-def news_report():
-    """Generate a news report."""
-    generate_report(NewsReport)
-    
-def weather_report():
-    """Generate a weather report."""
-    generate_report(WeatherReport)
 
-def schedule_report():
-    """Generate a schedule report."""
-    generate_report(ScheduleReport)
 
 def morning_preparation():
     """Prepare for the morning routine."""
-    news_report()
-    weather_report()
-    schedule_report()
+    logger.info("Preparing for morning routine...")
+    generate_report(NewsReport)
+    generate_report(WeatherReport)
+    morning_greeting()
 
+def play_morning_greeting():
+    """Play the morning greeting."""
+    todays_date = datetime.now().strftime("%b %d, %Y")
+    greeting_path = f"hestia/text_to_speech/outputs/morning_greeting/{todays_date}morning_greeting.wav"
+    play_audio(greeting_path)
     
 
-def play_weather():
-    """Play the weather report."""
-    logger.info("Playing weather report...")
-    play_report("weather_report")
-def play_news_details():
-    """Play the news report."""
-    logger.info("Playing news report...")
-    play_report("news_report")
-    
-def play_schedule():
-    """Play the schedule report."""
-    logger.info("Playing schedule report...")
-    play_report("schedule_report")
-    
+
 
 def morning_presentation():
     """Play the morning presentation."""
@@ -78,11 +87,7 @@ def morning_presentation():
     while alarm.is_active():
         time.sleep(1)
     time.sleep(5)
-    play_weather()
-    time.sleep(5)
-    play_news_details()
-    time.sleep(5)
-    play_schedule()
+    play_morning_greeting()
     logger.info("Morning presentation complete. Cleaning up...")
     cleanup()
     
@@ -104,6 +109,9 @@ def cleanup():
     for file in os.listdir("hestia/tools/reports/schedule"):
         if file.endswith(".txt"):
             os.remove(f"hestia/tools/reports/schedule/{file}")
+    for file in os.listdir("hestia/tools/reports/morning_greeting"):
+        if file.endswith(".wav"):
+            os.remove(f"hestia/tools/reports/morning_greeting/{file}")
         
     
 
