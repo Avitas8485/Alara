@@ -119,30 +119,6 @@ class GoogleCalendar:
                 raise
         return all_events
         
-    
-    def get_events_for_today(self):
-        today = datetime.datetime.utcnow().date().isoformat() + "T00:00:00Z"
-        tomorrow = (datetime.datetime.utcnow().date() + datetime.timedelta(days=1)).isoformat() + "T00:00:00Z"
-        logging.info("Getting today's events")
-        all_events = []
-        for calendar_id in self.get_all_calendars():
-            try:
-                events_result = (
-                    self.service.events()
-                    .list(
-                        calendarId=calendar_id,
-                        timeMin=today,
-                        timeMax=tomorrow,
-                        singleEvents=True,
-                        orderBy="startTime",
-                    )
-                    .execute()
-                )
-                all_events.extend(events_result.get("items", []))
-            except HttpError as error:
-                logging.error(f"Failed to get events: {error}")
-                raise
-        return all_events
         
     
     def print_events(self, events):

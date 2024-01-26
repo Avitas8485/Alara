@@ -1,13 +1,13 @@
 from flask import Flask, render_template
 from hestia.tools.system_and_utility.scheduler import SchedulerManager
 from hestia.lib.hestia_logger import logger
-from hestia.routines.morning.morning_routine import morning_preparation, morning_presentation
+from hestia.routines.morning.morning_routine import morning_preparation, play_morning_greeting
 from hestia.routines.recurring.calendar import get_events, send_notification
 from datetime import datetime, timedelta
 
 import os
 app = Flask(__name__)
-
+'''
 scheduler = SchedulerManager()
 scheduler.start_scheduler()
 def schedule_morning_routine():
@@ -32,7 +32,10 @@ def schedule_calendar_notification():
         logger.error(f"Failed to schedule notification: {e}")
 
 schedule_morning_routine()
-schedule_calendar_notification()
+schedule_calendar_notification()'''
+
+morning_preparation()
+play_morning_greeting()
 
 
 

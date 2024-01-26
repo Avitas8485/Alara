@@ -8,7 +8,7 @@ from hestia.lib.hestia_logger import logger
 def get_events() -> list:
     calendar = GoogleCalendar()
     try:
-        events = calendar.get_events_list()
+        events = calendar.get_events_for_today()
     except Exception as e:
         logger.error(f"Failed to get events: {e}")
         events = []
