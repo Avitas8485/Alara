@@ -20,13 +20,10 @@ mood_tracker.db
 model/
 
 # ignore output folder
-output/
+
 outputs/
 
-news/
-weather/
-schedule/
-
+reports/
 # ignore jobs.sqlite file
 jobs.sqlite
 
