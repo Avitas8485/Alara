@@ -8,6 +8,12 @@ import soundfile as sf
 from hestia.lib.hestia_logger import logger
 from typing import List
 
+# creating global variables
+CONFIG_PATH = "C:/Users/avity/Projects/models/tts/xtts_v2-001/config.json"
+VOCAB_PATH = "C:/Users/avity/Projects/models/tts/xtts_v2-001/vocab.json"
+SPEAKER_PATH = "hestia/text_to_speech/voice_samples/output_00000017.wav"
+MODEL_DIR = "C:/Users/avity/Projects/models/tts/xtts_v2-001/"
+
 
 class TextToSpeechSystem:
     """This class contains the code for the TextToSpeechSystem.
@@ -19,14 +25,14 @@ class TextToSpeechSystem:
         model: The model to use for the TextToSpeechSystem."""
     def __init__(self):
         self.config = XttsConfig()
-        self.config.load_json("C:/Users/avity/Projects/models/tts/xtts_v2-001/config.json")
-        self.vocab_path = "C:/Users/avity/Projects/models/tts/xtts_v2-001/vocab.json"
-        self.speaker_path = "hestia/text_to_speech/voice_samples/output_00000017.wav"
-        self.model_dir = "C:/Users/avity/Projects/models/tts/xtts_v2-001/"
+        self.config.load_json(CONFIG_PATH)
+        self.vocab_path = VOCAB_PATH
+        self.speaker_path = SPEAKER_PATH
+        self.model_dir = MODEL_DIR
         self.model = None
         logger.info("TextToSpeechSystem initialized.")
-        
-    def split_into_sentences_using_nlp(self, text)->List[str]:
+
+    def split_into_sentences_using_nlp(self, text) -> List[str]:
         """Split the text into sentences using NLP.
         Args:
             text: The text to split into sentences.
@@ -49,10 +55,9 @@ class TextToSpeechSystem:
                 merged_sentences.append(sentences[i])
                 i += 1
         logger.info("Text processed.")
-                
         return merged_sentences
-    
-    def load_txt_from_file(self,file_path)->str:
+
+    def load_txt_from_file(self, file_path) -> str:
         """Load text from a file.
         Args:
             file_path: The path to the file.
@@ -61,9 +66,9 @@ class TextToSpeechSystem:
         with open(file_path, "r") as file:
             text = file.read()
         return text
-    
-    
-    def convert_sentences_to_wav_files(self,filename: str, output_dir: str, sentences: list)->List[str]:
+
+    def convert_sentences_to_wav_files(self, filename: str, output_dir: str,
+                                       sentences: list) -> List[str]:
         """Convert the sentences to wav files.
         Args:
             filename(str): The name of the file.
@@ -74,11 +79,15 @@ class TextToSpeechSystem:
         logger.info("Converting sentences to wav files...")
         self.model = Xtts.init_from_config(self.config)
         logger.info("Loading TTS model...")
-        self.model.load_checkpoint(config=self.config, checkpoint_dir=self.model_dir, vocab_path=self.vocab_path)
+        self.model.load_checkpoint(config=self.config,
+                                   checkpoint_dir=self.model_dir,
+                                   vocab_path=self.vocab_path)
         soundbite_filepaths = []
         for i, sentence in enumerate(sentences):
             soundbite_filepath = f"{output_dir}/{filename}_{i}.wav"
-            gpt_cond_latent, speaker_embedding = self.model.get_conditioning_latents(audio_path=[self.speaker_path])
+            gpt_cond_latent, speaker_embedding = self.model.get_conditioning_latents(
+                audio_path=[self.speaker_path]
+            )
             out = self.model.inference(
                 text=sentence,
                 gpt_cond_latent=gpt_cond_latent,
