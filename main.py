@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 from hestia.tools.system_and_utility.scheduler import SchedulerManager
 from hestia.lib.hestia_logger import logger
-from hestia.routines.morning.morning_routine import morning_preparation, play_morning_greeting
+from hestia.routines.morning.morning_routine import morning_preparation, play_morning_greeting, morning_greeting
 from hestia.routines.recurring.calendar import get_events, send_notification
 from datetime import datetime, timedelta
 
@@ -34,7 +34,8 @@ def schedule_calendar_notification():
 schedule_morning_routine()
 schedule_calendar_notification()'''
 
-morning_preparation()
+#morning_preparation()
+morning_greeting()
 play_morning_greeting()
 
 

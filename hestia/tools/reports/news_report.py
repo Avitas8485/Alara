@@ -7,7 +7,7 @@ from datetime import datetime
 import nltk
 from typing import List
 from hestia.lib.hestia_logger import logger
-from hestia.llm.llama_chat_completion import load_prompt, chat_completion
+from hestia.llm.llama_chat_completion import load_prompt, chat_completion, load_prompt_txt
 from hestia.text_to_speech.speech import TextToSpeechSystem
 from hestia.tools.reports.base_report_generator import BaseReportGenerator
 load_dotenv()
@@ -170,7 +170,8 @@ class NewsReport(BaseReportGenerator):
     def generate_report_summary(self):
         """Generate the news report summary."""
         news = self.read_file(self.simplified_news_path)
-        news_prompt = load_prompt(prompt_name="news_debrief")
+        #news_prompt = load_prompt(prompt_name="news_debrief")
+        news_prompt = load_prompt_txt(prompt_name="news_debrief")
         news_summary = chat_completion(system_prompt=news_prompt, user_prompt=f"The news for {self.todays_date}:\n\n{news}")
         self.write_file(self.news_summary_path, news_summary)
 
