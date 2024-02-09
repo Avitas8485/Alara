@@ -1,18 +1,21 @@
 from llama_cpp import Llama
 import yaml
-#from hestia.lib.hestia_logger import logger
+# from hestia.lib.hestia_logger import logger
 from contextlib import contextmanager
 import logging
 logger = logging.getLogger(__name__)
+
 
 @contextmanager
 def load_llama_model():
     """Load the Llama model, and unload it when done."""
     logger.info("Loading LLM...")
-    llm =  Llama(model_path="C:/Users/avity/Projects/models/mistral-7b-instruct-v0.1.Q4_K_M.gguf",
-            n_threads=4,
-            n_threads_batch=4,
-            n_ctx=2048)
+    llm = Llama(
+        model_path="C:/Users/avity/Projects/models/"
+                   "mistral-7b-instruct-v0.1.Q4_K_M.gguf",
+        n_threads=4,
+        n_threads_batch=4,
+        n_ctx=2048)
     try:
         yield llm
     finally:
@@ -20,10 +23,8 @@ def load_llama_model():
         llm = None
 
 
-
-
 # now to turn this into a function
-def chat_completion(system_prompt: str, user_prompt: str, **kwargs)->str:
+def chat_completion(system_prompt: str, user_prompt: str, **kwargs) -> str:
     """Generate a chat completion from the Llama model."""
     logger.info("Generating chat completion...")
     with load_llama_model() as llm:
@@ -41,9 +42,10 @@ def chat_completion(system_prompt: str, user_prompt: str, **kwargs)->str:
         )
     logger.info("Generation complete.")
     # to prevent situations where the model outputs nothing
-    if output["choices"][0]["message"]["content"] == "":
+    if output["choices"][0]["message"]["content"] == "": # type: ignore
         return chat_completion(system_prompt, user_prompt, **kwargs)
-    return output["choices"][0]["message"]["content"]
+    return output["choices"][0]["message"]["content"] # type: ignore
+
 
 def load_prompt(prompt_name: str):
     """Load a prompt from prompts.yaml."""
@@ -53,3 +55,7 @@ def load_prompt(prompt_name: str):
     return prompts[f"{prompt_name}"][0]
 
 
+def load_prompt_txt(prompt_name: str):
+    logger.info(f"Loading {prompt_name} prompt...")
+    with open(f"hestia/llm/prompts/{prompt_name}.txt", "r") as file:
+        return file.read()
