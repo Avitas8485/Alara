@@ -2,9 +2,8 @@ from typing import Optional, Any, List
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from hestia.lib.hestia_logger import logger
-import os
 from uuid import uuid4
-import logging
+
 
 
 EXECUTORS = {

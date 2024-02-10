@@ -2,7 +2,7 @@ from plyer import notification
 
 def notify(title: str, message: str, notification_type="reminder"):
     if notification_type == "reminder":
-        app_icon = "HESTIA/hestia/tools/system_and_utility/notifications/icons/reminder.ico"
+        app_icon = "hestia/tools/system_and_utility/notifications/icons/reminder.ico"
     notification.notify( # type: ignore
         title=title,
         message=message,
