@@ -7,7 +7,6 @@ __pycache__/
 venv/
 
 # ignore news summary folder
-news_summary/
 
 # ignore apod_images folder
 apod_images/
@@ -23,7 +22,7 @@ model/
 
 outputs/
 
-reports/
+summary/
 # ignore jobs.sqlite file
 jobs.sqlite
 

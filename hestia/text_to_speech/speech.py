@@ -112,10 +112,10 @@ class TextToSpeechSystem:
         if format not in ["mp3","wav"]:
             raise Exception(f"Format:{format} not supported.")
         output_filepath=f"{output_dir}/{output_filename}.{format}"
-        print(f"output_filepath={output_filepath}")
+        logger.info(f"output_filepath={output_filepath}")
         combined_sounds = None
         for soundbite_filepath in soundbite_filepaths:
-            print(f'soundbite_filepath={soundbite_filepath}')
+            logger.info(f'soundbite_filepath={soundbite_filepath}')
             some_sound=AudioSegment.from_wav(soundbite_filepath)
             if combined_sounds is None:
                 combined_sounds=some_sound    
@@ -148,7 +148,7 @@ class TextToSpeechSystem:
         Returns:
             None"""
         soundbite_filepaths=self.get_output_files(output_dir,soundbite_filename)
-        print(f'soundbite_filepaths={soundbite_filepaths}')
+        logger.info(f'soundbite_filepaths={soundbite_filepaths}')
         self.merge_wav_files_into_one(extension,output_dir,output_filename,soundbite_filepaths)
         exit()
         
