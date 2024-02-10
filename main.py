@@ -34,8 +34,8 @@ def schedule_calendar_notification():
 schedule_morning_routine()
 schedule_calendar_notification()'''
 
-#morning_preparation()
-morning_greeting()
+morning_preparation()
+
 play_morning_greeting()
 
 
