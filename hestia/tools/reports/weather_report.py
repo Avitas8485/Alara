@@ -10,7 +10,7 @@ from datetime import datetime
 
 load_dotenv()
 
-
+REPORT_SUMMARY_PATH = 'hestia/tools/reports/summary'
 
 class WeatherReport(BaseReportGenerator):
     """A class to represent a WeatherReport.
@@ -29,10 +29,7 @@ class WeatherReport(BaseReportGenerator):
             weather_report_path: The path to the weather report."""
             
         self.todays_date = datetime.now().strftime("%b %d, %Y")
-        self.DIR_PATH = "hestia/tools/reports/weather"
-        self.simplified_weather_path = os.path.join(self.DIR_PATH, f"{self.todays_date}weather_report.txt")
-        self.weather_report_path = os.path.join(self.DIR_PATH, f"weather_report {self.todays_date}.txt")
-        self.weather_summary_path = os.path.join(self.DIR_PATH, f"weather_summary {self.todays_date}.txt")
+        self.weather_summary_path = os.path.join(REPORT_SUMMARY_PATH, f"weather_summary {self.todays_date}.txt")
     def write_file(self, file_path: str, content):
         """Write to a file.
         Args:
@@ -78,11 +75,11 @@ class WeatherReport(BaseReportGenerator):
             logger.error(f"Error making weather request: {e}")
             return {}
 
-    def parse_information(self):
+    def parse_information(self)-> str:
         """Returns weather report"""
         weather_data = self.get_information()
         if not weather_data:
-            return None
+            return 'None'
         weather_report = f"""Weather report for {self.get_city()}:\n"""
         report_items = {
             'Address': weather_data['address'],
@@ -102,19 +99,19 @@ class WeatherReport(BaseReportGenerator):
         }
         for key, value in report_items.items():
             weather_report += f"{key}: {value}\n"
-        self.write_file(self.simplified_weather_path, weather_report)
+        return weather_report
         
     def generate_report_summary(self):
         """Generate the weather report summary."""
-        weather = self.read_file(self.simplified_weather_path)
-        #weather_prompt = load_prompt(prompt_name="weather_report")
+        weather =  self.parse_information()
+
         weather_prompt = load_prompt_txt(prompt_name="weather_report")
         weather_report = chat_completion(system_prompt=weather_prompt, user_prompt=weather)
-        self.write_file(self.weather_report_path, weather_report)
+        self.write_file(self.weather_summary_path, weather_report)
 
     def convert_summary_to_audio(self):
         """Convert the weather report summary to audio using text to speech."""
-        weather = self.read_file(self.weather_report_path)
+        weather = self.read_file(self.weather_summary_path)
         tts = TextToSpeechSystem()
         if weather is None:
             return
@@ -123,3 +120,8 @@ class WeatherReport(BaseReportGenerator):
             output_dir="hestia/text_to_speech/outputs/weather_report",
             output_filename=f"{self.todays_date}weather_report"
         )
+        
+    def generate_report(self):
+        """Generate the weather report."""
+        self.generate_report_summary()
+        self.convert_summary_to_audio()

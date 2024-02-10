@@ -14,14 +14,13 @@ load_dotenv()
 
 
 
-
+REPORT_SUMMARY_PATH = 'hestia/tools/reports/summary'
 # hestia/tools/news/newsapi.py
 class NewsReport(BaseReportGenerator):
     """A class to represent a NewsReport.
     Attributes:
         DIR_PATH: The path to the directory where the news report is stored.
         NEWS_API_KEY: The API key for the News API."""
-    DIR_PATH = "hestia/tools/reports/news"
     NEWS_API_KEY = os.getenv('NEWS_API_KEY', '')
     
     def __init__(self):
@@ -32,9 +31,7 @@ class NewsReport(BaseReportGenerator):
             simplified_news_path: The path to the simplified news.
             news_summary_speech_path: The path to the news summary speech."""
         self.todays_date = datetime.now().strftime("%b %d, %Y")
-        self.news_summary_path = os.path.join(self.DIR_PATH, f"news_summary {self.todays_date}.txt")
-        self.simplified_news_path = os.path.join(self.DIR_PATH, f"{self.todays_date}news_report.txt")
-        self.news_summary_speech_path = os.path.join(self.DIR_PATH, f"{self.todays_date}summary.txt")
+        self.news_summary_path = os.path.join(REPORT_SUMMARY_PATH, f"news_summary {self.todays_date}.txt")
         nltk.download('punkt', quiet=True)
         
     def read_file(self, file_path: str):
@@ -153,7 +150,7 @@ class NewsReport(BaseReportGenerator):
         return news_information
     
 
-    def parse_information(self):
+    def parse_information(self)->str:
         """Parse the news information."""
         news_information = self.get_information(self.NEWS_API_KEY)
         news_information = {k: v for k, v in news_information.items() if k != "[Removed]"}
@@ -163,14 +160,14 @@ class NewsReport(BaseReportGenerator):
             value["title"] = self.encode_to_ascii(value.get("title", ""))
             value["summary"] = self.encode_to_ascii(value.get("summary", ""))
         news_information = [value["title"] + "." for value in news_information.values()]
-        self.write_file(self.simplified_news_path, "\n".join(news_information))
+        return "\n".join(news_information)
+        
 
             
             
     def generate_report_summary(self):
         """Generate the news report summary."""
-        news = self.read_file(self.simplified_news_path)
-        #news_prompt = load_prompt(prompt_name="news_debrief")
+        news = self.parse_information()
         news_prompt = load_prompt_txt(prompt_name="news_debrief")
         news_summary = chat_completion(system_prompt=news_prompt, user_prompt=f"The news for {self.todays_date}:\n\n{news}")
         self.write_file(self.news_summary_path, news_summary)
@@ -187,3 +184,9 @@ class NewsReport(BaseReportGenerator):
             output_dir="hestia/text_to_speech/outputs/news_report",
             output_filename=f"{self.todays_date}news_report"
         )
+    
+    def generate_report(self):
+        """Generate the news report."""
+        self.generate_report_summary()
+        self.convert_summary_to_audio()
+    

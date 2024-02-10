@@ -17,3 +17,7 @@ class BaseReportGenerator(ABC):
     @abstractmethod
     def convert_summary_to_audio():
         pass
+    
+    @abstractmethod
+    def generate_report():
+        pass

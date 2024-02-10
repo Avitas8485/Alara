@@ -6,12 +6,10 @@ from datetime import datetime
 import os
 import unicodedata
 
-
+REPORT_SUMMARY_PATH = 'hestia/tools/reports/summary'
 class ScheduleReport(BaseReportGenerator):
     def __init__(self):
-        self.DIR_PATH = "hestia/tools/reports/schedule"
-        self.schedule_report_path = os.path.join(self.DIR_PATH, f"schedule_report.txt")
-        self.summary_path = os.path.join(self.DIR_PATH, f"summary.txt")
+        self.summary_path = os.path.join(REPORT_SUMMARY_PATH, f"summary.txt")
         self.todays_date = datetime.now().strftime("%b %d, %Y")
     
     def remove_non_ascii(self, text: str)->str:
@@ -61,11 +59,12 @@ class ScheduleReport(BaseReportGenerator):
             else:
                 summary = event["summary"]
                 schedule_report += f"All day: {summary}\n"
-        self.write_file(self.schedule_report_path, schedule_report)
+        return schedule_report
+
     
     def generate_report_summary(self):
         """Generate a schedule report."""
-        schedule = self.read_file(self.schedule_report_path)
+        schedule = self.parse_information()
         schedule_prompt = load_prompt("schedule_report")
         schedule_summary = chat_completion(system_prompt=schedule_prompt, user_prompt=f"Beginning of schedule\n\nSchedule for {self.todays_date}: [{schedule}]\n\nEnd of schedule.")
         self.write_file(self.summary_path, schedule_summary)
