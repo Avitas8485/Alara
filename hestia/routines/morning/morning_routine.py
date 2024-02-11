@@ -11,14 +11,10 @@ from hestia.tools.reports.news_report import NewsReport
 from hestia.tools.reports.weather_report import WeatherReport
 from hestia.tools.system_and_utility.Alarm.alarm import Alarm
 from hestia.tools.system_and_utility.scheduler import SchedulerManager
-
+from hestia.config.config import cfg
 scheduler = SchedulerManager()
 
 # add some global variables
-REPORT_SUMMARY_PATH = "hestia/tools/reports/summary"
-TTS_PATH = "hestia/text_to_speech/outputs"
-PROMPT_PATH = "hestia/llm/prompts"
-SCHEDULE_PATH = "hestia/tools/reports/schedule"
 
 
         
@@ -28,9 +24,9 @@ SCHEDULE_PATH = "hestia/tools/reports/schedule"
 def morning_greeting():
     today = datetime.now().strftime("%b %d, %Y")
     logger.info(f"Generating morning greeting for {today}...")
-    with open(f"{REPORT_SUMMARY_PATH}/news_summary {today}.txt", "r") as file:
+    with open(f"{cfg.REPORT_SUMMARY_PATH}/news_summary {today}.txt", "r") as file:
         news = file.read()
-    with open(f"{REPORT_SUMMARY_PATH}/weather_summary {today}.txt", "r") as file:
+    with open(f"{cfg.REPORT_SUMMARY_PATH}/weather_summary {today}.txt", "r") as file:
         weather = file.read()
     prompt = load_prompt("morning_greeting")
     
@@ -47,14 +43,14 @@ def morning_greeting():
     )
     tts = TextToSpeechSystem()
     tts.convert_text_to_speech(greeting,
-                               output_dir=f"{TTS_PATH}/morning_greeting",
+                               output_dir=f"{cfg.XTTS_OUTPUT_PATH}/morning_greeting",
                                output_filename=f"{today}morning_greeting")
 
 
 def play_report(report_type):
     """Play a report."""
     todays_date = datetime.now().strftime("%b %d, %Y")
-    report_path = f"{TTS_PATH}/{report_type}/{todays_date}{report_type}.wav"
+    report_path = f"{cfg.TTS_PATH}/{report_type}/{todays_date}{report_type}.wav"
     play_audio(report_path)
 
 
@@ -73,7 +69,7 @@ def morning_preparation():
 def play_morning_greeting():
     """Play the morning greeting."""
     todays_date = datetime.now().strftime("%b %d, %Y")
-    greeting_path = f"{TTS_PATH}/morning_greeting/{todays_date}morning_greeting.wav"
+    greeting_path = f"{cfg.XTTS_OUTPUT_PATH}/morning_greeting/{todays_date}morning_greeting.wav"
     play_audio(greeting_path)
 
 
@@ -96,10 +92,7 @@ def cleanup():
 
     cleanup_paths = [
         ("hestia/text_to_speech/outputs", ".wav"),
-        ("hestia/tools/reports/news", ".txt"),
-        ("hestia/tools/reports/weather", ".txt"),
-        ("hestia/tools/reports/schedule", ".txt"),
-        ("hestia/tools/reports/morning_greeting", ".wav"),
+        ("hestia/tools/reports/summary", ".txt")
     ]
 
     for path, file_type in cleanup_paths:

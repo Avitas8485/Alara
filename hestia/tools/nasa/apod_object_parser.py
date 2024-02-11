@@ -2,10 +2,9 @@ import requests
 import os
 from PIL import Image
 from dotenv import load_dotenv
-
-
+from hestia.config.config import cfg
 load_dotenv()
-API_KEY = os.getenv('NASA_API_KEY')
+API_KEY = cfg.NASA_API_KEY
 if not API_KEY:
     raise ValueError('Missing NASA_API_KEY environment variable')
 

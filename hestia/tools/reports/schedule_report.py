@@ -5,11 +5,11 @@ from hestia.tools.system_and_utility.google_calendar import GoogleCalendar
 from datetime import datetime
 import os
 import unicodedata
+from hestia.config.config import cfg
 
-REPORT_SUMMARY_PATH = 'hestia/tools/reports/summary'
 class ScheduleReport(BaseReportGenerator):
     def __init__(self):
-        self.summary_path = os.path.join(REPORT_SUMMARY_PATH, f"summary.txt")
+        self.summary_path = os.path.join(cfg.REPORT_SUMMARY_PATH, f"summary.txt")
         self.todays_date = datetime.now().strftime("%b %d, %Y")
     
     def remove_non_ascii(self, text: str)->str:

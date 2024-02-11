@@ -7,12 +7,8 @@ from TTS.tts.models.xtts import Xtts
 import soundfile as sf
 from hestia.lib.hestia_logger import logger
 from typing import List
-
+from hestia.config.config import cfg
 # creating global variables
-CONFIG_PATH = "C:/Users/avity/Projects/models/tts/xtts_v2-001/config.json"
-VOCAB_PATH = "C:/Users/avity/Projects/models/tts/xtts_v2-001/vocab.json"
-SPEAKER_PATH = "hestia/text_to_speech/voice_samples/output_00000017.wav"
-MODEL_DIR = "C:/Users/avity/Projects/models/tts/xtts_v2-001/"
 
 
 class TextToSpeechSystem:
@@ -25,11 +21,10 @@ class TextToSpeechSystem:
         model: The model to use for the TextToSpeechSystem."""
     def __init__(self):
         self.config = XttsConfig()
-        self.config.load_json(CONFIG_PATH)
-        self.vocab_path = VOCAB_PATH
-        self.speaker_path = SPEAKER_PATH
-        self.model_dir = MODEL_DIR
-        self.model = None
+        self.config.load_json(cfg.XTTS_CONFIG_PATH)
+        self.vocab_path = cfg.XTTS_VOCAB_PATH
+        self.speaker_path = cfg.XTTS_SPEAKER_PATH
+        self.model_dir = cfg.XTTS_MODEL_DIR
         logger.info("TextToSpeechSystem initialized.")
 
     def split_into_sentences_using_nlp(self, text) -> List[str]:

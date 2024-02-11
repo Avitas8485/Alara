@@ -10,18 +10,16 @@ from hestia.lib.hestia_logger import logger
 from hestia.llm.llama_chat_completion import load_prompt, chat_completion, load_prompt_txt
 from hestia.text_to_speech.speech import TextToSpeechSystem
 from hestia.tools.reports.base_report_generator import BaseReportGenerator
-load_dotenv()
+from hestia.config.config import cfg
 
 
-
-REPORT_SUMMARY_PATH = 'hestia/tools/reports/summary'
 # hestia/tools/news/newsapi.py
 class NewsReport(BaseReportGenerator):
     """A class to represent a NewsReport.
     Attributes:
         DIR_PATH: The path to the directory where the news report is stored.
         NEWS_API_KEY: The API key for the News API."""
-    NEWS_API_KEY = os.getenv('NEWS_API_KEY', '')
+    NEWS_API_KEY = cfg.NEWS_API_KEY
     
     def __init__(self):
         """Initialize the NewsReport.
@@ -31,7 +29,7 @@ class NewsReport(BaseReportGenerator):
             simplified_news_path: The path to the simplified news.
             news_summary_speech_path: The path to the news summary speech."""
         self.todays_date = datetime.now().strftime("%b %d, %Y")
-        self.news_summary_path = os.path.join(REPORT_SUMMARY_PATH, f"news_summary {self.todays_date}.txt")
+        self.news_summary_path = os.path.join(cfg.REPORT_SUMMARY_PATH, f"news_summary {self.todays_date}.txt")
         nltk.download('punkt', quiet=True)
         
     def read_file(self, file_path: str):
@@ -152,7 +150,7 @@ class NewsReport(BaseReportGenerator):
 
     def parse_information(self)->str:
         """Parse the news information."""
-        news_information = self.get_information(self.NEWS_API_KEY)
+        news_information = self.get_information(cfg.NEWS_API_KEY)
         news_information = {k: v for k, v in news_information.items() if k != "[Removed]"}
         for key, value in news_information.items():
             value.pop("url", None)

@@ -12,12 +12,12 @@ from pytz import timezone
 from hestia.llm.llama_chat_completion import chat_completion, load_prompt
 from hestia.text_to_speech.speech import TextToSpeechSystem
 from hestia.tools.reports.base_report_generator import BaseReportGenerator
+from hestia.config.config import cfg
 
-REPORT_SUMMARY_PATH = 'hestia/tools/reports/summary'
 class ActivityReportGenerator(BaseReportGenerator):
     def __init__(self):
         self.todays_date = datetime.now().strftime("%b %d, %Y")
-        self.activity_report_path = os.path.join(REPORT_SUMMARY_PATH, f"activity_summary {self.todays_date}.txt")
+        self.activity_report_path = os.path.join(cfg.REPORT_SUMMARY_PATH, f"activity_summary {self.todays_date}.txt")
         self.hostname = "fakedata" if os.getenv("CI") else socket.gethostname()
         self.aw = ActivityWatchClient()
         self.timezone = self.get_timezone()

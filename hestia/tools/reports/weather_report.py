@@ -7,17 +7,16 @@ from hestia.text_to_speech.speech import TextToSpeechSystem
 from hestia.tools.system_and_utility.ip_geolocation import get_geolocation
 from hestia.lib.hestia_logger import logger
 from datetime import datetime
-
+from hestia.config.config import cfg
 load_dotenv()
 
-REPORT_SUMMARY_PATH = 'hestia/tools/reports/summary'
 
 class WeatherReport(BaseReportGenerator):
     """A class to represent a WeatherReport.
     Attributes:
         WEATHER_API_KEY: The API key for the Visual Crossing Weather API.
         BASE_URL: The base URL for the Visual Crossing Weather API."""
-    WEATHER_API_KEY = os.getenv('VISUAL_CROSSING_API_KEY', '')
+    WEATHER_API_KEY = cfg.VISUAL_CROSSING_API_KEY
     BASE_URL = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/'
 
     def __init__(self):
@@ -29,7 +28,7 @@ class WeatherReport(BaseReportGenerator):
             weather_report_path: The path to the weather report."""
             
         self.todays_date = datetime.now().strftime("%b %d, %Y")
-        self.weather_summary_path = os.path.join(REPORT_SUMMARY_PATH, f"weather_summary {self.todays_date}.txt")
+        self.weather_summary_path = os.path.join(cfg.REPORT_SUMMARY_PATH, f"weather_summary {self.todays_date}.txt")
     def write_file(self, file_path: str, content):
         """Write to a file.
         Args:

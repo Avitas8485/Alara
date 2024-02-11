@@ -4,6 +4,7 @@ import yaml
 from contextlib import contextmanager
 import logging
 logger = logging.getLogger(__name__)
+from hestia.config.config import cfg
 
 
 @contextmanager
@@ -11,11 +12,10 @@ def load_llama_model():
     """Load the Llama model, and unload it when done."""
     logger.info("Loading LLM...")
     llm = Llama(
-        model_path="C:/Users/avity/Projects/models/"
-                   "mistral-7b-instruct-v0.1.Q4_K_M.gguf",
-        n_threads=4,
-        n_threads_batch=4,
-        n_ctx=2048)
+        model_path=cfg.LLAMA_MODEL_PATH,
+        n_threads=cfg.LLAMA_N_THREADS,
+        n_threads_batch=cfg.LLAMA_N_THREADS_BATCH,
+        n_ctx=cfg.LLAMA_N_CTX)
     try:
         yield llm
     finally:
@@ -38,7 +38,7 @@ def chat_completion(system_prompt: str, user_prompt: str, **kwargs) -> str:
                     "role": "user",
                     "content": f"{user_prompt}"
                 }
-            ], max_tokens=2048, **kwargs
+            ], max_tokens=cfg.LLAMA_MAX_TOKENS, **kwargs
         )
     logger.info("Generation complete.")
     # to prevent situations where the model outputs nothing
