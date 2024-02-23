@@ -1,0 +1,77 @@
+{
+    "tools": [
+        {
+            "name": "Intent recognition",
+            "description": "Recognize the intent of a user's input",
+            "properties":{
+                "name": "user_input",
+                "type": "string"
+            },
+            "required": [
+                "user_input"
+            ],
+            "outputs": [
+                {
+                    "name": "Intent",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "Text Generation",
+            "description": "Generate text based on a given input",
+            "properties":[{
+                "name": "system_prompt",
+                "type": "string"
+            },
+            {
+                "name": "user_input",
+                "type": "string"
+            }],
+            "required": [
+                "system_prompt",
+                "user_input"
+            ],
+            "outputs": [
+                {
+                    "name": "Generated_text",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "speech-to-text",
+            "description": "Convert speech to text",
+            "properties":[{
+                "name": "audio",
+                "type": "array"
+            }],
+            "required": [
+                "audio"
+            ],
+            "outputs": [
+                {
+                    "name": "text",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "text-to-speech",
+            "description": "Convert text to speech",
+            "properties":[{
+                "name": "text",
+                "type": "string"
+            }],
+            "required": [
+                "text"
+            ],
+            "outputs": [
+                {
+                    "name": "audio",
+                    "type": "array"
+                }
+            ]
+        }
+    ]
+    }

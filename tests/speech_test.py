@@ -1,12 +1,12 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from typing import List
-from hestia.text_to_speech.speech import TextToSpeechSystem  # replace with the actual module name
+from hestia.tts.xtts_tts import XttsTextToSpeechSystem  # replace with the actual module name
 from unittest.mock import mock_open
 
 class TestTextToSpeechSystem(unittest.TestCase):
     def setUp(self):
-        self.text_to_speech_system = TextToSpeechSystem()
+        self.text_to_speech_system = XttsTextToSpeechSystem()
 
     @patch('nltk.tokenize.sent_tokenize')
     @patch('nltk.download')

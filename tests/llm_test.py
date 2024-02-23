@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from hestia.llm.llama_chat_completion import chat_completion
+from hestia.llm.zero_shot_llama_chat_completion import chat_completion
 
 class TestChatCompletion(unittest.TestCase):
     @patch('hestia.llm.llama_chat_completion.load_llama_model')
