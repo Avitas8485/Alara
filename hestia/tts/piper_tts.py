@@ -1,7 +1,8 @@
 import subprocess
 
 import re
-from hestia.tts.base_tts import BaseTTS
+from .base_tts import BaseTTS
+from ..tools.text_parser.format_en import Converter
 
 class PiperTTSError(Exception):
     pass
@@ -20,10 +21,11 @@ class PiperTTS(BaseTTS):
             "noise_scale": 0.66,
             "length_scale": 1,
             "noise_w": 0.8,
-            "sentence_silence": 0.2
+            "sentence_silence": 0.1,
         }
         
     def clean_text(self, text):
+        converter = Converter()
         cleaned_text = text
         
         replacements = {
@@ -44,7 +46,7 @@ class PiperTTS(BaseTTS):
         cleaned_text = re.sub(r"[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F700-\U0001F77F\U0001F780-\U0001F7FF\U0001F800-\U0001F8FF\U0001F900-\U0001F9FF\U0001FA00-\U0001FA6F\U0001FA70-\U0001FAFF\U00002702-\U000027B0\U000024C2-\U0001F251]+", "", cleaned_text)
         
         # Ignore text between asterisks if option is enabled
-        
+        cleaned_text = converter.convert_in_text(cleaned_text)
         return cleaned_text
     
     def synthesize(self, text):
@@ -109,10 +111,12 @@ class PiperTTS(BaseTTS):
     
 
 def main():
-    text = """Dynamic Adjustments to Thread Priorities:
-   - Example: In a gaming application, different threads handle tasks like physics calculations, rendering, and input processing. Replicating scheduling information in TCBs allows for dynamic adjustments to thread priorities. For instance, when a user initiates a resource-intensive action, like a complex in-game simulation, the priority of the corresponding thread can be temporarily increased to ensure a smoother user experience.
-    - Example: In a real-time operating system, a thread that handles sensor data may need to be given a higher priority when the system is in a critical state, such as when a vehicle is approaching an obstacle. This ensures that the sensor data is processed quickly and accurately, allowing the system to respond appropriately.
-    - Example: In a web server, threads that handle incoming requests can have their priorities adjusted based on the current load on the server. When the server is under heavy load, threads handling critical requests can be given higher priority to ensure timely responses."""
+    text = """It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.
+    The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.
+    Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy.
+    Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+    
+    It is 9:00 AM. Today is 02/23/2004 and the weather is 72 degrees Fahrenheit."""
     piper = PiperTTS()
     piper.synthesize(text)
     piper.synthesize_to_file(text)
