@@ -68,6 +68,7 @@ class StreamHandler:
                     transcription = result['text']
                     if self.asst['analyze']: self.asst['analyze'](result['text'])
                     self.fileready = False
+                    os.remove('dictate.wav')
                     return transcription
 
 def main():

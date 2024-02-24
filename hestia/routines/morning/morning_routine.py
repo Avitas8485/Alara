@@ -6,11 +6,11 @@ from hestia.lib.hestia_logger import logger
 from hestia.llm.zero_shot_llama_chat_completion import load_prompt, chat_completion
 from hestia.tts.xtts_tts import XttsTTS as TextToSpeechSystem
 from hestia.tts.tts_utils import play_audio
-from hestia.tools.random_scripts.advice import get_advice
+from hestia.skills.advice import get_advice
 from hestia.skills.reports.news_report import NewsReport
 from hestia.skills.reports.weather_report import WeatherReport
-from hestia.tools.system_and_utility.Alarm.alarm import Alarm
-from hestia.tools.system_and_utility.scheduler import SchedulerManager
+from hestia.skills.Alarm.alarm import Alarm
+from hestia.tools.scheduler import SchedulerManager
 from hestia.config.config import cfg
 scheduler = SchedulerManager()
 

@@ -1,7 +1,7 @@
 from hestia.skills.reports.base_report_generator import BaseReportGenerator
 from hestia.llm.zero_shot_llama_chat_completion import chat_completion, load_prompt
 from hestia.tts.xtts_tts import XttsTTS as TextToSpeechSystem
-from hestia.tools.system_and_utility.google_calendar import GoogleCalendar
+from hestia.skills.google_calendar import GoogleCalendar
 from datetime import datetime
 import os
 import unicodedata
