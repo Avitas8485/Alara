@@ -13,7 +13,7 @@ def load_llama_model()->Llama:
         model_path=cfg.MIDDLE_LLAMA_MODEL_PATH,
         n_threads=cfg.LLAMA_N_THREADS,
         n_threads_batch=cfg.LLAMA_N_THREADS_BATCH,
-        n_ctx=cfg.LLAMA_N_CTX)
+        n_ctx=cfg.LLAMA_N_CTX, chat_format="chatml")
     return llm
 
 def chat_completion(system_prompt: str, user_prompt: str, **kwargs) -> str:
@@ -35,6 +35,7 @@ def chat_completion(system_prompt: str, user_prompt: str, **kwargs) -> str:
     logger.info("Generation complete.")
     # to prevent situations where the model outputs nothing
     if output["choices"][0]["message"]["content"] == "": # type: ignore
+        print("Model output was empty. Retrying...")
         return chat_completion(system_prompt, user_prompt, **kwargs)
     return output["choices"][0]["message"]["content"] # type: ignore
 
