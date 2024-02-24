@@ -9,6 +9,7 @@ from hestia.lib.hestia_logger import logger
 from hestia.tts.base_tts import BaseTTS
 from typing import List
 from hestia.config.config import cfg
+import warnings
 # creating global variables
 
 
@@ -146,7 +147,7 @@ class XttsTTS(BaseTTS):
             soundbite_filename: The name of the soundbite file.
         Returns:
             None"""
-        logger.warning("This method is deprecated. Use merge_wav_files_into_one instead.")
+        warnings.warn("This method is deprecated. Use merge_wav_files_into_one instead.", DeprecationWarning)
         soundbite_filepaths=self.get_output_files(output_dir,soundbite_filename)
         logger.info(f'soundbite_filepaths={soundbite_filepaths}')
         self.merge_wav_files_into_one(extension,output_dir,output_filename,soundbite_filepaths)
@@ -181,7 +182,7 @@ class XttsTTS(BaseTTS):
             text: The text to convert to speech.
             output_dir: The directory to output the speech to.
             output_filename: The name of the output file."""
-        logger.warning("This method is deprecated. Use synthesize_to_file instead.")
+        warnings.warn("This method is deprecated. Use synthesize_to_file instead.", DeprecationWarning)
         sentences = self.split_into_sentences_using_nlp(text)
         soundbite_filepaths = self.convert_sentences_to_wav_files(output_filename, output_dir, sentences)
         self.merge_wav_files_into_one("wav", output_dir, output_filename, soundbite_filepaths)
