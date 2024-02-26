@@ -24,7 +24,7 @@ class PiperTTS(BaseTTS):
             "sentence_silence": 0.1,
         }
         
-    def clean_text(self, text):
+    def clean_text(self, text: str):
         converter = Converter()
         cleaned_text = text
         
@@ -45,11 +45,12 @@ class PiperTTS(BaseTTS):
         cleaned_text = cleaned_text.replace("***", "*").replace("**", "*")
         cleaned_text = re.sub(r"[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F700-\U0001F77F\U0001F780-\U0001F7FF\U0001F800-\U0001F8FF\U0001F900-\U0001F9FF\U0001FA00-\U0001FA6F\U0001FA70-\U0001FAFF\U00002702-\U000027B0\U000024C2-\U0001F251]+", "", cleaned_text)
         
-        # Ignore text between asterisks if option is enabled
+        # Remove any non-ascii characters
+        cleaned_text = cleaned_text.encode('ascii', 'ignore').decode('ascii')
         cleaned_text = converter.convert_in_text(cleaned_text)
         return cleaned_text
     
-    def synthesize(self, text):
+    def synthesize(self, text: str):
         cleaned_text = self.clean_text(text)
         process = subprocess.Popen(
             [
@@ -87,7 +88,7 @@ class PiperTTS(BaseTTS):
         process.wait()
         p.terminate()
         
-    def synthesize_to_file(self, text):
+    def synthesize_to_file(self, text: str):
         cleaned_text = self.clean_text(text)
         process = subprocess.Popen(
             [

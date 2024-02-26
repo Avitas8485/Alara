@@ -57,7 +57,7 @@ class StreamHandler:
         else:
             self.prevblock = indata.copy()
 
-    def listen(self):
+    def listen(self)-> str|None:
         print("\033[32mListening.. \033[37m(Ctrl+C to Quit)\033[0m")
         with sd.InputStream(channels=1, callback=self.callback, blocksize=int(self.SAMPLE_RATE * self.BLOCK_SIZE / 1000), samplerate=self.SAMPLE_RATE):
             while self.asst['running']: 
@@ -69,7 +69,10 @@ class StreamHandler:
                     if self.asst['analyze']: self.asst['analyze'](result['text'])
                     self.fileready = False
                     os.remove('dictate.wav')
+                    if isinstance(transcription, list):
+                        transcription = ' '.join(transcription)
                     return transcription
+                
 
 def main():
     try:

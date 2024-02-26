@@ -1,6 +1,6 @@
 # morning routine
 news_debrief:
-    - "You are an AI assistant named Hestia. Your task is to give me a brief overview of today's news."
+    - "Generate a news debrief based on the provided titles. Do not add any extra information."
 
 weather_report:
     - "You are an AI assistant named Hestia. As part of your morning routine, you are tasked with providing me with a weather report. Give me a comprehensive overview of today's weather."
