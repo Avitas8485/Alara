@@ -69,7 +69,15 @@ class WakeWord:
                     print(f"Wakeword detected! '{mdl}' with score {scores[-1]}")
                     logger.info(f"Wakeword detected! '{mdl}' with score {scores[-1]}")
                     return True
-    
+                
+    def clear_wakeword_buffer(self):
+        """Clears the prediction buffer of the wakeword model.
+        It is important to clear the buffer after a wakeword has been detected to avoid
+        the wakeword being detected multiple times in a row."""
+        while self.model.prediction_buffer:
+            self.model.prediction_buffer.popitem()
+            
+        
     def run(self):
         if self.wake_word_detection():
             print("Wakeword detected!, initiating voice assistant..")
