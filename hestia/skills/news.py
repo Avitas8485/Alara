@@ -1,0 +1,182 @@
+import os
+import requests
+from dotenv import load_dotenv
+from newspaper import Article
+from newspaper import Config
+from datetime import datetime
+import nltk
+from typing import List
+from ..skills.base_skill import Skill
+from ..tts.piper_tts import PiperTTS
+from ..lib.hestia_logger import logger
+
+load_dotenv()
+
+class News(Skill):
+    """A class to represent a News.
+    Attributes:
+        DIR_PATH: The path to the directory where the news report is stored.
+        NEWS_API_KEY: The API key for the News API."""
+    NEWS_API_KEY = os.getenv("NEWS_API_KEY", '')
+    
+    def __init__(self):
+        """Initialize the News.
+        Attributes:
+            todays_date: The date of the news report.
+            news_summary_path: The path to the news summary.
+            simplified_news_path: The path to the simplified news.
+            news_summary_speech_path: The path to the news summary speech."""
+        self.todays_date = datetime.now().strftime("%b %d, %Y")
+        nltk.download('punkt', quiet=True)
+        self.tts = PiperTTS()
+        
+    
+    def encode_to_ascii(self, text: str):
+        """Encode text to ascii.
+        Args:
+            text: The text to encode.
+        Returns:
+            str: The encoded text."""
+        return text.encode('ascii', 'ignore').decode('ascii')
+    
+    def get_news_params(self, news_api_key: str)->dict:
+        """Get the parameters for the news request.
+        Args:
+            news_api_key: The API key for the News API.
+        Returns:
+            dict: The parameters for the news request."""
+        return {
+            #"category": "science",
+            "language": "en",
+            "apiKey": news_api_key
+        }
+    
+    
+    def make_news_request(self, params: dict):
+        """Make a news request.
+        Args:
+            params: The parameters for the news request.
+        Returns:
+            requests.Response: The response from the news request."""
+        try:
+            return requests.get("https://newsapi.org/v2/top-headlines", params=params)
+        except Exception as e:
+            #logger.error(f"Error making news request: {e}")
+            raise
+        
+    def parse_news_response(self, response):
+        """Parse the news response.
+        Args:
+            response: The response from the news request.
+        Returns:
+            list: The news articles."""
+        return response.json()['articles']  
+        
+    def get_config(self)->Config:
+        """Get the config for the news request."""
+        user_agent = """Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) """
+        config = Config()
+        config.browser_user_agent = user_agent
+        config.request_timeout = 10
+        return config
+    
+    
+    def download_and_parse_article(self, article_info, config)->Article:
+        """Download and parse the article.
+        Args:
+            article_info: The information about the article.
+            config: The config for the news request.
+        Returns:
+            Article: The article."""
+        article = Article(article_info['url'], config=config)
+        article.download()
+        article.parse()
+        return article
+    
+    def get_article_info(self, article_info: dict, article: Article)->dict:
+        """Get the article information.
+        Args:
+            article_info: The information about the article.
+            article: The article.
+        Returns:
+            dict: The article information."""
+        self.todays_date = datetime.now().strftime("%b %d, %Y")
+        article.nlp()
+        summary = self.encode_to_ascii(article.summary.replace("\n", ""))
+        title = self.encode_to_ascii(article_info["title"])
+        return {"title": title, "summary": summary, "url": article_info["url"], "date": f"{self.todays_date}"}
+    
+    
+    def latest_news(self):
+        latest_news = dict()
+        params = self.get_news_params(self.NEWS_API_KEY)
+        params["sortBy"] = "publishedAt"
+        response = self.make_news_request(params)
+        news_articles = self.parse_news_response(response)
+        for articles in news_articles:
+            try:
+                article = self.download_and_parse_article(articles, self.get_config())
+            except Exception as e:
+                logger.error(f"Error downloading article: {e}")
+                continue    
+            articles = self.get_article_info(articles, article)
+            latest_news[articles["title"]] = articles
+        news_information = self.parse_information(latest_news)
+        self.tts.synthesize(f"Here are the latest news: {news_information}")
+        return news_information
+        
+    
+    def news_in_category(self, category: str="science"):
+        news_in_category = dict()
+        params = self.get_news_params(self.NEWS_API_KEY)
+        params["category"] = category
+        response = self.make_news_request(params)
+        news_articles = self.parse_news_response(response)
+        for articles in news_articles:
+            try:
+                article = self.download_and_parse_article(articles, self.get_config())
+            except Exception as e:
+                logger.error(f"Error downloading article: {e}")
+                continue    
+            articles = self.get_article_info(articles, article)
+            news_in_category[articles["title"]] = articles
+        news_information = self.parse_information(news_in_category)
+        self.tts.synthesize(f"Here are the latest news in {category}: {news_information}")
+        return news_information
+    
+    
+    def top_news(self):
+        top_news = dict()
+        params = self.get_news_params(self.NEWS_API_KEY)
+        response = self.make_news_request(params)
+        news_articles = self.parse_news_response(response)
+        for articles in news_articles:
+            try:
+                article = self.download_and_parse_article(articles, self.get_config())
+            except Exception as e:
+                logger.error(f"Error downloading article: {e}")
+                continue    
+            articles = self.get_article_info(articles, article)
+            top_news[articles["title"]] = articles
+        
+        news_information = self.parse_information(top_news)
+        self.tts.synthesize(f"Heres the top news for today: {news_information}")
+        return news_information
+    
+    
+    
+        
+
+
+    def parse_information(self, news: dict)->str:
+        """Parse the news information."""
+        
+        news = {k: v for k, v in news.items() if k != "[Removed]"}
+        for key, value in news.items():
+            value.pop("url", None)
+            value.pop("date", None)
+            value["title"] = self.encode_to_ascii(value.get("title", ""))
+            value["summary"] = self.encode_to_ascii(value.get("summary", ""))
+        news_information = [value["title"] + "." for value in news.values()]
+        return "\n".join(news_information)
+
