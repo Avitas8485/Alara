@@ -27,12 +27,8 @@ while True:
         wake_word.clear_wakeword_buffer()
 '''
 
+from hestia.skills.skill_manager import SkillManager
 
-from hestia.skills.news import News
-
-news = News()
-'''print(news.top_news())
-print(news.news_in_category("science"))
-print(news.latest_news())'''
-print(news.call_feature("latest_news"))
+sm = SkillManager()
+sm.call_skill("chat")
 

@@ -9,7 +9,12 @@ class NotImplementError(Exception):
         super().__init__(self.message)
         
 
-class BaseSkill:
+class Skill:
+    def __call__(self, *args, **kwargs) -> Any:
+        """Call the skill."""
+        return self.call_feature(*args, **kwargs)
+    
+    
     def call_feature(self, feature_name: str, *args, **kwargs) -> Any:
         """Call a feature of the skill."""
         feature = getattr(self, feature_name, None)
