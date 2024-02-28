@@ -1,22 +1,13 @@
 from llama_cpp import Llama
 import yaml
-# from hestia.lib.hestia_logger import logger
+from hestia.lib.hestia_logger import logger
 import logging
-logger = logging.getLogger(__name__)
 from hestia.config.config import cfg
 import threading
+from hestia.lib.singleton import Singleton
 
 
-class Singleton(type):
-    """Singleton metaclass."""
-    _instances = {}
-    _lock = threading.Lock()
 
-    def __call__(cls, *args, **kwargs):
-        with cls._lock:
-            if cls not in cls._instances:
-                cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
     
 class LlamaChatCompletion(metaclass=Singleton):
     def __init__(self):

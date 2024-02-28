@@ -1,46 +1,36 @@
 from transformers import pipeline
 import json
+from hestia.lib.singleton import Singleton
+from hestia.lib.hestia_logger import logger
 
-classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
-with open("hestia/nlp/intents.json", "r") as file:
-        intents = json.load(file)
 
-def classify_intent(text, intents, current_intent):
-    candidate_labels = [key["name"] for key in current_intent]
-    result = classifier(text, candidate_labels)
 
-    for key in current_intent:
-        if result['labels'][0] == key["name"]: # type: ignore
-            if "sub_intents" in key:
-                return classify_intent(text, intents, key["sub_intents"])
-    return result['labels'][0] # type: ignore
+class IntentRecognition(metaclass=Singleton):
+    def __init__(self):
+        self.classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+        with open("hestia/nlp/intents.json", "r") as file:
+            self.intents = json.load(file)
+            
+    def classify_intent(self, text: str, intents, current_intent: dict, parent_intent=None):
+        candidate_labels = [key["name"] for key in current_intent]
+        result = self.classifier(text, candidate_labels)
 
-def get_intent(text):
+        for key in current_intent:
+            if result['labels'][0] == key["name"]: # type: ignore
+                if "sub_intents" in key:
+                    return parent_intent, self.classify_intent(text, intents, key["sub_intents"], key["name"])
+        logger.info(f"Intent: {parent_intent}, Sub-intent: {result['labels'][0]}") # type: ignore
+        return parent_intent, result['labels'][0] # type: ignore
     
-    candidate_labels = [key for key in intents for key in intents[key]]
-    general_intents = [key["name"] for key in candidate_labels]
-    result = classifier(text, general_intents)
+    def get_intent(self, text: str):
+        candidate_labels = [key for key in self.intents for key in self.intents[key]]
+        general_intents = [key["name"] for key in candidate_labels]
+        result = self.classifier(text, general_intents)
 
-    for key in candidate_labels:
-        if result['labels'][0] == key["name"]: # type: ignore
-            if "sub_intents" in key:
-                return classify_intent(text, intents, key["sub_intents"])
-    return result['labels'][0] # type: ignore
-    
+        for key in candidate_labels:
+            if result['labels'][0] == key["name"]: # type: ignore
+                if "sub_intents" in key:
+                    return self.classify_intent(text, self.intents, key["sub_intents"], key["name"])       
+        return result['labels'][0], None # type: ignore
     
 
-# Example usage
-list_of_texts = [
-    "What day is it today?",
-    "What is the time?",
-    "Remind me to buy some milk",
-    "Set a timer for 10 minutes",
-    "What plans do I have for today?",
-    "Send an email to John",
-    "What is the capital of France?",
-    "Can you explain the concept of gravity?",
-]
-for text in list_of_texts:
-    print(get_intent(text))
-    print("----")
-    
