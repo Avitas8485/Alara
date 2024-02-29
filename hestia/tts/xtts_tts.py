@@ -6,19 +6,24 @@ from TTS.tts.configs.xtts_config import XttsConfig
 from TTS.tts.models.xtts import Xtts
 import soundfile as sf
 from hestia.lib.hestia_logger import logger
+from hestia.tts.base_tts import BaseTTS
 from typing import List
 from hestia.config.config import cfg
+import warnings
 # creating global variables
 
 
-class TextToSpeechSystem:
-    """This class contains the code for the TextToSpeechSystem.
+class XttsTTS(BaseTTS):
+    """This class contains the code for the TextToSpeechSystem using the XTTS model. 
+    It is good but slow. It is not recommended for use in real-time applications, at least on my machine.
+    Preferably, use piper-tts instead. Although, it is not as good as XTTS, it is faster, and can be used in real-time applications even on potato pcs.
+    
     Attributes:
-        config: The configuration for the TextToSpeechSystem.
+        config: The configuration for the XTTS model.
         vocab_path: The path to the vocabulary file.
         speaker_path: The path to the speaker file.
         model_dir: The path to the model directory.
-        model: The model to use for the TextToSpeechSystem."""
+        model: The model to use for text to speech."""
     def __init__(self):
         self.config = XttsConfig()
         self.config.load_json(cfg.XTTS_CONFIG_PATH)
@@ -142,6 +147,7 @@ class TextToSpeechSystem:
             soundbite_filename: The name of the soundbite file.
         Returns:
             None"""
+        warnings.warn("This method is deprecated. Use merge_wav_files_into_one instead.", DeprecationWarning)
         soundbite_filepaths=self.get_output_files(output_dir,soundbite_filename)
         logger.info(f'soundbite_filepaths={soundbite_filepaths}')
         self.merge_wav_files_into_one(extension,output_dir,output_filename,soundbite_filepaths)
@@ -176,12 +182,39 @@ class TextToSpeechSystem:
             text: The text to convert to speech.
             output_dir: The directory to output the speech to.
             output_filename: The name of the output file."""
+        warnings.warn("This method is deprecated. Use synthesize_to_file instead.", DeprecationWarning)
         sentences = self.split_into_sentences_using_nlp(text)
         soundbite_filepaths = self.convert_sentences_to_wav_files(output_filename, output_dir, sentences)
         self.merge_wav_files_into_one("wav", output_dir, output_filename, soundbite_filepaths)
         # delete the individual soundbite files
         for soundbite_filepath in soundbite_filepaths:
             os.remove(soundbite_filepath)
+            
+    def synthesize(self,text: str, output_dir: str, output_filename: str):
+        """synthesize the text, play the audio, and then delete the audio file.
+        Args:
+            text: The text to synthesize.
+            output_dir: The directory to output the synthesized text to.
+            output_filename: The name of the output file."""
+        self.convert_text_to_speech(text, output_dir, output_filename)
+        audio_path=f"{output_dir}/{output_filename}.wav"
+        self.play_audio(audio_path)
+        os.remove(audio_path)
+        
+    def synthesize_to_file(self,text: str, output_dir: str, output_filename: str):
+        """synthesize the text to a file. Does not play the audio.
+        Args:
+            text: The text to synthesize.
+            output_dir: The directory to output the synthesized text to.
+            output_filename: The name of the output file."""
+        sentences = self.split_into_sentences_using_nlp(text)
+        soundbite_filepaths = self.convert_sentences_to_wav_files(output_filename, output_dir, sentences)
+        self.merge_wav_files_into_one("wav", output_dir, output_filename, soundbite_filepaths)
+        # delete the individual soundbite files
+        for soundbite_filepath in soundbite_filepaths:
+            os.remove(soundbite_filepath)
+        logger.info(f"synthesized text to file: {output_dir}/{output_filename}.wav")
+        
         
         
  

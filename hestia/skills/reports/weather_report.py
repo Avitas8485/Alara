@@ -1,10 +1,10 @@
-from hestia.tools.reports.base_report_generator import BaseReportGenerator
+from hestia.skills.reports.base_report_generator import BaseReportGenerator
 import requests
 import os
 from dotenv import load_dotenv
-from hestia.llm.llama_chat_completion import chat_completion, load_prompt, load_prompt_txt
-from hestia.text_to_speech.speech import TextToSpeechSystem
-from hestia.tools.system_and_utility.ip_geolocation import get_geolocation
+from hestia.llm.zero_shot_llama_chat_completion import chat_completion, load_prompt, load_prompt_txt
+from hestia.tts.xtts_tts import XttsTTS as TextToSpeechSystem
+from hestia.tools.ip_geolocation import get_geolocation
 from hestia.lib.hestia_logger import logger
 from datetime import datetime
 from hestia.config.config import cfg

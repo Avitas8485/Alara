@@ -5,6 +5,7 @@ pydub
 pyaudio
 TTS
 soundfile
+sounddevice
 requests
 pillow
 python-dotenv
@@ -21,5 +22,7 @@ tabulate
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
+flask
+pywin32
 
 

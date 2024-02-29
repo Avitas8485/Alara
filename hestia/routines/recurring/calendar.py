@@ -1,7 +1,7 @@
 from typing import Dict
-from hestia.tools.system_and_utility.notifications.notifications import notify
-from hestia.tools.system_and_utility.google_calendar import GoogleCalendar
-from hestia.tools.system_and_utility.scheduler import SchedulerManager
+from hestia.tools.notifications.notifications import notify
+from hestia.skills.google_calendar import GoogleCalendar
+from hestia.tools.scheduler import SchedulerManager
 from datetime import datetime, timedelta
 from hestia.lib.hestia_logger import logger
 

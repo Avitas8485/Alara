@@ -5,15 +5,9 @@ from rich.logging import RichHandler
 from rich.pretty import install as pretty_install
 from rich.theme import Theme
 from rich.traceback import install as traceback_install
+from hestia.lib.singleton import Singleton
 
 
-class Singleton(type):
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super().__call__(*args, **kwargs)
-        return cls._instances[cls]
 
 
 class HestiaLogger(metaclass=Singleton):
@@ -63,4 +57,4 @@ class RingBuffer(logging.StreamHandler):
         return list(self.buffer)
 
 
-logger = HestiaLogger().logger
+logger = HestiaLogger("Alara").logger

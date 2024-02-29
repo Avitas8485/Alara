@@ -7,11 +7,11 @@ import pandas as pd
 from aw_client import ActivityWatchClient
 from aw_client.classes import default_classes
 from aw_client.queries import DesktopQueryParams, canonicalEvents
-from hestia.tools.system_and_utility.ip_geolocation import get_geolocation
+from hestia.tools.ip_geolocation import get_geolocation
 from pytz import timezone
-from hestia.llm.llama_chat_completion import chat_completion, load_prompt
-from hestia.text_to_speech.speech import TextToSpeechSystem
-from hestia.tools.reports.base_report_generator import BaseReportGenerator
+from hestia.llm.zero_shot_llama_chat_completion import chat_completion, load_prompt
+from hestia.tts.xtts_tts import XttsTTS as TextToSpeechSystem
+from hestia.skills.reports.base_report_generator import BaseReportGenerator
 from hestia.config.config import cfg
 
 class ActivityReportGenerator(BaseReportGenerator):

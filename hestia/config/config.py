@@ -15,6 +15,9 @@ class Config:
         self.THREAD_POOL_SIZE = int(os.getenv('THREAD_POOL_SIZE', 10))
         self.PROCESS_POOL_SIZE = int(os.getenv('PROCESS_POOL_SIZE', 5))
         
+        self.SMART_LLAMA_MODEL_PATH = os.getenv('SMART_LLAMA_MODEL_PATH', '')
+        self.FAST_LLAMA_MODEL_PATH = os.getenv('FAST_LLAMA_MODEL_PATH', '')
+        self.MIDDLE_LLAMA_MODEL_PATH = os.getenv('MIDDLE_LLAMA_MODEL_PATH', '')
         self.LLAMA_MODEL_PATH = os.getenv('LLAMA_MODEL_PATH', '')
         self.LLAMA_N_THREADS = int(os.getenv('LLAMA_N_THREADS', 4))
         self.LLAMA_N_THREADS_BATCH = int(os.getenv('LLAMA_N_THREADS_BATCH', 4))
