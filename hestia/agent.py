@@ -6,24 +6,23 @@ from hestia.lib.singleton import Singleton
 from hestia.tts.piper_tts import PiperTTS
 from hestia.llm.llama_chat_completion import LlamaChatCompletion
 
-handler = StreamHandler()
-wake_word = WakeWord()
-intent_recognition = IntentRecognition()
+
 
 # implementation a loop to keep the program running
 
 class Agent(metaclass=Singleton):
-    def __init__(self) -> None:
+    def __init__(self):
         self.skill_manager = SkillManager()
+        self.tts = PiperTTS()
         self.handler = StreamHandler()
         self.wake_word = WakeWord()
         self.intent_recognition = IntentRecognition()
         self.system_prompt = "Your name is Alara. You are an AI assistant that helps people with their daily tasks." 
-        self.tts = PiperTTS()
         self.llm = LlamaChatCompletion()
+        self.running = True
         
     def run(self):
-        while True:
+        while self.running:
             if self.wake_word.wake_word_detection():
                 print("\033[96mWakeword detected..\033[0m")
                 user_prompt = self.handler.listen()
@@ -35,5 +34,6 @@ class Agent(metaclass=Singleton):
                 self.skill_manager.call_skill(intent, sub_intent)
                 self.wake_word.clear_wakeword_buffer()
                 
-agent = Agent()
-agent.run()
+    def stop(self):
+        self.running = False
+        print("Agent stopped.")

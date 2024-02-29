@@ -5,7 +5,12 @@ from .base_tts import BaseTTS
 from ..tools.text_parser.format_en import Converter
 
 class PiperTTSError(Exception):
-    pass
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+    
+    
+        
+    
 
 class PiperTTS(BaseTTS):
     def __init__(self) -> None:

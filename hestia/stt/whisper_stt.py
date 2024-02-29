@@ -4,9 +4,9 @@ import numpy as np
 import sounddevice as sd
 from scipy.io.wavfile import write
 import logging
-from .wakeword import WakeWord
 from typing import List
-logger = logging.getLogger(__name__)
+from hestia.lib.hestia_logger import logger
+
 
 class StreamHandler:
     MODEL = 'small'
@@ -74,18 +74,5 @@ class StreamHandler:
                     return transcription
                 
 
-def main():
-    try:
-        handler = StreamHandler()
-        wake_word = WakeWord()
-        if wake_word.wake_word_detection():
-            print("\033[96mWakeword detected..\033[0m")
-            handler.listen()
-    except (KeyboardInterrupt, SystemExit):
-        print("\n\033[93mQuitting..\033[0m")
-    if os.path.exists('dictate.wav'): os.remove('dictate.wav')
-    
-    
+
         
-if __name__ == '__main__':
-    main()

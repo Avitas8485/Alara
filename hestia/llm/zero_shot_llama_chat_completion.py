@@ -1,9 +1,7 @@
 from llama_cpp import Llama
 import yaml
-# from hestia.lib.hestia_logger import logger
+from hestia.lib.hestia_logger import logger
 from contextlib import contextmanager
-import logging
-logger = logging.getLogger(__name__)
 from hestia.config.config import cfg
 
 
