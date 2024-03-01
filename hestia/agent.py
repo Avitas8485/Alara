@@ -31,7 +31,11 @@ class Agent(metaclass=Singleton):
                     user_prompt = ''
                 intent, sub_intent = self.intent_recognition.get_intent(user_prompt)
                 print(intent, sub_intent)
-                self.skill_manager.call_skill(intent, sub_intent)
+                try:
+                    self.skill_manager.call_skill(intent, sub_intent)
+                except Exception as e:
+                    output = self.llm.chat_completion(system_prompt=self.system_prompt, user_prompt="Notify the user that the feature has not been implemented yet.")
+                    self.tts.synthesize(output)
                 self.wake_word.clear_wakeword_buffer()
                 
     def stop(self):
