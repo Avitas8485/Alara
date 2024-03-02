@@ -1,8 +1,8 @@
 import pyaudio
 import wave
 from typing import List
-
-    
+import textwrap
+import spacy
 
 def play_audio(audio_path):
         """Play the audio."""   
@@ -21,30 +21,48 @@ def play_audio(audio_path):
                 stream.close()
         except Exception as e:
             print(f"Error: {e}")
-            
-            
-def split_into_sentences_using_nlp(text) -> List[str]:
-        """Split the text into sentences using NLP.
-        Args:
-            text: The text to split into sentences.
-        Returns:
-            List[str]: The sentences."""
-        
-        import nltk
-        nltk.download('punkt', quiet=True)
-        from nltk.tokenize import sent_tokenize
-        sentences = sent_tokenize(text)
-        import re
-        # in case the sentence tokenizer splits a number into two sentences.
-        merged_sentences = []
-        i = 0
-        while i < len(sentences):
-            if re.search(r'\d\.$', sentences[i]):
-                merged_sentences.append(sentences[i] + ' ' + sentences[i+1])
-                i += 2
-            else:
-                merged_sentences.append(sentences[i])
-                i += 1
-        
-        return merged_sentences
     
+def get_spacy_lang(lang):
+    """Get the spacy language model.
+    Args:
+        lang: The language code.
+    Returns:
+        spacy.lang: The spacy language model."""
+    return spacy.blank(lang)
+
+def split_sentence(text, lang, text_split_length=250):
+    """Preprocess the input text"""
+    text_splits = []
+    if text_split_length is not None and len(text) >= text_split_length:
+        text_splits.append("")
+        nlp = get_spacy_lang(lang)
+        nlp.add_pipe("sentencizer")
+        doc = nlp(text)
+        for sentence in doc.sents:
+            if len(text_splits[-1]) + len(str(sentence)) <= text_split_length:
+                # if the last sentence + the current sentence is less than the text_split_length
+                # then add the current sentence to the last sentence
+                text_splits[-1] += " " + str(sentence)
+                text_splits[-1] = text_splits[-1].lstrip()
+            elif len(str(sentence)) > text_split_length:
+                # if the current sentence is greater than the text_split_length
+                for line in textwrap.wrap(
+                    str(sentence),
+                    width=text_split_length,
+                    drop_whitespace=True,
+                    break_on_hyphens=False,
+                    tabsize=1,
+                ):
+                    text_splits.append(str(line))
+            else:
+                text_splits.append(str(sentence))
+
+        if len(text_splits) > 1:
+            if text_splits[0] == "":
+                del text_splits[0]
+    else:
+        text_splits = [text.lstrip()]
+
+    return text_splits
+
+
