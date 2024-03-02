@@ -7,7 +7,7 @@ from datetime import datetime
 import nltk
 from typing import List
 from hestia.lib.hestia_logger import logger
-from hestia.llm.zero_shot_llama_chat_completion import load_prompt, chat_completion, load_prompt_txt
+from hestia.llm.llama_chat_completion import load_prompt_txt, LlamaChatCompletion
 from hestia.tts.xtts_tts import XttsTTS as TextToSpeechSystem
 from hestia.skills.reports.base_report_generator import BaseReportGenerator
 from hestia.config.config import cfg
@@ -31,6 +31,7 @@ class NewsReport(BaseReportGenerator):
         self.todays_date = datetime.now().strftime("%b %d, %Y")
         self.news_summary_path = os.path.join(cfg.REPORT_SUMMARY_PATH, f"news_summary {self.todays_date}.txt")
         nltk.download('punkt', quiet=True)
+        self.llm = LlamaChatCompletion()
         
     def read_file(self, file_path: str):
         """Read a file.
@@ -167,7 +168,7 @@ class NewsReport(BaseReportGenerator):
         """Generate the news report summary."""
         news = self.parse_information()
         news_prompt = load_prompt_txt(prompt_name="news_debrief")
-        news_summary = chat_completion(system_prompt=news_prompt, user_prompt=f"The news for {self.todays_date}:\n\n{news}")
+        news_summary = self.llm.chat_completion(system_prompt=news_prompt, user_prompt=f"The news for {self.todays_date}:\n\n{news}")
         self.write_file(self.news_summary_path, news_summary)
 
 
@@ -177,7 +178,7 @@ class NewsReport(BaseReportGenerator):
         tts = TextToSpeechSystem()
         if news is None:
             return
-        tts.convert_text_to_speech(
+        tts.synthesize_to_file(
             text=news,
             output_dir="hestia/text_to_speech/outputs/news_report",
             output_filename=f"{self.todays_date}news_report"

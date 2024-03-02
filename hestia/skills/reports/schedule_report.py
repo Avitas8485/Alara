@@ -1,5 +1,5 @@
 from hestia.skills.reports.base_report_generator import BaseReportGenerator
-from hestia.llm.zero_shot_llama_chat_completion import chat_completion, load_prompt
+from hestia.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt as load_prompt
 from hestia.tts.xtts_tts import XttsTTS as TextToSpeechSystem
 from hestia.skills.google_calendar import GoogleCalendar
 from datetime import datetime
@@ -11,6 +11,7 @@ class ScheduleReport(BaseReportGenerator):
     def __init__(self):
         self.summary_path = os.path.join(cfg.REPORT_SUMMARY_PATH, f"summary.txt")
         self.todays_date = datetime.now().strftime("%b %d, %Y")
+        self.llm = LlamaChatCompletion()
     
     def remove_non_ascii(self, text: str)->str:
         """Remove non-ascii characters from text.
@@ -66,7 +67,7 @@ class ScheduleReport(BaseReportGenerator):
         """Generate a schedule report."""
         schedule = self.parse_information()
         schedule_prompt = load_prompt("schedule_report")
-        schedule_summary = chat_completion(system_prompt=schedule_prompt, user_prompt=f"Beginning of schedule\n\nSchedule for {self.todays_date}: [{schedule}]\n\nEnd of schedule.")
+        schedule_summary = self.llm.chat_completion(system_prompt=schedule_prompt, user_prompt=f"Beginning of schedule\n\nSchedule for {self.todays_date}: [{schedule}]\n\nEnd of schedule.")
         self.write_file(self.summary_path, schedule_summary)
         
     
@@ -76,7 +77,7 @@ class ScheduleReport(BaseReportGenerator):
         tts = TextToSpeechSystem()
         if schedule is None:
             return  # no schedule for today
-        tts.convert_text_to_speech(
+        tts.synthesize_to_file(
             text=schedule,
             output_dir='hestia/text_to_speech/outputs/schedule_report',
             output_filename=f"{self.todays_date}schedule_report")

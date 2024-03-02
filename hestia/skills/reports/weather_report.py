@@ -2,7 +2,7 @@ from hestia.skills.reports.base_report_generator import BaseReportGenerator
 import requests
 import os
 from dotenv import load_dotenv
-from hestia.llm.zero_shot_llama_chat_completion import chat_completion, load_prompt, load_prompt_txt
+from hestia.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt as load_prompt
 from hestia.tts.xtts_tts import XttsTTS as TextToSpeechSystem
 from hestia.tools.ip_geolocation import get_geolocation
 from hestia.lib.hestia_logger import logger
@@ -29,6 +29,8 @@ class WeatherReport(BaseReportGenerator):
             
         self.todays_date = datetime.now().strftime("%b %d, %Y")
         self.weather_summary_path = os.path.join(cfg.REPORT_SUMMARY_PATH, f"weather_summary {self.todays_date}.txt")
+        self.llm = LlamaChatCompletion()
+        
     def write_file(self, file_path: str, content):
         """Write to a file.
         Args:
@@ -104,8 +106,8 @@ class WeatherReport(BaseReportGenerator):
         """Generate the weather report summary."""
         weather =  self.parse_information()
 
-        weather_prompt = load_prompt_txt(prompt_name="weather_report")
-        weather_report = chat_completion(system_prompt=weather_prompt, user_prompt=weather)
+        weather_prompt = load_prompt(prompt_name="weather_report")
+        weather_report = self.llm.chat_completion(system_prompt=weather_prompt, user_prompt=weather)
         self.write_file(self.weather_summary_path, weather_report)
 
     def convert_summary_to_audio(self):
@@ -114,7 +116,7 @@ class WeatherReport(BaseReportGenerator):
         tts = TextToSpeechSystem()
         if weather is None:
             return
-        tts.convert_text_to_speech(
+        tts.synthesize_to_file(
             text=weather,
             output_dir="hestia/text_to_speech/outputs/weather_report",
             output_filename=f"{self.todays_date}weather_report"

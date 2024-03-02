@@ -9,7 +9,7 @@ from aw_client.classes import default_classes
 from aw_client.queries import DesktopQueryParams, canonicalEvents
 from hestia.tools.ip_geolocation import get_geolocation
 from pytz import timezone
-from hestia.llm.zero_shot_llama_chat_completion import chat_completion, load_prompt
+from hestia.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt as load_prompt
 from hestia.tts.xtts_tts import XttsTTS as TextToSpeechSystem
 from hestia.skills.reports.base_report_generator import BaseReportGenerator
 from hestia.config.config import cfg
@@ -21,6 +21,7 @@ class ActivityReportGenerator(BaseReportGenerator):
         self.hostname = "fakedata" if os.getenv("CI") else socket.gethostname()
         self.aw = ActivityWatchClient()
         self.timezone = self.get_timezone()
+        self.llm = LlamaChatCompletion()
         
     def write_file(self, file_path: str, content):
         """Write to a file.
@@ -121,7 +122,7 @@ class ActivityReportGenerator(BaseReportGenerator):
         """Generate the activity report summary."""
         activity = self.parse_information()
         activity_prompt = load_prompt(prompt_name="activity_report")
-        activity_summary = chat_completion(system_prompt=activity_prompt, user_prompt=f"Activity summary for {self.todays_date}:\n\n{activity}")
+        activity_summary = self.llm.chat_completion(system_prompt=activity_prompt, user_prompt=f"Activity summary for {self.todays_date}:\n\n{activity}")
         self.write_file(self.activity_report_path, activity_summary)
         
     
@@ -131,7 +132,7 @@ class ActivityReportGenerator(BaseReportGenerator):
         tts = TextToSpeechSystem()
         if activity is None:
             return
-        tts.convert_text_to_speech(
+        tts.synthesize_to_file(
             text=activity,
             output_dir='hestia/text_to_speech/outputs/activity_report',
             output_filename=f"{self.todays_date}activity_report")

@@ -9,7 +9,7 @@ def default_timezone():
 def set_timezone(timezone):
     return gettz(timezone)
 
-def to_timezone(dt, tz):
+def to_timezone(dt: datetime, tz):
     """Convert a datetime object to a specified timezone."""
     if dt.tzinfo:
         return dt.astimezone(tz)

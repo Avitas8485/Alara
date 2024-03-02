@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 
 from hestia.lib.hestia_logger import logger
-from hestia.llm.zero_shot_llama_chat_completion import load_prompt, chat_completion
+from hestia.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt as load_prompt
 from hestia.tts.xtts_tts import XttsTTS as TextToSpeechSystem
 from hestia.tts.tts_utils import play_audio
 from hestia.skills.advice import get_advice
@@ -22,6 +22,8 @@ scheduler = SchedulerManager()
 
 
 def morning_greeting():
+    llm = LlamaChatCompletion() 
+    tts = TextToSpeechSystem()
     today = datetime.now().strftime("%b %d, %Y")
     logger.info(f"Generating morning greeting for {today}...")
     with open(f"{cfg.REPORT_SUMMARY_PATH}/news_summary {today}.txt", "r") as file:
@@ -30,7 +32,7 @@ def morning_greeting():
         weather = file.read()
     prompt = load_prompt("morning_greeting")
     
-    greeting = chat_completion(
+    greeting = llm.chat_completion(
         system_prompt=prompt,
         user_prompt=f"""Today's information:
         Day of the week:{datetime.now().strftime("%A")}\
@@ -41,8 +43,8 @@ def morning_greeting():
         Advice of the day:\n{get_advice()}\n
         """
     )
-    tts = TextToSpeechSystem()
-    tts.convert_text_to_speech(greeting,
+    
+    tts.synthesize_to_file(greeting,
                                output_dir=f"{cfg.XTTS_OUTPUT_PATH}/morning_greeting",
                                output_filename=f"{today}morning_greeting")
 
@@ -91,8 +93,8 @@ def cleanup():
     logger.info("Cleaning up...")
 
     cleanup_paths = [
-        ("hestia/text_to_speech/outputs", ".wav"),
-        ("hestia/tools/reports/summary", ".txt")
+        ("hestia/tts/outputs", ".wav"),
+        ("hestia/skills/reports/summary", ".txt")
     ]
 
     for path, file_type in cleanup_paths:
