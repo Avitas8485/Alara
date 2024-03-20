@@ -3,7 +3,6 @@ import yaml
 from hestia.lib.hestia_logger import logger
 import logging
 from hestia.config.config import cfg
-import threading
 from hestia.lib.singleton import Singleton
 
 

@@ -7,65 +7,63 @@ from hestia.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_tx
 from hestia.tts.xtts_tts import XttsTTS as TextToSpeechSystem
 from hestia.tts.tts_utils import play_audio
 from hestia.skills.advice import get_advice
-from hestia.skills.reports.news_report import NewsReport
-from hestia.skills.reports.weather_report import WeatherReport
-from hestia.skills.Alarm.alarm import Alarm
+from hestia.skills.alarm import Alarm
 from hestia.tools.scheduler import SchedulerManager
 from hestia.config.config import cfg
+from hestia.skills.news import News
+from hestia.skills.weather import Weather
 scheduler = SchedulerManager()
 
 # add some global variables
 
 
-        
-
-
-
-def morning_greeting():
-    llm = LlamaChatCompletion() 
+    
+    
+def morning_preparation():
+    llm = LlamaChatCompletion()
     tts = TextToSpeechSystem()
+    news = News()
+    weather = Weather()
     today = datetime.now().strftime("%b %d, %Y")
     logger.info(f"Generating morning greeting for {today}...")
-    with open(f"{cfg.REPORT_SUMMARY_PATH}/news_summary {today}.txt", "r") as file:
-        news = file.read()
-    with open(f"{cfg.REPORT_SUMMARY_PATH}/weather_summary {today}.txt", "r") as file:
-        weather = file.read()
+    current_news = news.top_news(tts=False)
+    current_weather = weather.current_weather(tts=False)
+    news_prompt = load_prompt("news_debrief")
+    weather_prompt = load_prompt("weather_report")
+    news_summary = llm.chat_completion(
+        system_prompt=news_prompt,
+        user_prompt=f"""Today's news:
+        {current_news}
+        """
+    )
+    weather_summary = llm.chat_completion(
+        system_prompt=weather_prompt,
+        user_prompt=f"""Today's weather:
+        {current_weather}
+        """
+    )
     prompt = load_prompt("morning_greeting")
-    
     greeting = llm.chat_completion(
         system_prompt=prompt,
         user_prompt=f"""Today's information:
-        Day of the week:{datetime.now().strftime("%A")}\
-        Time is: {datetime.now().strftime("%I:%M %p")}
-        Date: {today},
-        Newss:\n{news}\n,
-        weather:\n{weather}\n,
+        Day of the week:{datetime.now().strftime("%A")}\n
+        Time is: {datetime.now().strftime("%I:%M %p")}\n
+        Date: {today}\n
+        Newss:\n{news_summary}\n
+        weather:\n{weather_summary}\n
         Advice of the day:\n{get_advice()}\n
         """
     )
-    
     tts.synthesize_to_file(greeting,
-                               output_dir=f"{cfg.XTTS_OUTPUT_PATH}/morning_greeting",
-                               output_filename=f"{today}morning_greeting")
-
-
-def play_report(report_type):
-    """Play a report."""
-    todays_date = datetime.now().strftime("%b %d, %Y")
-    report_path = f"{cfg.TTS_PATH}/{report_type}/{todays_date}{report_type}.wav"
-    play_audio(report_path)
-
-
-def morning_preparation():
-    """Prepare for the morning routine."""
-    logger.info("Preparing for morning routine...")
-    news_report = NewsReport()
-    weather_report = WeatherReport()
-    news_report.generate_report_summary()
-    weather_report.generate_report_summary()
-    logger.info("Morning preparation complete.")
-    morning_greeting()
+                            output_dir=f"{cfg.XTTS_OUTPUT_PATH}/morning_greeting",
+                            output_filename=f"{today}morning_greeting")
+    logger.info("Morning greeting complete.")
     
+
+
+
+
+
 
 
 def play_morning_greeting():
@@ -103,3 +101,4 @@ def cleanup():
                 os.remove(f"{path}/{file}")
 
     logger.info("Cleanup complete.")
+    
