@@ -5,6 +5,7 @@ from hestia.skills.skill_manager import SkillManager
 from hestia.lib.singleton import Singleton
 from hestia.tts.piper_tts import PiperTTS
 from hestia.llm.llama_chat_completion import LlamaChatCompletion
+from hestia.tools.scheduler import SchedulerManager
 
 
 
@@ -20,6 +21,8 @@ class Agent(metaclass=Singleton):
         self.system_prompt = "Your name is Alara. You are an AI assistant that helps people with their daily tasks." 
         self.llm = LlamaChatCompletion()
         self.running = True
+        self.scheduler = SchedulerManager()
+        
         
     def run(self):
         while self.running:
