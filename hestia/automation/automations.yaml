@@ -11,11 +11,12 @@
       entity_id: "light"
       state: "off"
   actions:
-    - service: "light.turn_on"
+    - action: "change_state"
       entity_id: "light"
+      state: "on"
 
 
-- alias: "Turn off light after 5 minutes"
+- alias: "Turn off the light after 5 minutes"
   triggers:
     - type: "state"
       entity_id: "light"
@@ -24,8 +25,9 @@
       for: "00:05:00"
   conditions: []
   actions:
-    - service: "light.turn_off"
+    - action: "change_state"
       entity_id: "light"
+      state: "off"
 
 - alias: "Turn off the light at 10:00 PM"
   triggers:
@@ -34,5 +36,6 @@
       minute: 0
   conditions: []
   actions:
-    - service: "light.turn_off"
+    - action: "change_state"
       entity_id: "light"
+      state: "off"
