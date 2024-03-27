@@ -90,8 +90,9 @@ class State:
     last_updated: datetime: the time the state was last updated
     context: dict: the context of the state
     """   
-    def __init__(self, entity_id, state, attributes=None,
-                 last_changed=None, last_updated=None, context=None):
+    def __init__(self, entity_id: str, state: str, attributes: Optional[Dict[str, Any]] = None,
+                 last_changed: Optional[datetime] = None, last_updated: Optional[datetime] = None,
+                 context: Optional[Dict[str, Any]] = None) -> None:
         self.entity_id = entity_id
         self.state = state
         self.attributes = attributes if attributes else {}
@@ -100,8 +101,34 @@ class State:
         self.context = context if context else {}
         
     def __repr__(self) -> str:
-        return f'<State {self.entity_id}= {self.state} @ {self.last_changed.isoformat()}>'
+        return f"State(entity_id={self.entity_id}, state={self.state}, attributes={self.attributes}, last_changed={self.last_changed}, last_updated={self.last_updated}, context={self.context})"
     
+    @staticmethod   
+    def from_dict(state_dict: dict[str, Any]) -> 'State':
+        """Convert a dictionary to a State
+        Args:
+        state_dict: dict: a dictionary representation of a state
+        Returns:
+        State: the state object"""
+        return State(
+            state_dict['entity_id'],
+            state_dict['state'],
+            state_dict['attributes'],
+            state_dict['last_changed'],
+            state_dict['last_updated'],
+            state_dict['context']
+        )
+    
+    def as_dict(self) -> dict[str, Any]:
+        """Return the state as a dictionary"""
+        return {
+            "entity_id": self.entity_id,
+            "state": self.state,
+            "attributes": self.attributes,
+            "last_changed": self.last_changed,
+            "last_updated": self.last_updated,
+            "context": self.context
+        }
 
 
 class StateMachine:
@@ -111,8 +138,41 @@ class StateMachine:
     states: dict: a dictionary of entity ids and their states
     event_bus: EventBus: an instance of the EventBus class"""
     def __init__(self):
-        self.states = {}
+        self.states: Dict[str, State] = {}
         self.event_bus = EventBus()
+        
+    @staticmethod
+    def to_state(state_dict: dict[str, Any]) -> State:
+        """Convert a dictionary to a State
+        Args:
+        state_dict: dict: a dictionary representation of a state
+        Returns:
+        State: the state object"""
+        return State(
+            state_dict['entity_id'],
+            state_dict['state'],
+            state_dict['attributes'],
+            state_dict['last_changed'],
+            state_dict['last_updated'],
+            state_dict['context']
+        )
+        
+    
+    @staticmethod
+    def from_state(state: State) -> dict[str, Any]:
+        """Convert a State to a dictionary
+        Args:
+        state: State: the state to convert to a dictionary
+        Returns:
+        dict: a dictionary representation of the state"""
+        return {
+            "entity_id": state.entity_id,
+            "state": state.state,
+            "attributes": state.attributes,
+            "last_changed": state.last_changed,
+            "last_updated": state.last_updated,
+            "context": state.context
+        }
         
     def add_state(self, state: State):
         """Add a state to the state machine
@@ -127,37 +187,47 @@ class StateMachine:
         entity_id: str: the id of the entity to remove from the state machine"""
         if entity_id in self.states:
             del self.states[entity_id]
-            
-    def get_state(self, entity_id: str) -> dict[str, Any]:
+           
+    def get_state(self, entity_id: str)-> State:
         """Get the state of an entity
         Args:
         entity_id: str: the id of the entity
         Returns:
-        dict: a dictionary representation of the entity's state"""
+        State: the state of the entity"""
         if entity_id not in self.states:
             raise ValueError(f'Entity {entity_id} not found in state machine')
-        state: State = self.states[entity_id]
-        if state:
-            return {
-                "entity_id": state.entity_id,
-                "state": state.state,
-                "attributes": state.attributes,
-                "last_changed": state.last_changed,
-                "last_updated": state.last_updated,
-                "context": state.context
-            }
-        else:
-            return {}
+        return self.states[entity_id]
     
-    def set_state(self, entity_id: str, new_state: State, attributes: Optional[dict[str, Any]] = None):
+    
+    
+    def set_state(self, entity_id: str, new_state: State|str, attributes: Optional[dict[str, Any]] = None):
         """Set the state of an entity
         Args:
         entity_id: str: the id of the entity
         state: State: the state to set for the entity"""
-        if entity_id in self.states:
-            self.states[entity_id].state = new_state.state
-        else:
-            raise ValueError(f'Entity {entity_id} not found')
+        # get the current state of the entity
+        current_state = self.get_state(entity_id)
+        if isinstance(new_state, str):
+            new_state = State(
+                entity_id=entity_id,
+                state=new_state,
+                attributes=attributes if attributes else current_state.attributes,
+                last_changed=datetime.now(),
+                last_updated=datetime.now(),
+                context=current_state.context
+            )
+        updated_state = State(
+            entity_id=entity_id,
+            state=new_state.state,
+            attributes=attributes if attributes else current_state.attributes,
+            last_changed=datetime.now(),
+            last_updated=datetime.now(),
+            context=current_state.context
+        )
+        self.states[entity_id] = updated_state
+        
+            
+        
         
     def listen_state(self, entity_id: str, callback: Callable[..., None]):
         """Add a listener to an entity's state
@@ -174,7 +244,10 @@ class StateMachine:
         """Fire an event
         Args:
         event: Event: the event to fire"""
-        self.event_bus.emit_event(event)
+        if self.event_bus:
+            self.event_bus.emit_event(event)
+        else:
+            print('Warning: No event bus to fire event')
         
     def listen_event(self, event_type: str, callback: Callable[..., None]):
         """Add a listener to an event type
@@ -184,45 +257,48 @@ class StateMachine:
         self.event_bus.add_listener(event_type, callback)
         
         
-class SampleIntegration:
-    """A sample integration class to demonstrate the use of the StateMachine class
-    Attributes:
-    state_machine: StateMachine: an instance of the StateMachine class"""
-    def __init__(self, state_machine: StateMachine):
-        self.state_machine = state_machine
-        
-        
-    def do_something(self):
-        """A method to demonstrate the use of the StateMachine class"""
-        print("I'm doing something")
-        self.state_machine.fire_event(Event('something_happened', {'data': 'some data'}))
 
-class SampleIntegrationII:
-    """A sample integration class to demonstrate the use of the StateMachine class
-    Attributes:
-    state_machine: StateMachine: an instance of the StateMachine class"""
-    def __init__(self, state_machine: StateMachine):
+class Lights:
+    """A class to handle lights
+    Args:
+    state_machine: StateMachine: the state machine to change states
+    """
+    def __init__(self, state_machine: StateMachine) -> None:
         self.state_machine = state_machine
-        
-    def do_something_else(self):
-        """A method to demonstrate the use of the StateMachine class"""
-        print("I'm doing something else")
-        self.state_machine.fire_event(Event('something_else_happened', {'data': 'some other data'}))
-               
+        self.state_machine.add_state(State("light", "off"))
 
+    def turn_on(self):
+        """Turn on the light"""
+        self.state_machine.set_state("light", State("light", "on"))
+        self.state_machine.fire_event(Event("light_turned_on", {"data": "some data"}))
+
+    def turn_off(self):
+        """Turn off the light"""
+        self.state_machine.set_state("light", State("light", "off"))
+        self.state_machine.fire_event(Event("light_turned_off", {"data": "some data"}))
+
+
+class Alarm:
+    """A class to handle alarms
+    Args:
+    event_bus: EventBus: the event bus to emit events"""
+    def __init__(self, event_bus: EventBus) -> None:
+        self.event_bus = event_bus
+
+    def trigger_alarm(self):
+        """Trigger the alarm"""
+        self.event_bus.emit_event(Event("alarm_triggered", {"data": "some data"}))
+
+    def stop_alarm(self):
+        """Stop the alarm"""
+        self.event_bus.emit_event(Event("alarm_stopped", {"data": "some data"}))
+        
 
 if __name__ == '__main__':
     state_machine = StateMachine()
-    sample_integration = SampleIntegration(state_machine)
-    sample_integration_ii = SampleIntegrationII(state_machine)
-    def trigger(event):
-        print(f'Event {event.event_type} triggered with data {event.data}')
-        
-    state_machine.listen_event('something_happened', trigger)
-    state_machine.listen_event('something_else_happened', trigger)
-    
-    sample_integration.do_something()
-    sample_integration_ii.do_something_else()
+    event_bus = EventBus()
+    lights = Lights(state_machine)
+    alarm = Alarm(event_bus)
     
     
     
