@@ -1,63 +1,39 @@
-from event import StateMachine
+from .event import StateMachine
 from datetime import datetime
-from event import Event, EventBus, State
+from .event import Event, EventBus, State
 from typing import List
 
-"""Condition module for automation
-the plan is to check condition based on the condition type specified in the automation
-Code is written to be extendable, so that new condition types can be added easily
-Sample automation file
-[
-    {
-        'alias': 'Change light state every 30 seconds', 
-        'triggers': [
-            {'type': 'interval', 'hours': 0, 'minutes': 0, 'seconds': 30}
-            ],
-        'conditions': [
-            {'condition': 'state', 'entity_id': 'light', 'state': 'off'}
-            ], 
-        'actions': [
-            {'service': 'light.turn_on', 'entity_id': 'light'}
-            ]
-    }, 
-    {
-        'alias': 'Turn off light after 5 minutes', 
-        'triggers': [
-            {'type': 'state', 'entity_id': 'light', 'from': 'on', 'to': 'off', 'for': '00:05:00'}
-            ], 
-        'conditions': [], 
-        'actions': [
-                {'service': 'light.turn_off', 'entity_id': 'light'}
-                ]
-    }, 
-    {
-        'alias': 'Turn off the light at 10:00 PM', 
-        'triggers': [
-            {'type': 'cron', 'hour': 22, 'minute': 0}
-            ], 
-        'conditions': [], 
-        'actions': [
-            {'service': 'light.turn_off', 'entity_id': 'light'}
-            ]
-        }
-]
-"""
 
-#something like homeassistant/automation/condition.py
 class Condition:
+    """Condition class to check the condition specified in the automation
+    Args:
+        state_machine (StateMachine): Instance of StateMachine class
+        """
     def __init__(self, state_machine: StateMachine) -> None:
         self.state_machine = state_machine
     
-    def check_state(self, entity_id, required_state: dict):
-        # check if the state of the entity is as required
-        # if for_period is specified, check if the state was as required for the given period
+    def check_state(self, entity_id: str, required_state: dict)-> bool:
+        """Check the state of the entity
+        Args:
+            entity_id (str): Entity ID
+            required_state (dict): Required state of the entity
+        Returns:
+            bool: True if the current state of the entity is same as the required state, else False"""
         value = self.state_machine.get_state(entity_id)
+        value = value.as_dict()
         if value['state'] == required_state:
             return True
         return False
     
-    def check_time(self, start_time, end_time):
-        # check if the current time is within the given range
+    def check_time(self, start_time: str|datetime, end_time: str|datetime)-> bool:
+        """Check if the current time is within the specified time range
+        Args:
+            start_time (datetime): Start time
+            end_time (datetime): End time"""
+        if not isinstance(start_time, datetime):
+            start_time = datetime.strptime(start_time, '%H:%M:%S')
+        if not isinstance(end_time, datetime):
+            end_time = datetime.strptime(end_time, '%H:%M:%S')
         now = datetime.now()
         if start_time and now < start_time:
             return False
@@ -65,17 +41,28 @@ class Condition:
             return False
         return True
     
-    def check_condition(self, condition: List[dict]):
-        # check the condition
-        # if the condition is met, return True
-        # else, return False
-        for cond in condition:
-            if cond['condition'] == 'state':
-                if not self.check_state(cond['entity_id'], cond['state']):
-                    return False
-            elif cond['condition'] == 'time':
-                if not self.check_time(cond['start_time'], cond['end_time']):
-                    return False
+    def check_condition(self, conditions: List[dict]) -> bool:
+        """Check the conditions specified in the automation.
+        Args:
+            conditions: List of conditions.
+            Returns:
+            bool: True if all the conditions are met, else False."""
+        for cond in conditions:
+            condition_type = cond.get('condition')
+            if condition_type == 'state':
+                entity_id = cond.get('entity_id')
+                required_state = cond.get('state')
+                if entity_id and required_state:
+                    if not self.check_state(entity_id, required_state):
+                        return False
+            elif condition_type == 'time':
+                start_time = cond.get('start_time')
+                end_time = cond.get('end_time')
+                if start_time and end_time:
+                    if not self.check_time(start_time, end_time):
+                        return False
+            else:
+                print(f"Warning: Invalid condition type '{condition_type}'")
         return True
         
 
@@ -118,6 +105,8 @@ if __name__ == "__main__":
     light.turn_on()
     print(condition.check_condition([{'condition': 'state', 'entity_id': 'light', 'state': 'on'}]))
     print(condition.check_condition([{'condition': 'state', 'entity_id': 'light', 'state': 'off'}]))
+    print(condition.check_condition([{'condition': 'time', 'start_time': '22:00:00', 'end_time': '23:00:00'}]))
+    print(condition.check_condition([{'condition': 'time', 'start_time': '22:00:00', 'end_time': '23:00:00'}]))
     
     
     
