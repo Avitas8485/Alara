@@ -1,6 +1,6 @@
 import requests
 from dotenv import load_dotenv
-from hestia.tools.ip_geolocation import get_geolocation
+from hestia.tools.ip_geolocation import IpInfoTool
 from hestia.config.config import cfg
 from hestia.skills.base_skill import Skill
 from hestia.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt
@@ -28,10 +28,12 @@ class Weather(Skill):
         self.tts = PiperTTS()
         self.city = self.get_city()
         
+        
     def get_city(self) -> str:
         """Returns city name"""
-        location = get_geolocation()
-        return location['city']
+        ip_info = IpInfoTool()
+        geolocation = ip_info.run()
+        return geolocation['city']
     
     def fetch_weather(self, city=None) -> dict:
         """Fetch weather data
