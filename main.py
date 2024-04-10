@@ -1,6 +1,4 @@
-from hestia.agent import Agent
+from hestia.agent.agent import Agent
 
 agent = Agent()
 agent.run()
-
-
