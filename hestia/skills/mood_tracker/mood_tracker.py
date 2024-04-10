@@ -1,9 +1,10 @@
 import datetime
 import yaml
 import sqlite3
+from hestia.skills.base_skill import Skill
 
 
-class MoodTracker:
+class MoodTracker(Skill):
     """A class for tracking moods.
     Attributes:
         conn: The connection to the database.
@@ -57,7 +58,7 @@ class MoodTracker:
                 "sub_emotion": sub_emotion,
                 "speficity": speficity}
     
-    def record_mood(self, emotions: list):
+    def record_mood(self):
         """Record the mood."""
         mood = self.track_mood()
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -89,7 +90,7 @@ class MoodTracker:
 
 def main():
     mood_tracker = MoodTracker()
-    mood_tracker.record_mood(mood_tracker.emotions)
+    mood_tracker.record_mood()
     mood_tracker.display_mood_entries()
     
 

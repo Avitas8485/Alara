@@ -19,7 +19,6 @@ for dir_name in file_types.keys():
     os.makedirs(os.path.join(root_dir, dir_name), exist_ok=True)
 
 def organize_files():
-    # Move files to the respective folders, overwriting if needed
     for file_name in os.listdir(root_dir):
         file_path = os.path.join(root_dir, file_name)
         if os.path.isfile(file_path) and not file_name.startswith('.') and not file_name == os.path.basename(__file__):

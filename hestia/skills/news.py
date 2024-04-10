@@ -32,10 +32,10 @@ class News(Skill):
         self.news_prompt = load_prompt("news_debrief")
         
     
-    def encode_to_ascii(self, text: str):
+    def encode_to_ascii(self, text: str)->str:
         """Encode text to ascii.
         Args:
-            text: The text to encode.
+            text (str): The text to encode.
         Returns:
             str: The encoded text."""
         return text.encode('ascii', 'ignore').decode('ascii')
@@ -43,7 +43,7 @@ class News(Skill):
     def get_news_params(self, news_api_key: str)->dict:
         """Get the parameters for the news request.
         Args:
-            news_api_key: The API key for the News API.
+            news_api_key (str): The API key for the News API.
         Returns:
             dict: The parameters for the news request."""
         return {
@@ -52,10 +52,10 @@ class News(Skill):
         }
     
     
-    def make_news_request(self, params: dict):
+    def make_news_request(self, params: dict)->requests.Response:
         """Make a news request.
         Args:
-            params: The parameters for the news request.
+            params (dict): The parameters for the news request.
         Returns:
             requests.Response: The response from the news request."""
         try:
@@ -64,10 +64,10 @@ class News(Skill):
             #logger.error(f"Error making news request: {e}")
             raise
         
-    def parse_news_response(self, response):
+    def parse_news_response(self, response: requests.Response):
         """Parse the news response.
         Args:
-            response: The response from the news request.
+            response (requests.Response): The response from the news request.
         Returns:
             list: The news articles."""
         return response.json()['articles']  
@@ -81,7 +81,7 @@ class News(Skill):
         return config
     
     
-    def download_and_parse_article(self, article_info, config)->Article:
+    def download_and_parse_article(self, article_info: dict, config: Config)->Article:
         """Download and parse the article.
         Args:
             article_info: The information about the article.
@@ -96,8 +96,8 @@ class News(Skill):
     def get_article_info(self, article_info: dict, article: Article)->dict:
         """Get the article information.
         Args:
-            article_info: The information about the article.
-            article: The article.
+            article_info (dict): The information about the article.
+            article (Article): The article.
         Returns:
             dict: The article information."""
         self.todays_date = datetime.now().strftime("%b %d, %Y")
@@ -107,6 +107,11 @@ class News(Skill):
         return {"title": title, "summary": summary, "url": article_info["url"], "date": f"{self.todays_date}"}
     
     def get_articles(self, params: dict)->dict:
+        """Get the articles.
+        Args:
+            params (dict): The parameters for the news request.
+        Returns:
+            dict: The articles."""
         articles_dict = dict()
         response = self.make_news_request(params)
         news_articles = self.parse_news_response(response)
@@ -120,7 +125,14 @@ class News(Skill):
             articles_dict[articles["title"]] = articles
         return articles_dict
     
-    def latest_news(self, tts=True, summarize=True) -> str:
+    def latest_news(self, tts: bool=True, summarize: bool=True) -> str:
+        """Get the latest news.
+        Args:
+            tts (bool): Whether to use text to speech.
+            summarize (bool): Whether to summarize the news.
+        Returns:
+            str: The latest news."""
+        
         params = self.get_news_params(self.NEWS_API_KEY)
         params["sortBy"] = "publishedAt"
         latest_news = self.get_articles(params)
@@ -132,7 +144,14 @@ class News(Skill):
         return news_information
         
     
-    def news_in_category(self, category: str="science", tts=True, summarize=True)->str:
+    def news_in_category(self, category: str="science", tts: bool=True, summarize: bool=True)->str:
+        """Get the news in a category.
+        Args:
+            category (str): The category of the news.
+            tts (bool): Whether to use text to speech.
+            summarize (bool): Whether to summarize the news.
+        Returns:
+            str: The news in the category."""
         params = self.get_news_params(self.NEWS_API_KEY)
         params["category"] = category
         news_in_category = self.get_articles(params)
@@ -144,7 +163,12 @@ class News(Skill):
         return news_information
     
     
-    def top_news(self, tts=True) -> str:
+    def top_news(self, tts: bool=True) -> str:
+        """Get the top news.
+        Args:
+            tts (bool): Whether to use text to speech.
+        Returns:
+            str: The top news."""
         params = self.get_news_params(self.NEWS_API_KEY)
         top_news = self.get_articles(params)
         news_information = "\n".join([value["title"] + "." for value in top_news.values()])
@@ -158,8 +182,11 @@ class News(Skill):
 
 
     def parse_information(self, news: dict)->str:
-        
-        """Parse the news information."""
+        """Parse the news information.
+        Args:
+            news (dict): The news information.
+        Returns:
+            str: The parsed news information."""
         
         news = {k: v for k, v in news.items() if k != "[Removed]"}
         for key, value in news.items():

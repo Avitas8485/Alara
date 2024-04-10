@@ -30,18 +30,20 @@ class Weather(Skill):
         
         
     def get_city(self) -> str:
-        """Returns city name"""
+        """Fetch the city based on the IP address.
+        Returns:
+            str: The city based on the IP address."""
         ip_info = IpInfoTool()
         geolocation = ip_info.run()
         return geolocation['city']
     
-    def fetch_weather(self, city=None) -> dict:
+    def fetch_weather(self, city: str='') -> dict:
         """Fetch weather data
         Args:
-            city: The city to fetch the weather data for.
-            Returns:
-                dict: The weather data."""
-        if city is None:
+            city (str): The city to fetch the weather data for. If not provided, the city is fetched based on the IP address.
+        Returns:
+            dict: The weather data."""
+        if not city:
             city = self.city
         params = {
             'aggregateHours': '24',
@@ -58,11 +60,12 @@ class Weather(Skill):
         response = requests.get(self.BASE_URL, params=params)
         return response.json()
     
-    def current_weather(self, city=None, tts=True) -> str:
+    def current_weather(self, city: str='', tts: bool=True) -> str:
         """Get the current weather.
         Args:
-            city: The city to get the current weather for.
-            Returns:
+            city (str): The city to get the current weather for. If not provided, the city is fetched based on the IP address.
+            tts (bool): Whether to use text-to-speech.
+        Returns:
                 str: The current weather."""
         if not city:
             city = self.city

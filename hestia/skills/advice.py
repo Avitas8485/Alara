@@ -4,7 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_advice():
+def get_advice()->str:
     """Get advice from the Advice Slip API.
     Returns:
         str: The advice."""
