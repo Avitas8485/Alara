@@ -23,5 +23,13 @@ pywin32
 openwakeword
 sqlalchemy
 sentence-transformers
+aw-client
+aw-core
+beautifulsoup4
+huggingface-hub
+onnxruntime
+openai-whisper
+pydantic
+rich
 
 
