@@ -22,5 +22,6 @@ tabulate
 pywin32
 openwakeword
 sqlalchemy
+sentence-transformers
 
 
