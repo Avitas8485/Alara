@@ -1,7 +1,5 @@
 {
     "intents": [
-        { "name": "chat" },
-        { "name": "none" },
         
         {
             "name": "weather",

@@ -7,7 +7,7 @@ from hestia.lib.hestia_logger import logger
 
 class IntentRecognition(metaclass=Singleton):
     def __init__(self):
-        self.classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+        self.classifier = pipeline(task="zero-shot-classification", model="facebook/bart-large-mnli")
         with open("hestia/nlp/intents.json", "r") as file:
             self.intents = json.load(file)
             
@@ -33,4 +33,5 @@ class IntentRecognition(metaclass=Singleton):
                     return self.classify_intent(text, self.intents, key["sub_intents"], key["name"])       
         return result['labels'][0], None # type: ignore
     
+
 
