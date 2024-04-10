@@ -1,8 +1,7 @@
 import subprocess
-
 import re
 from .base_tts import BaseTTS
-from ..tools.text_parser.format_en import Converter
+from hestia.tools.text_parser.format_en import Converter
 
 class PiperTTSError(Exception):
     def __init__(self, message: str) -> None:
@@ -14,7 +13,7 @@ class PiperTTSError(Exception):
 
 class PiperTTS(BaseTTS):
     def __init__(self) -> None:
-        self.model_path = 'hestia\\piper\\models\\en_US-hestia-large-high.onnx'
+        self.model_path = 'hestia\\tts\\piper\\models\\en_US-hestia-large-high.onnx'
         self.output_file = f"hestia\\tts\\outputs\\temp.wav"
         self.params = {
             "active": True,
@@ -59,7 +58,7 @@ class PiperTTS(BaseTTS):
         cleaned_text = self.clean_text(text)
         process = subprocess.Popen(
             [
-                "hestia\\piper\\piper.exe",
+                "hestia\\tts\\piper\\piper.exe",
                 '--model', self.model_path,
                 '--output_file', self.output_file,
                 '--sentence_silence', str(self.params['sentence_silence']),
@@ -93,13 +92,13 @@ class PiperTTS(BaseTTS):
         process.wait()
         p.terminate()
         
-    def synthesize_to_file(self, text: str):
+    def synthesize_to_file(self, output_dir: str='hestia\\tts\\outputs', output_filename: str='output', text: str=''):
         cleaned_text = self.clean_text(text)
         process = subprocess.Popen(
             [
-                "hestia\\piper\\piper.exe",
+                "hestia\\tts\\piper\\piper.exe",
                 '--model', self.model_path,
-                '--output_file', self.output_file,
+                '--output_file', f"{output_dir}\\{output_filename}.wav",
                 '--sentence_silence', str(self.params['sentence_silence']),
                 '--noise_scale', str(self.params['noise_scale']),
                 '--length_scale', str(self.params['length_scale']),

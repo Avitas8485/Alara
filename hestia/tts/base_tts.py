@@ -1,5 +1,6 @@
 from abc import ABC, ABCMeta, abstractmethod
 
+
 class SingletonMeta(ABCMeta):
     """Singleton metaclass."""
     _instances = {}
@@ -14,6 +15,7 @@ class BaseTTS(ABC, metaclass=SingletonMeta):
     @abstractmethod
     def synthesize(self, text: str):
         pass
+    
 
     @abstractmethod
     def synthesize_to_file(self, text: str, output_dir: str, output_filename: str):
