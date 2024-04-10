@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from hestia.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt as load_prompt
 from hestia.tts.xtts_tts import XttsTTS as TextToSpeechSystem
-from hestia.tools.ip_geolocation import get_geolocation
+from hestia.tools.ip_geolocation import IpInfoTool
 from hestia.lib.hestia_logger import logger
 from datetime import datetime
 from hestia.config.config import cfg
@@ -50,7 +50,8 @@ class WeatherReport(BaseReportGenerator):
 
     def get_city(self) -> str:
         """Returns city name"""
-        location = get_geolocation()
+        ip_info_tool = IpInfoTool()
+        location = ip_info_tool.run()
         return location['city']
 
     def get_information(self)-> dict:
