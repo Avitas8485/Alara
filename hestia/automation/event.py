@@ -1,3 +1,4 @@
+from hestia.lib.hestia_logger import logger
 from typing import Dict, Any, Callable, Optional
 from enum import Enum
 from datetime import datetime
@@ -75,7 +76,7 @@ class EventBus:
             for listener in self.listeners[event_type]:
                 listener(event)
         else:
-            print(f'Warning: No listeners for event type {event_type}')
+            logger.warning(f'Warning: No listeners for event type {event_type}')
             
     
 

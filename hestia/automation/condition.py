@@ -1,6 +1,7 @@
 from .event import StateMachine
 from datetime import datetime
 from .event import Event, EventBus, State
+from hestia.lib.hestia_logger import logger
 from typing import List
 
 
@@ -62,7 +63,7 @@ class Condition:
                     if not self.check_time(start_time, end_time):
                         return False
             else:
-                print(f"Warning: Invalid condition type '{condition_type}'")
+                logger.error(f"Warning: Invalid condition type '{condition_type}'")
         return True
         
 

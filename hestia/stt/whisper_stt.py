@@ -4,9 +4,8 @@ import numpy as np
 import sounddevice as sd
 from scipy.io.wavfile import write
 from typing import List
-#from hestia.lib.hestia_logger import logger
+from hestia.lib.hestia_logger import logger
 import logging
-logger = logging.getLogger(__name__)
 import threading
 
 
@@ -99,8 +98,7 @@ class StreamHandler:
                     if isinstance(transcription, list):
                         transcription = ' '.join(transcription)
                     return transcription
-            print("Returning None")
-        print("Returning None 2")
+        return None
                 
 
 

@@ -1,9 +1,8 @@
-
-
-from typing import List, Callable
+from typing import List
 from hestia.automation.event import Event, EventBus, StateMachine, State
 from hestia.automation.condition import Condition
 from hestia.skills.skill_manager import SkillManager
+from hestia.lib.hestia_logger import logger
 
 
 
@@ -28,7 +27,7 @@ class Action:
             else:   
                 self.state_machine.set_state(entity_id, state)
         else:
-            print("Warning: State machine not found.")
+            logger.error("State machine is not initialized.")
         
     def check_condition(self, conditions: List[dict]) -> bool:
         """Check the conditions specified in the automation.
@@ -68,7 +67,7 @@ class Action:
                 if conditions:
                     self.check_condition(conditions)
             else:
-                raise ValueError(f"Invalid action: {action_type}")
+                logger.error(f"Invalid action type: {action_type}")
     
     
 

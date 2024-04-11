@@ -1,7 +1,6 @@
 from llama_cpp import Llama
 import yaml
 from hestia.lib.hestia_logger import logger
-import logging
 from hestia.config.config import cfg
 from hestia.lib.singleton import Singleton
 
@@ -45,7 +44,8 @@ class LlamaChatCompletion(metaclass=Singleton):
             # to prevent situations where the model outputs nothing
             if output["choices"][0]["message"]["content"] != "": # type: ignore
                 return output["choices"][0]["message"]["content"] # type: ignore
-            print("Model output was empty. Retrying...")
+            logger.warning("Model failed to generate output. Retrying...")
+        logger.error("Model failed to generate output after maximum retries.")
         return "Model failed to generate output after maximum retries."
     
     
