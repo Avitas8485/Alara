@@ -10,6 +10,10 @@ class CurrentTimeTool(Tool):
         self.description = "Get current time"
         self.usage = "current_time"
         self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        return datetime.now() is not None
         
     def run(self)-> str:
         return datetime.now().strftime("%H:%M:%S")
@@ -20,6 +24,10 @@ class CurrentDateTool(Tool):
         self.description = "Get current date"
         self.usage = "current_date"
         self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        return datetime.now() is not None
         
     def run(self)-> str:
         return datetime.now().strftime("%d/%m/%Y")
@@ -30,6 +38,10 @@ class CurrentDatetimeTool(Tool):
         self.description = "Get current datetime"
         self.usage = "current_datetime"
         self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        return datetime.now() is not None
         
     def run(self)-> str:
         return datetime.now().strftime("%d/%m/%Y %H:%M:%S")
@@ -40,6 +52,10 @@ class CurrentTimezoneTool(Tool):
         self.description = "Get current timezone"
         self.usage = "current_timezone"
         self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        return datetime.now(tzlocal()).tzinfo is not None
         
     def run(self) -> str:
         return str(datetime.now(tzlocal()).tzinfo)
@@ -50,6 +66,11 @@ class SetTimezoneTool(Tool):
         self.description = "Set the timezone"
         self.usage = "set_timezone [timezone]"
         self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        timezone = "Asia/Kolkata"
+        return gettz(timezone) is not None
         
     def run(self, timezone: str) -> str:
         return str(gettz(timezone))
@@ -60,6 +81,10 @@ class ToLocalTimeTool(Tool):
         self.description = "Convert time to local timezone"
         self.usage = "to_local_time [datetime]"
         self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        return datetime.now().astimezone(tzlocal()) is not None
         
     def run(self, dt: datetime) -> str:
         return str(dt.astimezone(tzlocal()))
@@ -70,6 +95,10 @@ class ToUtcTimeTool(Tool):
         self.description = "Convert time to UTC timezone"
         self.usage = "to_utc_time [datetime]"
         self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        return datetime.now().astimezone(gettz("UTC")) is not None
         
     def run(self, dt: datetime) -> str:
         return str(dt.astimezone(gettz("UTC")))
@@ -80,6 +109,10 @@ class ToSystemTimezoneTool(Tool):
         self.description = "Convert time to system timezone"
         self.usage = "to_system_timezone [datetime]"
         self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        return datetime.now().astimezone(tzlocal()) is not None
         
     def run(self, dt: datetime) -> str:
         return str(dt.astimezone(tzlocal()))
@@ -90,6 +123,10 @@ class TimeDifferenceTool(Tool):
         self.description = "Get the time difference between two datetime objects"
         self.usage = "time_difference [datetime1] [datetime2]"
         self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        return datetime.now() is not None
         
     def run(self, dt1: datetime, dt2: datetime) -> str:
         return str(dt1 - dt2)
@@ -100,6 +137,10 @@ class FormatTimeTool(Tool):
         self.description = "Format the time string"
         self.usage = "format_time [datetime] [format]"
         self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        return datetime.now() is not None
         
     def run(self, dt: datetime, format="%d/%m/%Y %H:%M:%S") -> str:
         return dt.strftime(format)
@@ -110,6 +151,10 @@ class ParseTimeTool(Tool):
         self.description = "Parse the time string"
         self.usage = "parse_time [time_str] [format]"
         self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        return datetime.now() is not None
         
     def run(self, time_str: str, format="%d/%m/%Y %H:%M:%S") -> str:
         return str(datetime.strptime(time_str, format))
