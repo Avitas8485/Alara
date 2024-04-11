@@ -8,6 +8,9 @@ import logging
 import time
 import pythoncom
 from hestia.skills.base_skill import Skill
+from hestia.automation.event import Event, State
+from hestia.automation.automation_handler import AutomationHandler
+from hestia.automation.entity import Entity
 
 
 
@@ -55,7 +58,7 @@ class VolumeMute:
         self.set_mute_status(False)
 
 
-class Alarm(Skill):
+class Alarm(Entity, Skill):
     """An alarm clock skill that plays a sound when triggered.
     By itself, it can only play alarm and dismiss the alarm.
     However, it can be extended to include more features such as setting the alarm time, snoozing the alarm, etc.
@@ -76,6 +79,10 @@ class Alarm(Skill):
         self.lock = threading.Lock()
         self.volume_mute = VolumeMute()
         self.output_device = self.get_main_speaker()
+        self.alarm_state = "off"
+        self.alarm_attributes = {"volume": -20.0}
+        
+        self.add_entity_state()
         
 
     def get_main_speaker(self) -> int|None:
@@ -96,6 +103,7 @@ class Alarm(Skill):
             logger.error(f"Sound file not found: {self.sound_path}")
             return
         print(f"Time to wake up!")
+        self.update_entity_state("on", {"volume": -20.0})
         increase_volume = 0
         sd.play(data, samplerate, device=self.output_device)
         if self.volume_mute.get_mute_status():
