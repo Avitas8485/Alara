@@ -1,15 +1,16 @@
-from hestia.tools.scheduler import SchedulerManager
-from hestia.automation.event import Event, EventBus, StateMachine, State
+from hestia.skills.skill_manager import SkillManager
 from hestia.automation.condition import Condition
 from hestia.automation.action import Action
+from hestia.tools.scheduler import SchedulerManager
+from hestia.automation.event import Event, EventBus, StateMachine, State
+from hestia.lib.hestia_logger import logger
 from typing import List
-from hestia.skills.skill_manager import SkillManager
 import os
-
 import yaml
 
 
-class Handler:
+
+class AutomationHandler:
     """A class that is responsible for handling the automation workflow
     The handler is responsible for:
     - loading automations from a file
@@ -39,8 +40,11 @@ class Handler:
         file_path = os.path.join('hestia', 'automation', 'automations.yaml')
         with open(file_path, 'r') as file:
             self.automations = yaml.load(file, Loader=yaml.FullLoader)
-        print(f"Automations: {self.automations}")
+        logger.debug(f"Loaded automations: {self.automations}")
         self.trigger = Trigger(self, self.event_bus, self.state_machine)
+        if not self.automations:
+            logger.warning("No automations found")
+            return
         for automation in self.automations:
             for trigger in automation['triggers']:
                 trigger_args = {key: value for key, value in trigger.items() if key != 'type'}
@@ -68,9 +72,9 @@ class Handler:
         for automation in self.automations:
             for trigger in automation['triggers']:
                 if trigger['type'] == trigger_type and all(trigger_data.get(key) == value for key, value in trigger_data.items() if key != 'type'):
-                    print(f"Trigger found: {trigger} with data: {trigger_data}")
+                    logger.debug(f"Found related automation: {automation['alias']}")
                     filtered_automations.append(automation)
-                    print(f"Filtered automations: ", [filtered['alias'] for filtered in filtered_automations])
+                    logger.debug(f"Filtered automations: ", [filtered['alias'] for filtered in filtered_automations])
         return filtered_automations
     
     def check_conditions(self, automation: dict)-> bool:
@@ -79,10 +83,10 @@ class Handler:
         automation: dict: the automation to check conditions for
         Returns:
         bool: True if all conditions are met, else False"""
-        print(f"Checking conditions for automation: {automation['alias']}")
+        logger.info(f"Checking conditions for automation: {automation['alias']}")
         conditions = automation.get('conditions')
         if not conditions or len(conditions) == 0:
-            print(f"No conditions found for automation: {automation['alias']}")
+            logger.debug(f"No conditions found for automation: {automation['alias']}")
             return True
         return self.condition.check_condition(automation['conditions'])
         
@@ -91,9 +95,9 @@ class Handler:
         """A placeholder for executing the actions of the automation
             Args:
             automation: dict: the automation to execute actions for"""
-        print(f"Executing actions for automation: {automation}")
+        logger.info(f"Executing actions for automation: {automation}")
         if not automation or len(automation) == 0:
-            print(f"No actions found for automation: {automation}")
+            logger.info(f"No actions found for automation: {automation}")
             return
         return self.action.choose_action(automation)
             
@@ -107,7 +111,8 @@ class Handler:
         for automation in automations:
             if self.check_conditions(automation):
                 self.execute_actions(automation['actions'])
-        
+     
+   
         
 class Trigger:
     """A class to handle triggers
@@ -122,7 +127,7 @@ class Trigger:
     event_bus: EventBus: the event bus to emit events
     state_machine: StateMachine: the state machine to change states
     """
-    def __init__(self, handler: Handler, event_bus: EventBus, state_machine: StateMachine) -> None:
+    def __init__(self, handler: AutomationHandler, event_bus: EventBus, state_machine: StateMachine) -> None:
         self.handler = handler
         self.event_bus = event_bus
         self.state_machine = state_machine
@@ -133,7 +138,7 @@ class Trigger:
         trigger_type: str: the type of trigger
         kwargs: dict: relevant data for the trigger
         """
-        print(f"Trigger fired: {trigger_type} with data: {kwargs}")
+        logger.debug(f"Trigger fired: {trigger_type} with data: {kwargs}")
         self.handler.handle_trigger(trigger_type, kwargs)
                 
     def cron_trigger(self,**kwargs):
@@ -245,12 +250,16 @@ class Alarm:
         
 
 
+
+
+     
+     
+
 if __name__ == "__main__":
-    handler = Handler()
+    handler = AutomationHandler()
     light = Lights(handler.state_machine)
     alarm = Alarm(handler.event_bus)
     while True:
         pass
     
-
 

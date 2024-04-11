@@ -1,0 +1,41 @@
+
+- alias: "Change light state every 30 seconds"
+  triggers:
+    - type: "interval"
+      hours: 0
+      minutes: 0
+      seconds: 30
+      
+  conditions:
+    - condition: "state"
+      entity_id: "light"
+      state: "off"
+  actions:
+    - action: "change_state"
+      entity_id: "light"
+      state: "on"
+
+
+- alias: "Turn off the light after 5 minutes"
+  triggers:
+    - type: "state"
+      entity_id: "light"
+      from: "on"
+      to: "off"
+      for: "00:05:00"
+  conditions: []
+  actions:
+    - action: "change_state"
+      entity_id: "light"
+      state: "off"
+
+- alias: "Turn off the light at 10:00 PM"
+  triggers:
+    - type: "cron"
+      hour: 22
+      minute: 0
+  conditions: []
+  actions:
+    - action: "change_state"
+      entity_id: "light"
+      state: "off"
