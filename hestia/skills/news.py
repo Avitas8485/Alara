@@ -6,7 +6,7 @@ from newspaper import Config
 from datetime import datetime
 import nltk
 from typing import List
-from ..skills.base_skill import Skill
+from ..skills.skill_manager import Skill
 from ..tts.piper_tts import PiperTTS
 from ..lib.hestia_logger import logger
 from hestia.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt as load_prompt

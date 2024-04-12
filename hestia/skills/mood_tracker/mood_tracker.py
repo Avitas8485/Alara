@@ -1,7 +1,7 @@
 import datetime
 import yaml
 import sqlite3
-from hestia.skills.base_skill import Skill
+from hestia.skills.skill_manager import Skill
 
 
 class MoodTracker(Skill):

@@ -2,7 +2,7 @@ import requests
 from dotenv import load_dotenv
 from hestia.tools.ip_geolocation import IpInfoTool
 from hestia.config.config import cfg
-from hestia.skills.base_skill import Skill
+from hestia.skills.skill_manager import Skill
 from hestia.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt
 from hestia.tts.piper_tts import PiperTTS
 load_dotenv()

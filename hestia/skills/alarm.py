@@ -7,7 +7,7 @@ from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 import logging
 import time
 import pythoncom
-from hestia.skills.base_skill import Skill
+from hestia.skills.skill_manager import Skill
 from hestia.automation.event import Event, State
 from hestia.automation.automation_handler import AutomationHandler
 from hestia.automation.entity import Entity
