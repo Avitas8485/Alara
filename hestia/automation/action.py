@@ -5,16 +5,16 @@ from hestia.skills.skill_manager import SkillManager
 from hestia.lib.hestia_logger import logger
 
 
-
 class Action:
     """A class to represent an Action that the AI assistant can take."""
-    def __init__(self, event_bus: EventBus, state_machine: StateMachine, condition: Condition, skill_manager: SkillManager) -> None:
+
+    def __init__(self, event_bus: EventBus, state_machine: StateMachine, condition: Condition,
+                 skill_manager: SkillManager) -> None:
         self.event_bus = event_bus
         self.state_machine = state_machine
         self.condition = condition
         self.skill_manager = skill_manager
-        
-        
+
     def change_state(self, entity_id: str, state: State):
         """Change the state of an entity.
         Args:
@@ -24,11 +24,11 @@ class Action:
             obj = self.state_machine.get_state(entity_id)
             if obj is None:
                 self.state_machine.add_state(state)
-            else:   
+            else:
                 self.state_machine.set_state(entity_id, state)
         else:
             logger.error("State machine is not initialized.")
-        
+
     def check_condition(self, conditions: List[dict]) -> bool:
         """Check the conditions specified in the automation.
         Args:
@@ -36,7 +36,7 @@ class Action:
         Returns:
             bool: True if all the conditions are met, else False."""
         return self.condition.check_condition(conditions)
-    
+
     def call_skill(self, skill_name: str, *args, **kwargs):
         """Call a skill.
         Args:
@@ -44,7 +44,7 @@ class Action:
             args: The arguments to pass to the skill.
             kwargs: The keyword arguments to pass to the skill."""
         return self.skill_manager.call_skill(skill_name, *args, **kwargs)
-    
+
     def choose_action(self, actions: List[dict]):
         """Take the action specified in the automation.
         Args:
@@ -68,8 +68,6 @@ class Action:
                     self.check_condition(conditions)
             else:
                 logger.error(f"Invalid action type: {action_type}")
-    
-    
 
 
 class Lights:
@@ -77,6 +75,7 @@ class Lights:
     Args:
     state_machine: StateMachine: the state machine to change states
     """
+
     def __init__(self, state_machine: StateMachine) -> None:
         self.state_machine = state_machine
         self.state_machine.add_state(State("light", "off"))
@@ -96,6 +95,7 @@ class Alarm:
     """A class to handle alarms
     Args:
     event_bus: EventBus: the event bus to emit events"""
+
     def __init__(self, event_bus: EventBus) -> None:
         self.event_bus = event_bus
 
@@ -106,7 +106,6 @@ class Alarm:
     def stop_alarm(self):
         """Stop the alarm"""
         self.event_bus.emit_event(Event("alarm_stopped", {"data": "some data"}))
-        
 
 
 if __name__ == "__main__":
@@ -125,8 +124,3 @@ if __name__ == "__main__":
     print(action.check_condition([{'condition': 'state', 'entity_id': 'light', 'state': 'off'}]))
     print(action.call_skill("weather", "get_weather"))
     alarm.trigger_alarm()
-        
-        
-    
-    
-    

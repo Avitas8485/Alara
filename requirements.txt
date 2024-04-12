@@ -31,5 +31,5 @@ onnxruntime
 openai-whisper
 pydantic
 rich
-
-
+docstring-parser
+chromadb

@@ -4,7 +4,7 @@
 # ignore python cache files
 __pycache__/
 # ignore python virtual environment
-venv/
+.venv/
 
 # ignore news summary folder
 
@@ -44,3 +44,5 @@ playground.py
 piper/
 
 *.log
+
+.idea/

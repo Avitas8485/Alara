@@ -1,42 +1,47 @@
 from llama_cpp import Llama, LlamaGrammar
 from pydantic import BaseModel, Field
 from enum import Enum
-from hestia.llm.grammar.pydantic_models_to_grammar import generate_gbnf_grammar_and_documentation, generate_gbnf_grammar_from_pydantic_models
+from hestia.llm.grammar.pydantic_models_to_grammar import generate_gbnf_grammar_and_documentation, \
+    generate_gbnf_grammar_from_pydantic_models
 from hestia.nlp.intent_recognition import IntentRecognition
 from hestia.skills.skill_manager import SkillManager
 from hestia.tools.memory.chroma.chroma import SearchMemoryTool, AddMemoryTool, Memory
 import json
 
+
 class InputType(str, Enum):
     CONVERSATIONAL = 'conversational'
     TASK_ORIENTED = 'task-oriented'
-    
+
+
 class InputTypeResponse(BaseModel):
     input_type: InputType = Field(..., description='The type of input: conversational or task-oriented')
-    #reason: str = Field(..., description='The reason why the input is classified as conversational or task-oriented')
+    # reason: str = Field(..., description='The reason why the input is classified as conversational or task-oriented')
+
+
 gbnf = generate_gbnf_grammar_from_pydantic_models([InputTypeResponse])
 input_type_grammar = LlamaGrammar.from_string(gbnf)
+
 
 class Dialogue(BaseModel):
     agent_name: str = Field('Alara', description='This is your name ')
     agent_response: str = Field(..., description='Your response goes here')
-    
+
 
 class ConversationalResponse(BaseModel):
-    chain_of_thought: str = Field(..., description='These can be your inner thoughts, your observations or anything that led to the response')
-    #response: str = Field(..., description='The response to the conversational input')
+    chain_of_thought: str = Field(...,
+                                  description='These can be your inner thoughts, your observations or anything that led to the response')
+    # response: str = Field(..., description='The response to the conversational input')
     response: Dialogue = Field(..., description='The response to the conversational input')
-    
+
+
 class MemoryType(str, Enum):
     THOUGHT = 'thought'
     KNOWLEDGE = 'knowledge'
     DIALOGUE = 'dialogue'
-    
 
 
-
-
-llm = Llama(model_path='C:/Users/avity/Projects/models/stablelm-zephyr-3b.Q4_K_M.gguf',n_ctx=1024)
+llm = Llama(model_path='C:/Users/avity/Projects/models/stablelm-zephyr-3b.Q4_K_M.gguf', n_ctx=1024)
 
 
 def input_type_prompt(input_text: str):
@@ -59,7 +64,7 @@ def input_type_prompt(input_text: str):
     {input_text}
     """
     system_prompt = "Your name is Alara. You are an AI language model designed to help users with their tasks and engage in conversation."
-    
+
     output = llm.create_chat_completion(
         messages=[
             {
@@ -73,10 +78,10 @@ def input_type_prompt(input_text: str):
         ], temperature=1.31, top_p=0.14, repeat_penalty=1.17, top_k=49,
         max_tokens=100, grammar=input_type_grammar
     )
-    print(output["choices"][0]["message"]["content"]) # type: ignore
-    json_output = json.loads(output["choices"][0]["message"]["content"]) # type: ignore
+    print(output["choices"][0]["message"]["content"])  # type: ignore
+    json_output = json.loads(output["choices"][0]["message"]["content"])  # type: ignore
     return InputTypeResponse(**json_output)
-    
+
 
 def conversational_prompt(input_text: str):
     search_memory_tool = SearchMemoryTool()
@@ -88,7 +93,7 @@ def conversational_prompt(input_text: str):
     Now, respond to the following prompt
     {input_text}
     """
-    grammar,_ = generate_gbnf_grammar_and_documentation([ConversationalResponse])
+    grammar, _ = generate_gbnf_grammar_and_documentation([ConversationalResponse])
     conversational_grammar = LlamaGrammar.from_string(grammar)
     output = llm.create_chat_completion(
         messages=[
@@ -103,11 +108,12 @@ def conversational_prompt(input_text: str):
         ], temperature=1.31, top_p=0.14, repeat_penalty=1.17, top_k=49,
         max_tokens=1024, grammar=conversational_grammar
     )
-    
-    print(output["choices"][0]["message"]["content"]) # type: ignore
-    json_output = json.loads(output["choices"][0]["message"]["content"]) # type: ignore
+
+    print(output["choices"][0]["message"]["content"])  # type: ignore
+    json_output = json.loads(output["choices"][0]["message"]["content"])  # type: ignore
     return ConversationalResponse(**json_output)
-    
+
+
 def task_oriented_prompt(input_text: str):
     intent_recognition = IntentRecognition()
     intent, sub_intent = intent_recognition.get_intent(input_text)
@@ -116,7 +122,7 @@ def task_oriented_prompt(input_text: str):
         skill_manager.call_skill(intent, sub_intent)
     except Exception as e:
         print("Notify the user that the feature has not been implemented yet.")
-    
+
 
 def store_memory(text: str):
     prompt = f"""You are now in the memory storage mode. You are provided with a chunk of text, ranging from your thoughts, conversations, facts, etc. You are to store this memory for future reference.
@@ -140,19 +146,19 @@ def store_memory(text: str):
         ], temperature=1.31, top_p=0.14, repeat_penalty=1.17, top_k=49,
         max_tokens=1024, grammar=memory_grammar
     )
-    json_output = json.loads(output["choices"][0]["message"]["content"]) # type: ignore
+    json_output = json.loads(output["choices"][0]["message"]["content"])  # type: ignore
     memory = Memory(**json_output)
     add_memory_tool.run(memory)
-    print(output["choices"][0]["message"]["content"]) # type: ignore
-   
-   
+    print(output["choices"][0]["message"]["content"])  # type: ignore
+
+
 def conversation_flow(input_text: str):
     input_type = input_type_prompt(input_text)
     if input_type.input_type == InputType.CONVERSATIONAL:
         conversational_prompt(input_text)
     elif input_type.input_type == InputType.TASK_ORIENTED:
         task_oriented_prompt(input_text)
-     
+
 
 input_list = [
     "Hi, my name is Avity. I am a software engineer.",
@@ -164,4 +170,3 @@ input_list = [
 
 for input_text in input_list:
     input_type = input_type_prompt(input_text)
-    
