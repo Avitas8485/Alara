@@ -6,276 +6,387 @@ import time
 from datetime import datetime
 from tabulate import tabulate
 from typing import List, Tuple, Any
+from base_tool import Tool, ToolKit
 
-def print_header(header: str) -> None:
-    """
-    Print formatted header
-    """
-    print(f"+{'-' * (len(header) + 2)}+")
-    print(f"|  {header}  |")
-    print(f"+{'-' * (len(header) + 2)}+")
-
-def print_info(info_name: str, info_value: Any) -> None:
-    """
-    Print formatted information
-    """
-    print(f"{info_name}: {info_value}")
-
-def print_section(header: str, info: List[Tuple[str, Any]]) -> None:
-    """
-    Print a section with a header and multiple information lines
-    """
-    print_header(header)
-    for info_name, info_value in info:
-        print_info(info_name, info_value)
-    print()
-    
-    
-def get_size(bytes: float, suffix: str = "B") -> str:
-    """
-    Scale bytes to its proper format
-    e.g:
-        1253656 => '1.20MB'
-        1253656678 => '1.17GB'
-    """
-    factor = 1024
-    for unit in ["", "K", "M", "G", "T", "P"]:
-        if bytes < factor:
-            return f"{bytes:.2f}{unit}{suffix}"
-        bytes /= factor
-    return ""
+class ScaleBytesTool(Tool):
+    def __init__(self):
+        self.name = "scale_bytes"
+        self.description = "Scale bytes to its proper format"
+        self.usage = "scale_bytes [bytes] [suffix]"
+        self.dependencies = {}
+        self.healthy = self.check_health()
         
-def get_cpu_info() -> Tuple[str, str, str]:
-    """
-    Get CPU information
-    """
-    cpu_freq = str(psutil.cpu_freq())
-    cpu_usage = str(psutil.cpu_percent())
-    cpu_cores = str(psutil.cpu_count())
-    return cpu_freq, cpu_usage, cpu_cores
-
-def get_memory_info() -> Tuple[str, str, str]:
-    """
-    Get memory information
-    """
-    memory = psutil.virtual_memory()
-    memory_total = get_size(memory.total)
-    memory_available = get_size(memory.available)
-    memory_used = get_size(memory.used)
-    return memory_total, memory_available, memory_used
-
-def get_disk_info() -> Tuple[str, str, str]:
-    """
-    Get disk information
-    """
-    disk = psutil.disk_usage("/")
-    disk_total = get_size(disk.total)
-    disk_used = get_size(disk.used)
-    disk_free = get_size(disk.free)
-    return disk_total, disk_used, disk_free
-
-def get_network_info() -> Tuple[str, str]:
-    """
-    Get network information
-    """
-    network = psutil.net_io_counters()
-    network_bytes_sent = get_size(network.bytes_sent)
-    network_bytes_recv = get_size(network.bytes_recv)
-    return network_bytes_sent, network_bytes_recv
-
-def get_gpu_info() -> List[Tuple[str, str, str, str, str, str, str, str]]:
-    """
-    Get GPU information
-    """
-    gpus = GPUtil.getGPUs()
-    list_gpus = []
-    for gpu in gpus:
-        gpu_id = gpu.id
-        gpu_name = gpu.name
-        gpu_load = f"{gpu.load*100}%"
-        gpu_free_memory = f"{gpu.memoryFree}MB"
-        gpu_used_memory = f"{gpu.memoryUsed}MB"
-        gpu_total_memory = f"{gpu.memoryTotal}MB"
-        gpu_temperature = f"{gpu.temperature} °C"
-        gpu_uuid = gpu.uuid
-        list_gpus.append((
-            gpu_id, gpu_name, gpu_load, gpu_free_memory, gpu_used_memory,
-            gpu_total_memory, gpu_temperature, gpu_uuid
-        ))
-    return list_gpus
-
-def get_boot_info() -> str:
-    """
-    Get boot time
-    """
-    boot_time_timestamp = psutil.boot_time()
-    bt = datetime.fromtimestamp(boot_time_timestamp)
-    return f"{bt.year}/{bt.month}/{bt.day} {bt.hour}:{bt.minute}:{bt.second}"
-
-def get_system_info() -> Tuple[str, str, str, str]:
-    """
-    Get system information
-    """
-    system = platform.uname()
-    system_name = system.system
-    system_version = system.version
-    system_release = system.release
-    system_machine = system.machine
-    return system_name, system_version, system_release, system_machine
-
-def get_processes_info() -> List[Tuple[str, str, str, str]]:
-    """
-    Get process information
-    """
-    processes = []
-    for process in psutil.process_iter():
-        pid = process.pid
-        process_name = process.name()
-        process_status = process.status()
-        process_creation_time = datetime.fromtimestamp(process.create_time())
-        processes.append((
-            pid, process_name, process_status, process_creation_time
-        ))
-    return processes
-
-def get_users_info() -> List[Tuple[str, str, str]]:
-    """
-    Get users information
-    """
-    users = []
-    for user in psutil.users():
-        username = user.name
-        terminal = user.terminal
-        host = user.host
-        users.append((
-            username, terminal, host
-        ))
-    return users
-
-def get_current_time() -> str:
-    """
-    Get current time
-    """
-    current_time = time.strftime("%H:%M:%S")
-    return current_time
-
-def get_current_date() -> str:
-    """
-    Get current date
-    """
-    current_date = time.strftime("%d/%m/%Y")
-    return current_date
-
-def get_current_datetime() -> str:
-    """
-    Get current datetime
-    """
-    current_datetime = time.strftime("%d/%m/%Y %H:%M:%S")
-    return current_datetime
-
-
-
-
-
-def get_current_timezone() -> str:
-    """
-    Get current timezone
-    """
-    current_timezone = time.tzname[0]
-    return current_timezone
-
-
-def humanize_seconds(seconds: int) -> str:
-    """
-    Convert seconds to human readable string
-    """
-    return humanize.precisedelta(seconds)
-
-def get_system_uptime() -> str:
-    """
-    Get system uptime
-    """
-    uptime = int(time.time() - psutil.boot_time())
-    return humanize_seconds(uptime)
-
-
-def tabulate_data(data: List[Tuple[str, str, str, str]], headers: List[str], table_format: str = "fancy_grid") -> None:
-    """
-    Tabulate data
-    """
-    print(tabulate(data, headers=headers, tablefmt=table_format))
+    def check_health(self, bytes: float=0, suffix: str="B")-> bool:
+        try:
+            self.run(bytes, suffix)
+            return True
+        except Exception as e:
+            print(f"Error checking health of scale_bytes: {e}")
+            return False
+        
+        
+    def run(self, bytes: float, suffix: str = "B")-> str:
+        factor = 1024
+        for unit in ["", "K", "M", "G", "T", "P"]:
+            if bytes < factor:
+                return f"{bytes:.2f} {unit}{suffix}"
+            bytes /= factor
+        return ""
     
-def main() -> None:
-    """
-    Main function
-    """
-    # System Information
-    system_name, system_version, system_release, system_machine = get_system_info()
-    print_section("System Information", [
-        ("System", system_name),
-        ("Version", system_version),
-        ("Release", system_release),
-        ("Machine", system_machine),
-        ("Boot Time", get_boot_info()),
-        ("Current Time", get_current_time()),
-        ("Current Date", get_current_date()),
-        ("Current Datetime", get_current_datetime()),
-        ("Current Timezone", get_current_timezone()),
-        ("System Uptime", get_system_uptime())
-    ])
+class HumanizeSecondsTool(Tool):
+    def __init__(self):
+        self.name = "humanize_seconds"
+        self.description = "Convert seconds to human readable string"
+        self.usage = "humanize_seconds [seconds]"
+        self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self, seconds: int=0)-> bool:
+        try:
+            self.run(seconds)
+            return True
+        except Exception as e:
+            print(f"Error checking health of humanize_seconds: {e}")
+            return False
+        
+    def run(self, seconds: int)-> str:
+        return humanize.precisedelta(seconds)
     
-    # CPU Information
-    cpu_freq, cpu_usage, cpu_cores = get_cpu_info()
-    if isinstance(cpu_freq, str):
-        cpu_freq_str = cpu_freq
-    else:
-        cpu_freq_str = f"{cpu_freq.current:.2f}Mhz"
-    print_section("CPU Information", [
-        ("CPU Frequency", cpu_freq_str),
-        ("CPU Usage", f"{cpu_usage}%"),
-        ("CPU Cores", cpu_cores)
-    ])
+class SystemUptimeTool(Tool):
+    def __init__(self):
+        self.name = "system_uptime"
+        self.description = "Get system uptime"
+        self.usage = "system_uptime"
+        self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        try:
+            self.run()
+            return True
+        except Exception as e:
+            print(f"Error checking health of system_uptime: {e}")
+            return False
+        
+    def run(self)-> str:
+        uptime = int(time.time() - psutil.boot_time())
+        return humanize.precisedelta(uptime)
     
-    # Memory Information
-    memory_total, memory_available, memory_used = get_memory_info()
-    print_section("Memory Information", [
-        ("Memory Total", memory_total),
-        ("Memory Available", memory_available),
-        ("Memory Used", memory_used)
-    ])
+class CurrentTimeTool(Tool):
+    def __init__(self):
+        self.name = "current_time"
+        self.description = "Get current time"
+        self.usage = "current_time"
+        self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        try:
+            self.run()
+            return True
+        except Exception as e:
+            print(f"Error checking health of current_time: {e}")
+            return False
+        
+    def run(self)-> str:
+        return time.strftime("%H:%M:%S")
     
-    # Disk Information
-    disk_total, disk_used, disk_free = get_disk_info()
-    print_section("Disk Information", [
-        ("Disk Total", disk_total),
-        ("Disk Used", disk_used),
-        ("Disk Free", disk_free)
-    ])
+class CurrentDateTool(Tool):
+    def __init__(self):
+        self.name = "current_date"
+        self.description = "Get current date"
+        self.usage = "current_date"
+        self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        try:
+            self.run()
+            return True
+        except Exception as e:
+            print(f"Error checking health of current_date: {e}")
+            return False
+        
+    def run(self)-> str:
+        return time.strftime("%d/%m/%Y")
     
-    # Network Information
-    network_bytes_sent, network_bytes_recv = get_network_info()
-    print_section("Network Information", [
-        ("Network Bytes Sent", network_bytes_sent),
-        ("Network Bytes Received", network_bytes_recv)
-    ])
+class CurrentDatetimeTool(Tool):
+    def __init__(self):
+        self.name = "current_datetime"
+        self.description = "Get current datetime"
+        self.usage = "current_datetime"
+        self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        try:
+            self.run()
+            return True
+        except Exception as e:
+            print(f"Error checking health of current_datetime: {e}")
+            return False
+        
+        
+    def run(self)-> str:
+        return time.strftime("%d/%m/%Y %H:%M:%S")
     
-    # GPU Information
-    gpus = get_gpu_info()
-    print_header("GPU Information")
-    headers = ("GPU ID", "GPU Name", "GPU Load", "GPU Free Memory", "GPU Used Memory", "GPU Total Memory", "GPU Temperature", "GPU UUID")
-    tabulate_data(gpus, list(headers)) # type: ignore
-    print()
+class CurrentTimezoneTool(Tool):
+    def __init__(self):
+        self.name = "current_timezone"
+        self.description = "Get current timezone"
+        self.usage = "current_timezone"
+        self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        try:
+            self.run()
+            return True
+        except Exception as e:
+            print(f"Error checking health of current_timezone: {e}")
+            return False
+        
+    def run(self)-> str:
+        return time.tzname[0]
     
-    # Users Information
-    users = get_users_info()
-    print_header("Users Information")
-    headers = ("Username", "Terminal", "Host")
-    tabulate_data(users, list(headers)) # type: ignore
-    print()
+class BootTimeTool(Tool):
+    def __init__(self):
+        self.name = "boot_time"
+        self.description = "Get boot time"
+        self.usage = "boot_time"
+        self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        try:
+            self.run()
+            return True
+        except Exception as e:
+            print(f"Error checking health of boot_time: {e}")
+            return False
+        
+    def run(self)-> str:
+        boot_time_timestamp = psutil.boot_time()
+        bt = datetime.fromtimestamp(boot_time_timestamp)
+        return f"{bt.year}/{bt.month}/{bt.day} {bt.hour}:{bt.minute}:{bt.second}"
     
+class CpuInfoTool(Tool):
+    def __init__(self):
+        self.name = "cpu_info"
+        self.description = "Get CPU information"
+        self.usage = "cpu_info"
+        self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        try:
+            self.run()
+            return True
+        except Exception as e:
+            print(f"Error checking health of cpu_info: {e}")
+            return False
+        
+    def run(self)-> Tuple[str, str, str]:
+        cpu_freq = str(psutil.cpu_freq())
+        cpu_usage = str(psutil.cpu_percent())
+        cpu_cores = str(psutil.cpu_count())
+        return cpu_freq, cpu_usage, cpu_cores
     
+class MemoryInfoTool(Tool):
+    def __init__(self):
+        self.name = "memory_info"
+        self.description = "Get memory information"
+        self.usage = "memory_info"
+        self.dependencies = {"scale_bytes": ScaleBytesTool()}
+        
+    def check_health(self)-> bool:
+        try:
+            self.run()
+            return True
+        except Exception as e:
+            print(f"Error checking health of memory_info: {e}")
+            return False
+        
+    def run(self)-> Tuple[str, str, str]:
+        memory = psutil.virtual_memory()
+        memory_total = self.dependencies['scale_bytes'].run(memory.total, "B")
+        memory_available = self.dependencies['scale_bytes'].run(memory.available, "B")
+        memory_used = self.dependencies['scale_bytes'].run(memory.used, "B")
+        return memory_total, memory_available, memory_used
+    
+class DiskInfoTool(Tool):
+    def __init__(self):
+        self.name = "disk_info"
+        self.description = "Get disk information"
+        self.usage = "disk_info"
+        self.dependencies = {"scale_bytes": ScaleBytesTool()}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        try:
+            self.run()
+            return True
+        except Exception as e:
+            print(f"Error checking health of disk_info: {e}")
+            return False
+        
+    def run(self)-> Tuple[str, str, str]:
+        disk = psutil.disk_usage("/")
+        disk_total = self.dependencies['scale_bytes'].run(disk.total, "B")
+        disk_used = self.dependencies['scale_bytes'].run(disk.used, "B")
+        disk_free = self.dependencies['scale_bytes'].run(disk.free, "B")
+        return disk_total, disk_used, disk_free
+    
+class NetworkInfoTool(Tool):
+    def __init__(self):
+        self.name = "network_info"
+        self.description = "Get network information"
+        self.usage = "network_info"
+        self.dependencies = {"scale_bytes": ScaleBytesTool()}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        try:
+            self.run()
+            return True
+        except Exception as e:
+            print(f"Error checking health of network_info: {e}")
+            return False
+        
+    def run(self)-> Tuple[str, str]:
+        network = psutil.net_io_counters()
+        network_bytes_sent = self.dependencies['scale_bytes'].run(network.bytes_sent, "B")
+        network_bytes_recv = self.dependencies['scale_bytes'].run(network.bytes_recv, "B")
+        return network_bytes_sent, network_bytes_recv
+    
+class GpuInfoTool(Tool):
+    def __init__(self):
+        self.name = "gpu_info"
+        self.description = "Get GPU information"
+        self.usage = "gpu_info"
+        self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        try:
+            self.run()
+            return True
+        except Exception as e:
+            print(f"Error checking health of gpu_info: {e}")
+            return False
+        
+    def run(self)-> List[Tuple[int, str, str, str, str, str, str, str]]:
+        gpus = GPUtil.getGPUs()
+        list_gpus = []
+        for gpu in gpus:
+            gpu_id = gpu.id
+            gpu_name = gpu.name
+            gpu_load = f"{gpu.load*100}%"
+            gpu_free_memory = f"{gpu.memoryFree}MB"
+            gpu_used_memory = f"{gpu.memoryUsed}MB"
+            gpu_total_memory = f"{gpu.memoryTotal}MB"
+            gpu_temperature = f"{gpu.temperature} °C"
+            gpu_uuid = gpu.uuid
+            list_gpus.append((
+                gpu_id, gpu_name, gpu_load, gpu_free_memory, gpu_used_memory,
+                gpu_total_memory, gpu_temperature, gpu_uuid
+            ))
+        return list_gpus
+    
+class ProcessesInfoTool(Tool):
+    def __init__(self):
+        self.name = "processes_info"
+        self.description = "Get process information"
+        self.usage = "processes_info"
+        self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        try:
+            self.run()
+            return True
+        except Exception as e:
+            print(f"Error checking health of processes_info: {e}")
+            return False
+        
+    def run(self)-> List[Tuple[int, str, str, datetime]]:
+        processes = []
+        for process in psutil.process_iter():
+            pid = process.pid
+            process_name = process.name()
+            process_status = process.status()
+            process_creation_time = datetime.fromtimestamp(process.create_time())
+            processes.append((
+                pid, process_name, process_status, process_creation_time
+            ))
+        return processes
+    
+class UsersInfoTool(Tool):
+    def __init__(self):
+        self.name = "users_info"
+        self.description = "Get users information"
+        self.usage = "users_info"
+        self.dependencies = {}
+        self.healthy = self.check_health()
+        
+    def check_health(self)-> bool:
+        try:
+            self.run()
+            return True
+        except Exception as e:
+            print(f"Error checking health of users_info: {e}")
+            return False
+        
+    def run(self)-> List[Tuple[str, str, str]]:
+        users = []
+        for user in psutil.users():
+            username = user.name
+            terminal = user.terminal
+            host = user.host
+            users.append((
+                username, terminal, host
+            ))
+        return users
+    
+class SystemInfoToolkit(ToolKit):
+    def __init__(self):
+        super().__init__()
+        self.add_tool(ScaleBytesTool())
+        self.add_tool(BootTimeTool())
+        self.add_tool(CurrentTimeTool())
+        self.add_tool(CurrentDateTool())
+        self.add_tool(CurrentDatetimeTool())
+        self.add_tool(CurrentTimezoneTool())
+        self.add_tool(SystemUptimeTool())
+        self.add_tool(CpuInfoTool())
+        self.add_tool(MemoryInfoTool())
+        self.add_tool(DiskInfoTool())
+        self.add_tool(NetworkInfoTool())
+        self.add_tool(GpuInfoTool())
+        self.add_tool(ProcessesInfoTool())
+        self.add_tool(UsersInfoTool())
+        
+    def __str__(self)-> str:
+        return "\n".join([str(tool) for tool in self.tools.values()])
+    
+if __name__ == '__main__':
+    toolkit = SystemInfoToolkit()
+    print(toolkit)
+    
+    # test the tools
+    print(toolkit.run("scale_bytes", 1024, "B"))
+    print(toolkit.run("boot_time"))
+    print(toolkit.run("current_time"))
+    print(toolkit.run("current_date"))
+    print(toolkit.run("current_datetime"))
+    print(toolkit.run("current_timezone"))
+    print(toolkit.run("system_uptime"))
+    print(toolkit.run("cpu_info"))
+    print(toolkit.run("memory_info"))
+    print(toolkit.run("disk_info"))
+    print(toolkit.run("network_info"))
+    print(toolkit.run("gpu_info"))
+    print(toolkit.run("processes_info"))
 
-if __name__ == "__main__":
-    main()
     
-
+    

@@ -59,30 +59,32 @@ class XttsTTS(BaseTTS):
         except Exception as e:
             logger.error(f"Error playing audio: {e}")
                         
-    def synthesize(self,text: str, output_dir: str, output_filename: str):
+    def synthesize(self,text: str, output_dir: str='hestia/tts/outputs', output_filename: str='output.wav'):
         """synthesize the text, play the audio, and then delete the audio file.
         Args:
             text: The text to synthesize.
             output_dir: The directory to output the synthesized text to.
             output_filename: The name of the output file."""
         self.synthesize_to_file(text,output_dir,output_filename)
-        self.play_audio(f"{output_dir}/{output_filename}.wav")
-        os.remove(f"{output_dir}/{output_filename}.wav")
+        self.play_audio(f"{output_dir}/{output_filename}")
+        os.remove(f"{output_dir}/{output_filename}")
         
         
-    def synthesize_to_file(self,text: str, output_dir: str, output_filename: str):
+    def synthesize_to_file(self,text: str, output_dir: str='hestia/tts/outputs', output_filename: str='output.wav'):
         """synthesize the text to a file. Does not play the audio.
         Args:
             text: The text to synthesize.
             output_dir: The directory to output the synthesized text to.
             output_filename: The name of the output file."""
         self.model = Xtts.init_from_config(self.config)
+        logger.info("Loading model checkpoint...")
         self.model.load_checkpoint(config=self.config,
                                    checkpoint_dir=self.model_dir,
                                    vocab_path=self.vocab_path)
         gpt_cond_latent, speaker_embedding = self.model.get_conditioning_latents(
                 audio_path=[self.speaker_path]
             )
+        logger.info("Synthesizing text...")
         out = self.model.inference(
                 text=text,
                 gpt_cond_latent=gpt_cond_latent,
@@ -90,7 +92,8 @@ class XttsTTS(BaseTTS):
                 language="en",
                 enable_text_splitting=True
             )
-        sf.write(f"{output_dir}/{output_filename}.wav", out["wav"], 24000)
+        logger.info("Synthesis complete.")
+        sf.write(f"{output_dir}/{output_filename}", out["wav"], 24000)
         
         
         

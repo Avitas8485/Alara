@@ -6,10 +6,10 @@ from newspaper import Config
 from datetime import datetime
 import nltk
 from typing import List
-from ..skills.base_skill import Skill
+from ..skills.skill_manager import Skill
 from ..tts.piper_tts import PiperTTS
 from ..lib.hestia_logger import logger
-
+from hestia.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt as load_prompt
 load_dotenv()
 
 class News(Skill):
@@ -17,7 +17,6 @@ class News(Skill):
     Attributes:
         DIR_PATH: The path to the directory where the news report is stored.
         NEWS_API_KEY: The API key for the News API."""
-    NEWS_API_KEY = os.getenv("NEWS_API_KEY", '')
     
     def __init__(self):
         """Initialize the News.
@@ -26,15 +25,17 @@ class News(Skill):
             news_summary_path: The path to the news summary.
             simplified_news_path: The path to the simplified news.
             news_summary_speech_path: The path to the news summary speech."""
-        self.todays_date = datetime.now().strftime("%b %d, %Y")
+        self.NEWS_API_KEY = os.getenv("NEWS_API_KEY", '')
         nltk.download('punkt', quiet=True)
         self.tts = PiperTTS()
+        self.llm = LlamaChatCompletion()
+        self.news_prompt = load_prompt("news_debrief")
         
     
-    def encode_to_ascii(self, text: str):
+    def encode_to_ascii(self, text: str)->str:
         """Encode text to ascii.
         Args:
-            text: The text to encode.
+            text (str): The text to encode.
         Returns:
             str: The encoded text."""
         return text.encode('ascii', 'ignore').decode('ascii')
@@ -42,20 +43,19 @@ class News(Skill):
     def get_news_params(self, news_api_key: str)->dict:
         """Get the parameters for the news request.
         Args:
-            news_api_key: The API key for the News API.
+            news_api_key (str): The API key for the News API.
         Returns:
             dict: The parameters for the news request."""
         return {
-            #"category": "science",
             "language": "en",
             "apiKey": news_api_key
         }
     
     
-    def make_news_request(self, params: dict):
+    def make_news_request(self, params: dict)->requests.Response:
         """Make a news request.
         Args:
-            params: The parameters for the news request.
+            params (dict): The parameters for the news request.
         Returns:
             requests.Response: The response from the news request."""
         try:
@@ -64,10 +64,10 @@ class News(Skill):
             #logger.error(f"Error making news request: {e}")
             raise
         
-    def parse_news_response(self, response):
+    def parse_news_response(self, response: requests.Response):
         """Parse the news response.
         Args:
-            response: The response from the news request.
+            response (requests.Response): The response from the news request.
         Returns:
             list: The news articles."""
         return response.json()['articles']  
@@ -81,7 +81,7 @@ class News(Skill):
         return config
     
     
-    def download_and_parse_article(self, article_info, config)->Article:
+    def download_and_parse_article(self, article_info: dict, config: Config)->Article:
         """Download and parse the article.
         Args:
             article_info: The information about the article.
@@ -96,8 +96,8 @@ class News(Skill):
     def get_article_info(self, article_info: dict, article: Article)->dict:
         """Get the article information.
         Args:
-            article_info: The information about the article.
-            article: The article.
+            article_info (dict): The information about the article.
+            article (Article): The article.
         Returns:
             dict: The article information."""
         self.todays_date = datetime.now().strftime("%b %d, %Y")
@@ -106,61 +106,74 @@ class News(Skill):
         title = self.encode_to_ascii(article_info["title"])
         return {"title": title, "summary": summary, "url": article_info["url"], "date": f"{self.todays_date}"}
     
+    def get_articles(self, params: dict)->dict:
+        """Get the articles.
+        Args:
+            params (dict): The parameters for the news request.
+        Returns:
+            dict: The articles."""
+        articles_dict = dict()
+        response = self.make_news_request(params)
+        news_articles = self.parse_news_response(response)
+        for articles in news_articles:
+            try:
+                article = self.download_and_parse_article(articles, self.get_config())
+            except Exception as e:
+                logger.error(f"Error downloading article: {e}")
+                continue
+            articles = self.get_article_info(articles, article)
+            articles_dict[articles["title"]] = articles
+        return articles_dict
     
-    def latest_news(self):
-        latest_news = dict()
+    def latest_news(self, tts: bool=True, summarize: bool=True) -> str:
+        """Get the latest news.
+        Args:
+            tts (bool): Whether to use text to speech.
+            summarize (bool): Whether to summarize the news.
+        Returns:
+            str: The latest news."""
+        
         params = self.get_news_params(self.NEWS_API_KEY)
         params["sortBy"] = "publishedAt"
-        response = self.make_news_request(params)
-        news_articles = self.parse_news_response(response)
-        for articles in news_articles:
-            try:
-                article = self.download_and_parse_article(articles, self.get_config())
-            except Exception as e:
-                logger.error(f"Error downloading article: {e}")
-                continue    
-            articles = self.get_article_info(articles, article)
-            latest_news[articles["title"]] = articles
-        news_information = self.parse_information(latest_news)
-        self.tts.synthesize(f"Here are the latest news: {news_information}")
+        latest_news = self.get_articles(params)
+        news_information = "\n".join([value["title"] + "." for value in latest_news.values()])
+        if summarize:
+            news_information = self.llm.chat_completion(self.news_prompt, news_information)    
+        if tts:
+            self.tts.synthesize(f"Here are the latest news: {news_information}")
         return news_information
         
     
-    def news_in_category(self, category: str="science"):
-        news_in_category = dict()
+    def news_in_category(self, category: str="science", tts: bool=True, summarize: bool=True)->str:
+        """Get the news in a category.
+        Args:
+            category (str): The category of the news.
+            tts (bool): Whether to use text to speech.
+            summarize (bool): Whether to summarize the news.
+        Returns:
+            str: The news in the category."""
         params = self.get_news_params(self.NEWS_API_KEY)
         params["category"] = category
-        response = self.make_news_request(params)
-        news_articles = self.parse_news_response(response)
-        for articles in news_articles:
-            try:
-                article = self.download_and_parse_article(articles, self.get_config())
-            except Exception as e:
-                logger.error(f"Error downloading article: {e}")
-                continue    
-            articles = self.get_article_info(articles, article)
-            news_in_category[articles["title"]] = articles
-        news_information = self.parse_information(news_in_category)
-        self.tts.synthesize(f"Here are the latest news in {category}: {news_information}")
+        news_in_category = self.get_articles(params)
+        news_information = "\n".join([value["title"] + "." for value in news_in_category.values()])
+        if summarize:
+            news_information = self.llm.chat_completion(self.news_prompt, news_information)
+        if tts:
+            self.tts.synthesize(f"Here are the latest news in {category}: {news_information}")
         return news_information
     
     
-    def top_news(self):
-        top_news = dict()
+    def top_news(self, tts: bool=True) -> str:
+        """Get the top news.
+        Args:
+            tts (bool): Whether to use text to speech.
+        Returns:
+            str: The top news."""
         params = self.get_news_params(self.NEWS_API_KEY)
-        response = self.make_news_request(params)
-        news_articles = self.parse_news_response(response)
-        for articles in news_articles:
-            try:
-                article = self.download_and_parse_article(articles, self.get_config())
-            except Exception as e:
-                logger.error(f"Error downloading article: {e}")
-                continue    
-            articles = self.get_article_info(articles, article)
-            top_news[articles["title"]] = articles
-        
-        news_information = self.parse_information(top_news)
-        self.tts.synthesize(f"Heres the top news for today: {news_information}")
+        top_news = self.get_articles(params)
+        news_information = "\n".join([value["title"] + "." for value in top_news.values()])
+        if tts:
+            self.tts.synthesize(f"Heres the top news for today: {news_information}")
         return news_information
     
     
@@ -169,7 +182,11 @@ class News(Skill):
 
 
     def parse_information(self, news: dict)->str:
-        """Parse the news information."""
+        """Parse the news information.
+        Args:
+            news (dict): The news information.
+        Returns:
+            str: The parsed news information."""
         
         news = {k: v for k, v in news.items() if k != "[Removed]"}
         for key, value in news.items():

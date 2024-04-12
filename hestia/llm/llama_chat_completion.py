@@ -1,9 +1,7 @@
 from llama_cpp import Llama
 import yaml
 from hestia.lib.hestia_logger import logger
-import logging
 from hestia.config.config import cfg
-import threading
 from hestia.lib.singleton import Singleton
 
 
@@ -13,7 +11,7 @@ class LlamaChatCompletion(metaclass=Singleton):
     def __init__(self):
         self.llm = self.load_llama_model()
 
-    def load_llama_model(self)->Llama:
+    def load_llama_model(self, **kwargs)->Llama:
         """Load the Llama model, and unload it when done."""
         logger.info("Loading LLM...")
         llm = Llama(
@@ -21,12 +19,14 @@ class LlamaChatCompletion(metaclass=Singleton):
             model_path=cfg.MIDDLE_LLAMA_MODEL_PATH,
             n_threads=cfg.LLAMA_N_THREADS,
             n_threads_batch=cfg.LLAMA_N_THREADS_BATCH,
-            n_ctx=cfg.LLAMA_N_CTX, chat_format="chatml")
+            n_ctx=cfg.LLAMA_N_CTX,
+            **kwargs)
         return llm
 
-    def chat_completion(self, system_prompt: str, user_prompt: str, max_retries=3, **kwargs) -> str:
+    def chat_completion(self, system_prompt: str, user_prompt: str, max_retries=3, grammar=None, **kwargs) -> str:
         """Generate a chat completion from the Llama model."""
         for _ in range(max_retries):
+            
             logger.info("Generating chat completion...")
             output = self.llm.create_chat_completion(
                 messages=[
@@ -38,13 +38,14 @@ class LlamaChatCompletion(metaclass=Singleton):
                         "role": "user",
                         "content": f"{user_prompt}"
                     }
-                ], max_tokens=cfg.LLAMA_MAX_TOKENS, **kwargs
+                ], max_tokens=cfg.LLAMA_MAX_TOKENS, grammar=grammar, **kwargs
             )
             logger.info("Generation complete.")
             # to prevent situations where the model outputs nothing
             if output["choices"][0]["message"]["content"] != "": # type: ignore
                 return output["choices"][0]["message"]["content"] # type: ignore
-            print("Model output was empty. Retrying...")
+            logger.warning("Model failed to generate output. Retrying...")
+        logger.error("Model failed to generate output after maximum retries.")
         return "Model failed to generate output after maximum retries."
     
     

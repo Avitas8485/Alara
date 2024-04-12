@@ -3,9 +3,10 @@ import os
 import numpy as np
 import sounddevice as sd
 from scipy.io.wavfile import write
-import logging
 from typing import List
 from hestia.lib.hestia_logger import logger
+import logging
+import threading
 
 
 class StreamHandler:
@@ -13,13 +14,13 @@ class StreamHandler:
     ENGLISH = True
     TRANSLATE = False
     SAMPLE_RATE = 44100  # Stream device recording frequency
-    BLOCK_SIZE = 100      # Block size in milliseconds
-    THRESHOLD = 0.05    # Minimum volume threshold to activate listening
-    VOCALS = [40, 1000]  # Frequency range to detect sounds that could be speech
-    END_BLOCKS = 40      # Number of blocks to wait before sending to Whisper
+    BLOCK_SIZE = 110      # Block size in milliseconds
+    THRESHOLD = 0.07    # Minimum volume threshold to activate listening
+    VOCALS = [50, 1000]  # Frequency range to detect sounds that could be speech
+    END_BLOCKS = 30      # Number of blocks to wait before sending to Whisper
 
 
-    def __init__(self, assist=None):
+    def __init__(self, assist=None, timeout=10, on_timeout=None):
         self.asst = assist if assist else {'running': True, 'talking': False, 'analyze': None}
         self.padding = 0
         self.prevblock = self.buffer = np.zeros((0,1))
@@ -27,6 +28,22 @@ class StreamHandler:
         print("\033[96mLoading Whisper Model..\033[0m", end='', flush=True)
         self.model = whisper.load_model(f'{self.MODEL}')
         print("\033[90m Done.\033[0m")
+        self.timeout = timeout
+        self.timer = None
+        self.on_timeout = on_timeout
+    def start_timer(self):
+        if self.timer is not None:
+            self.timer.cancel()
+        self.timer = threading.Timer(self.timeout, self.stop_listening)
+        self.timer.start()
+        
+    def stop_listening(self):
+        self.asst['running'] = False
+        if self.timer is not None:
+            self.timer.cancel()
+        self.timer = None
+        print("\n\033[31mTimeout\033[0m")
+        
 
     def callback(self, indata, frames, time, status):
         if not any(indata):
@@ -40,6 +57,9 @@ class StreamHandler:
             print('.', end='', flush=True)
             self.buffer = self.prevblock.copy() if self.padding < 1 else np.concatenate((self.buffer, indata))
             self.padding = self.END_BLOCKS
+            if self.timer is not None:
+                self.timer.cancel()
+                self.timer = None
         else:
             self.process_silence(indata)
 
@@ -57,9 +77,15 @@ class StreamHandler:
         else:
             self.prevblock = indata.copy()
 
+    
     def listen(self)-> str|None:
         print("\033[32mListening.. \033[37m(Ctrl+C to Quit)\033[0m")
+        self.asst['running'] = True
         with sd.InputStream(channels=1, callback=self.callback, blocksize=int(self.SAMPLE_RATE * self.BLOCK_SIZE / 1000), samplerate=self.SAMPLE_RATE):
+            print("getting input stream")
+            if self.timer is None:
+                print("Starting timer")
+                self.start_timer()
             while self.asst['running']: 
                 if self.fileready:
                     print("\n\033[90mTranscribing..\033[0m")
@@ -72,7 +98,14 @@ class StreamHandler:
                     if isinstance(transcription, list):
                         transcription = ' '.join(transcription)
                     return transcription
+        return None
                 
 
 
         
+if __name__ == "__main__":
+    stream_handler = StreamHandler()
+    while True:
+        
+        stream_handler.listen()
+        print("Done")

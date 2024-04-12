@@ -35,7 +35,11 @@ class HestiaLogger(metaclass=Singleton):
                          show_level=True, show_path=False, markup=False,
                          rich_tracebacks=True, log_time_format=log_time_format,
                          level=log_level, console=console)
+        file_handler = logging.FileHandler('hestia.log')
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
         self.logger.addHandler(rh)
+        self.logger.addHandler(file_handler)
 
 
 class RingBuffer(logging.StreamHandler):

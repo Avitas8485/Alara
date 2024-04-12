@@ -1,9 +1,10 @@
 from typing import Optional, Any, List, Callable
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.jobstores.memory import MemoryJobStore
 from hestia.lib.hestia_logger import logger
-import hashlib
+from hestia.lib.singleton import Singleton
+from uuid import uuid4
 
 EXECUTORS = {
     'default': ThreadPoolExecutor(20),
@@ -17,10 +18,10 @@ JOB_DEFAULTS = {
 }
 
 STORAGE = {
-    'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
+    'default': MemoryJobStore()
 }
 
-class SchedulerManager:
+class SchedulerManager(metaclass=Singleton):
     """Class to manage the scheduler.
     Attributes:
         scheduler: APscheduler instance"""
@@ -28,7 +29,6 @@ class SchedulerManager:
         self.scheduler = BackgroundScheduler(executors=EXECUTORS, job_defaults=JOB_DEFAULTS, daemon=True, jobstores=STORAGE)
         self.scheduler.start()
 
-                
     def add_job(self, job_function: Callable, job_id: Optional[str] = None, trigger: Optional[str] = None, **kwargs: Any) -> None:
         """Add a job to the scheduler.
         Args:
@@ -37,17 +37,36 @@ class SchedulerManager:
             trigger: The trigger for the job.
             kwargs: The keyword arguments for the job."""
         if job_id is None:
-            job_id = hashlib.md5(str(job_function).encode()).hexdigest()
+            job_id = str(uuid4())
         if self.scheduler.get_job(job_id=job_id):
-            logger.info(f"Job with id {job_id} already exists.")
+            logger.info(f"Job {job_id} already exists")
+            return 
+        # add the job to the scheduler
+        try:
+            self.scheduler.add_job(func=job_function, trigger=trigger, id=job_id,replace_existing=True, **kwargs)
+        except Exception as e:
+            logger.error(f"Error adding job: {e}")
+    '''def add_job(self, job_function: Callable, job_id: Optional[str] = None, trigger: Optional[str] = None, **kwargs: Any) -> None:
+        """Add a job to the scheduler.
+        Args:
+            job_function: The function to run.
+            job_id: The id of the job.
+            trigger: The trigger for the job.
+            kwargs: The keyword arguments for the job."""
+        if job_id is None:
+            function_name = job_function.__name__
+            sorted_kwargs = str(sorted(kwargs.items()))
+            job_id = hashlib.md5(f"{function_name}{sorted_kwargs}".encode()).hexdigest()
+        if self.scheduler.get_job(job_id=job_id):
+            logger.info(f"Job {function_name} with parameters {sorted_kwargs} already exists")
             return 
         # add the job to the scheduler
         try:
             self.scheduler.add_job(job_function, trigger=trigger, id=job_id,replace_existing=True, **kwargs)
         except Exception as e:
-            logger.error(f"Error adding job: {e}")
+            logger.error(f"Error adding job: {e}")'''
 
-        
+     
     def remove_job(self, job_id: str) -> None:
         """Remove a job from the scheduler.
         Args:
@@ -65,7 +84,37 @@ class SchedulerManager:
             return self.scheduler.get_jobs()
         except Exception as e:
             logger.error(f"Error getting jobs: {e}")
-            return []        
+            return []
+        
+    '''def get_job(self, job_function: Callable, **kwargs) -> Any:
+        """Get a job from the scheduler.
+        Args:
+            job_function (Callable): The function to run.
+            kwargs: The keyword arguments for the job.
+        Returns:
+            Any: The job."""
+        try:
+            function_name = job_function.__name__
+            sorted_kwargs = str(sorted(kwargs.items()))
+            job_id = hashlib.md5(f"{function_name}{sorted_kwargs}".encode()).hexdigest()
+            return self.scheduler.get_job(job_id)
+        except Exception as e:
+            logger.error(f"Error getting job: {e}")
+            return None'''
+        
+    def get_job(self, job_id: str) -> Any:
+        """Get a job from the scheduler.
+        Args:
+            job_id: The id of the job.
+        Returns:
+            Any: The job."""
+        try:
+            return self.scheduler.get_job(job_id)
+        except Exception as e:
+            logger.error(f"Error getting job: {e}")
+            return None
+    
+        
     def modify_job(self, job_id: str, job_function: Optional [Callable], trigger: Optional[str] = None, **changes: Any) -> None:
         """Modify a job.
         Args:
@@ -111,6 +160,8 @@ class SchedulerManager:
         """Start the scheduler."""
         if not self.scheduler.running:
             self.scheduler.start()
+            
+
     
 
 

@@ -1,14 +1,11 @@
 {
     "intents": [
-        { "name": "chat" },
-        { "name": "none" },
         
         {
             "name": "weather",
             "sub_intents": [
                 { "name": "current_weather" },
-                { "name": "forecast_weather" },
-                { "name": "weather_report" }
+                { "name": "forecast_weather" }
             ]
         },
         {

@@ -7,7 +7,7 @@ import pandas as pd
 from aw_client import ActivityWatchClient
 from aw_client.classes import default_classes
 from aw_client.queries import DesktopQueryParams, canonicalEvents
-from hestia.tools.ip_geolocation import get_geolocation
+from hestia.tools.ip_geolocation import IpInfoTool
 from pytz import timezone
 from hestia.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt as load_prompt
 from hestia.tts.xtts_tts import XttsTTS as TextToSpeechSystem
@@ -41,8 +41,10 @@ class ActivityReportGenerator(BaseReportGenerator):
             return f.read()
     def get_timezone(self) -> str:
         """Returns timezone of the system"""
-        geolocation = get_geolocation()
+        ip_info_tool = IpInfoTool()
+        geolocation = ip_info_tool.run()
         return geolocation['timezone']
+    
     def get_start_of_day(self, now: datetime):
         start_of_day = now.replace(hour=4, minute=0, second=0, microsecond=0)
         if now < start_of_day:
