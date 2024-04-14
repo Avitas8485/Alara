@@ -51,6 +51,7 @@ class SkillManager:
     def dynamic_load_skill(self):
         self.skills_dir = Path("hestia/skills")
         logger.info(f"Loading skills from {self.skills_dir}")
+        self.skill_mapping = {"skills": []}
         for skill_dir in self.skills_dir.iterdir():
             if skill_dir.is_dir():
                 skill_module_path = f"{self.skills_dir.as_posix().replace('/', '.')}.{skill_dir.name}.skill"
@@ -61,13 +62,16 @@ class SkillManager:
                     skills = [getattr(module, attr_name)() for attr_name in dir(module)
                               if isinstance(getattr(module, attr_name), type) and issubclass(getattr(module, attr_name), Skill) and getattr(module, attr_name) != Skill]
                     for skill in skills:
-                        self.features.update({feature_name: skill_dir.name for feature_name in dir(skill) if callable(getattr(skill, feature_name)) and hasattr(getattr(skill, feature_name), "is_skill_feature")})
+                        feature_names = [feature_name for feature_name in dir(skill) if callable(getattr(skill, feature_name)) and hasattr(getattr(skill, feature_name), "is_skill_feature")]
+                        self.features.update({feature_name: skill_dir.name for feature_name in feature_names})
+                        self.skill_mapping["skills"].append({"name": skill_dir.name, "features": [{"name": feature_name} for feature_name in feature_names]})
                 except ImportError:
                     logger.warning(f"Failed to import skill {skill_dir.name}.")
                 except AttributeError:
                     logger.warning(f"Skill {skill_dir.name} not found in module.")
         logger.info(f"Loaded skills: {self.skills}")
         logger.info(f"Loaded features: {self.features}")
+        print(self.skill_mapping)
 
     def call_feature(self, feature_name: str, *args, **kwargs) -> Any:
         if feature_name in self.features:
@@ -88,3 +92,7 @@ class SkillManager:
                 return attr()
         logger.info(f"Skill {skill_name} not found in module {skill_module_path}")
         return FallBackSkill()
+    
+if __name__ == "__main__":
+    skill_manager = SkillManager()
+    skill_manager.call_feature("current_weather")
