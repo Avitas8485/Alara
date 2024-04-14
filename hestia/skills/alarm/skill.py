@@ -8,8 +8,6 @@ import logging
 import time
 import pythoncom
 from hestia.skills.skill_manager import Skill
-from hestia.automation.event import Event, State
-from hestia.automation.automation_handler import AutomationHandler
 from hestia.automation.entity import Entity
 
 
@@ -48,7 +46,7 @@ class VolumeMute:
         except Exception as e:
             logger.error(f"Error setting mute status: {e}")
             raise
-
+    
     def mute(self):
         """Mute the system volume."""
         self.set_mute_status(True)
@@ -81,9 +79,7 @@ class Alarm(Entity, Skill):
         self.output_device = self.get_main_speaker()
         self.alarm_state = "off"
         self.alarm_attributes = {"volume": -20.0}
-        
-        self.add_entity_state()
-        
+                
 
     def get_main_speaker(self) -> int|None:
         """Get the index of the main speaker device."""
@@ -146,7 +142,7 @@ class Alarm(Entity, Skill):
             print("Alarm stopped. Good morning!")
             self.reset_volume()
             
-
+    @Skill.skill_feature
     def dismiss_alarm(self):
         """Dismiss the alarm."""
         
@@ -154,7 +150,7 @@ class Alarm(Entity, Skill):
             self.alarm_active = False
             sd.stop()
             
-
+    @Skill.skill_feature
     def snooze_alarm(self, snooze_duration: int=5):
         """Snooze the alarm for a specified duration."""
         with self.lock:

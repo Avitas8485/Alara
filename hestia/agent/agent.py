@@ -14,13 +14,14 @@ import time
 
 class Agent(metaclass=Singleton):
     def __init__(self):
-        self.skill_manager = SkillManager()
+        
         self.tts = PiperTTS()
         self.stream_handler = StreamHandler()
         self.wake_word = WakeWord()
         self.intent_recognition = IntentRecognition()
         self.system_prompt = "Your name is Alara. You are an AI assistant that helps people with their daily tasks."
         self.llm = LlamaChatCompletion()
+        self.skill_manager = SkillManager()
         self.running = True
         self.scheduler = SchedulerManager()
         self.automation_handler = AutomationHandler()
@@ -43,7 +44,7 @@ class Agent(metaclass=Singleton):
         intent, sub_intent = self.intent_recognition.get_intent(user_prompt)
         self.logger.debug(f"Intent: {intent}, Sub-intent: {sub_intent}")
         try:
-            self.skill_manager.call_skill(intent, sub_intent)
+            self.skill_manager.call_feature(sub_intent)
         except Exception as e:
             self.logger.error(f"Error calling skill: {e}")
             output = self.llm.chat_completion(system_prompt=self.system_prompt,
@@ -61,6 +62,7 @@ class Agent(metaclass=Singleton):
         user_prompt = self.stream_handler.listen()
         if user_prompt:
             self.process_user_prompt(user_prompt)
+        self.wake_word.clear_wakeword_buffer()
 
     def run(self):
         while self.running:

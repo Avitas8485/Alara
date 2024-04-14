@@ -27,6 +27,7 @@ class Weather(Skill):
         self.weather_prompt = load_prompt_txt("weather_report")
         self.tts = PiperTTS()
         self.city = self.get_city()
+        self.dependencies = {"IpInfoTool": IpInfoTool()}
         
         
     def get_city(self) -> str:
@@ -60,6 +61,7 @@ class Weather(Skill):
         response = requests.get(self.BASE_URL, params=params)
         return response.json()
     
+    @Skill.skill_feature
     def current_weather(self, city: str='', tts: bool=True) -> str:
         """Get the current weather.
         Args:

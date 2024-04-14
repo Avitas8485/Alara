@@ -6,11 +6,12 @@ from newspaper import Config
 from datetime import datetime
 import nltk
 from typing import List
-from ..skills.skill_manager import Skill
-from ..tts.piper_tts import PiperTTS
-from ..lib.hestia_logger import logger
+from hestia.skills.skill_manager import Skill
+from hestia.tts.piper_tts import PiperTTS
+from hestia.lib.hestia_logger import logger
 from hestia.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt as load_prompt
 load_dotenv()
+
 
 class News(Skill):
     """A class to represent a News.
@@ -125,6 +126,7 @@ class News(Skill):
             articles_dict[articles["title"]] = articles
         return articles_dict
     
+    @Skill.skill_feature
     def latest_news(self, tts: bool=True, summarize: bool=True) -> str:
         """Get the latest news.
         Args:
@@ -143,7 +145,7 @@ class News(Skill):
             self.tts.synthesize(f"Here are the latest news: {news_information}")
         return news_information
         
-    
+    @Skill.skill_feature
     def news_in_category(self, category: str="science", tts: bool=True, summarize: bool=True)->str:
         """Get the news in a category.
         Args:
@@ -162,7 +164,7 @@ class News(Skill):
             self.tts.synthesize(f"Here are the latest news in {category}: {news_information}")
         return news_information
     
-    
+    @Skill.skill_feature
     def top_news(self, tts: bool=True) -> str:
         """Get the top news.
         Args:
