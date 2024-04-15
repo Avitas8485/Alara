@@ -27,6 +27,7 @@ class Weather(Skill):
         self.weather_prompt = load_prompt_txt("weather_report")
         self.tts = PiperTTS()
         self.city = self.get_city()
+        self.dependencies = {"IpInfoTool": IpInfoTool()}
         
         
     def get_city(self) -> str:
@@ -40,7 +41,7 @@ class Weather(Skill):
     def fetch_weather(self, city: str='') -> dict:
         """Fetch weather data
         Args:
-            city (str): The city to fetch the weather data for. If not provided, the city is fetched based on the IP address.
+            city (str): The city to fetch the weather data for. Defaults to an empty string.
         Returns:
             dict: The weather data."""
         if not city:
@@ -60,11 +61,12 @@ class Weather(Skill):
         response = requests.get(self.BASE_URL, params=params)
         return response.json()
     
+    @Skill.skill_feature
     def current_weather(self, city: str='', tts: bool=True) -> str:
         """Get the current weather.
         Args:
             city (str): The city to get the current weather for. If not provided, the city is fetched based on the IP address.
-            tts (bool): Whether to use text-to-speech.
+            tts (bool): Whether to use text-to-speech. Default is True.
         Returns:
                 str: The current weather."""
         if not city:

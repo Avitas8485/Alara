@@ -4,8 +4,7 @@ import numpy as np
 import sounddevice as sd
 from scipy.io.wavfile import write
 from typing import List
-from hestia.lib.hestia_logger import logger
-import logging
+
 import threading
 
 
@@ -15,7 +14,7 @@ class StreamHandler:
     TRANSLATE = False
     SAMPLE_RATE = 44100  # Stream device recording frequency
     BLOCK_SIZE = 110      # Block size in milliseconds
-    THRESHOLD = 0.07    # Minimum volume threshold to activate listening
+    THRESHOLD = 0.01    # Minimum volume threshold to activate listening
     VOCALS = [50, 1000]  # Frequency range to detect sounds that could be speech
     END_BLOCKS = 30      # Number of blocks to wait before sending to Whisper
 
@@ -106,6 +105,5 @@ class StreamHandler:
 if __name__ == "__main__":
     stream_handler = StreamHandler()
     while True:
-        
         stream_handler.listen()
         print("Done")
