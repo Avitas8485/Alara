@@ -2,7 +2,7 @@ import os
 import time
 from datetime import datetime
 
-from alara.lib.hestia_logger import logger
+from alara.lib.logger import logger
 from alara.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt as load_prompt
 from alara.tts.xtts_tts import XttsTTS as TextToSpeechSystem
 from alara.tts.tts_utils import play_audio

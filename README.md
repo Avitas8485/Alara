@@ -18,7 +18,7 @@ The agent's main functionality is to listen for user prompts, process them using
 The agent is designed to be extensible and customizable, with the ability to add new skills and integrate with various devices and services.
 
 ### Components
-The Hestia agent is composed of the following main components:
+Alara is composed of the following main components:
 
 1. **Agent**: The main entry point for the agent, responsible for managing the various components and handling user input.
 2. **Skill Manager**: Responsible for loading and managing skills, which are plugins that extend the agent's functionality.
@@ -28,7 +28,7 @@ The Hestia agent is composed of the following main components:
 
 ### Usage
 
-To use the Hestia agent, you can run the `main.py` script. The agent will start listening for user input and respond accordingly.
+To use the Alara agent, you can run the `main.py` script. The agent will start listening for user input and respond accordingly.
 
 ### Roadmap
 
@@ -39,5 +39,5 @@ To use the Hestia agent, you can run the `main.py` script. The agent will start 
 - Add agent Actions.
 
 ### Contributing
-If you'd like to contribute to the Hestia project, please feel free to submit a pull request or open an issue on the project's GitHub repository.
+If you'd like to contribute to the Alara project, please feel free to submit a pull request or open an issue on the project's GitHub repository.
 

@@ -1,6 +1,6 @@
 from alara.automation.automation_handler import AutomationHandler
 from alara.automation.event import Event, State
-from alara.lib.hestia_logger import HestiaLogger
+from alara.lib.logger import Logger
 
 
 class Entity:

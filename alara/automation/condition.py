@@ -1,7 +1,7 @@
 from .event import StateMachine
 from datetime import datetime
 from .event import Event, EventBus, State
-from alara.lib.hestia_logger import logger
+from alara.lib.logger import logger
 from typing import List
 
 

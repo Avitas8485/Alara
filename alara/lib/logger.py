@@ -10,8 +10,8 @@ from alara.lib.singleton import Singleton
 
 
 
-class HestiaLogger(metaclass=Singleton):
-    def __init__(self, logger_name='Hestia', log_level=logging.DEBUG):
+class Logger(metaclass=Singleton):
+    def __init__(self, logger_name='Alara', log_level=logging.DEBUG):
         if not hasattr(self, 'logger'):
             self.logger = logging.getLogger(logger_name)
             self.logger.setLevel(log_level)
@@ -61,4 +61,4 @@ class RingBuffer(logging.StreamHandler):
         return list(self.buffer)
 
 
-logger = HestiaLogger("Alara").logger
+logger = Logger("Alara").logger

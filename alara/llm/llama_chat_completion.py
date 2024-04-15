@@ -1,6 +1,6 @@
 from llama_cpp import Llama
 import yaml
-from alara.lib.hestia_logger import logger
+from alara.lib.logger import logger
 from alara.config.config import cfg
 from alara.lib.singleton import Singleton
 

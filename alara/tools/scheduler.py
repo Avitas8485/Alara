@@ -2,7 +2,7 @@ from typing import Optional, Any, List, Callable
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from apscheduler.jobstores.memory import MemoryJobStore
-from alara.lib.hestia_logger import logger
+from alara.lib.logger import logger
 from alara.lib.singleton import Singleton
 from uuid import uuid4
 

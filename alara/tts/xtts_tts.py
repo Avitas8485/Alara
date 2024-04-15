@@ -4,7 +4,7 @@ import wave
 from TTS.tts.configs.xtts_config import XttsConfig
 from TTS.tts.models.xtts import Xtts
 import soundfile as sf
-from alara.lib.hestia_logger import logger
+from alara.lib.logger import logger
 from alara.tts.base_tts import BaseTTS
 from alara.config.config import cfg
 

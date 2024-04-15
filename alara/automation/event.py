@@ -1,4 +1,4 @@
-from alara.lib.hestia_logger import logger
+from alara.lib.logger import logger
 from typing import Dict, Any, Callable, Optional
 from enum import Enum
 from datetime import datetime

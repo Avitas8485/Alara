@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from alara.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt as load_prompt
 from alara.tts.xtts_tts import XttsTTS as TextToSpeechSystem
 from alara.tools.ip_geolocation import IpInfoTool
-from alara.lib.hestia_logger import logger
+from alara.lib.logger import logger
 from datetime import datetime
 from alara.config.config import cfg
 load_dotenv()

@@ -6,7 +6,7 @@ import openwakeword.utils as utils
 from openwakeword.model import Model
 import logging
 from rich import print
-from alara.lib.hestia_logger import logger
+from alara.lib.logger import logger
 
 class WakeWord:
     def __init__(self, model_path="hestia/stt/Alara.onnx", inference_framework="onnx", chunk_size=1280):

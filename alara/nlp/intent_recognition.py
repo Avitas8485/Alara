@@ -1,7 +1,7 @@
 from transformers import pipeline
 import json
 from alara.lib.singleton import Singleton
-from alara.lib.hestia_logger import logger
+from alara.lib.logger import logger
 from alara.skills.skill_manager import SkillManager
 
 

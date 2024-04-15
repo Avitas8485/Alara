@@ -6,7 +6,7 @@ from newspaper import Config
 from datetime import datetime
 import nltk
 from typing import List
-from alara.lib.hestia_logger import logger
+from alara.lib.logger import logger
 from alara.llm.llama_chat_completion import load_prompt_txt, LlamaChatCompletion
 from alara.tts.xtts_tts import XttsTTS as TextToSpeechSystem
 from alara.skills.reports.base_report_generator import BaseReportGenerator

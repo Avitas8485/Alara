@@ -8,7 +8,7 @@ from alara.llm.llama_chat_completion import LlamaChatCompletion
 from alara.tools.scheduler import SchedulerManager
 from alara.automation.automation_handler import AutomationHandler
 from alara.automation.event import Event, State
-from alara.lib.hestia_logger import HestiaLogger
+from alara.lib.logger import Logger
 from alara.llm.grammar.pydantic_models_to_grammar import generate_gbnf_grammar_and_documentation, create_dynamic_model_from_function
 import json
 from llama_cpp.llama_grammar import LlamaGrammar
@@ -35,7 +35,7 @@ class Agent(metaclass=Singleton):
         self.last_interaction = None
         self.agent_name = "Alara"
         self.agent_state = None
-        self.logger = HestiaLogger("Alara").logger
+        self.logger = Logger("Alara").logger
         self.agent_state = self.automation_handler.state_machine.add_state(
             State(entity_id=self.agent_name, state="idle", attributes={"last_interaction": None}))
 

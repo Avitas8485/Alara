@@ -8,7 +8,7 @@ import nltk
 from typing import List
 from alara.skills.skill_manager import Skill
 from alara.tts.piper_tts import PiperTTS
-from alara.lib.hestia_logger import logger
+from alara.lib.logger import logger
 from alara.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt as load_prompt
 load_dotenv()
 

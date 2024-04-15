@@ -3,7 +3,7 @@ from alara.automation.condition import Condition
 from alara.automation.action import Action
 from alara.tools.scheduler import SchedulerManager
 from alara.automation.event import Event, EventBus, StateMachine, State
-from alara.lib.hestia_logger import logger
+from alara.lib.logger import logger
 from typing import List
 import os
 import yaml

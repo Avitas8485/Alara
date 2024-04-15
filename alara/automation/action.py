@@ -2,7 +2,7 @@ from typing import List
 from alara.automation.event import Event, EventBus, StateMachine, State
 from alara.automation.condition import Condition
 from alara.skills.skill_manager import SkillManager
-from alara.lib.hestia_logger import logger
+from alara.lib.logger import logger
 
 
 class Action:
