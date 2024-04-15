@@ -41,7 +41,7 @@ class Weather(Skill):
     def fetch_weather(self, city: str='') -> dict:
         """Fetch weather data
         Args:
-            city (str): The city to fetch the weather data for. If not provided, the city is fetched based on the IP address.
+            city (str): The city to fetch the weather data for. Defaults to an empty string.
         Returns:
             dict: The weather data."""
         if not city:
@@ -66,7 +66,7 @@ class Weather(Skill):
         """Get the current weather.
         Args:
             city (str): The city to get the current weather for. If not provided, the city is fetched based on the IP address.
-            tts (bool): Whether to use text-to-speech.
+            tts (bool): Whether to use text-to-speech. Default is True.
         Returns:
                 str: The current weather."""
         if not city:

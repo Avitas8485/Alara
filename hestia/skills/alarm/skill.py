@@ -152,7 +152,9 @@ class Alarm(Entity, Skill):
             
     @Skill.skill_feature
     def snooze_alarm(self, snooze_duration: int=5):
-        """Snooze the alarm for a specified duration."""
+        """Snooze the alarm for a specified duration.
+        Args:
+            snooze_duration (int): The duration to snooze the alarm in minutes. Default is 5 minutes."""
         with self.lock:
             self.alarm_active = False
 

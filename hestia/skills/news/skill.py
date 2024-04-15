@@ -130,8 +130,8 @@ class News(Skill):
     def latest_news(self, tts: bool=True, summarize: bool=True) -> str:
         """Get the latest news.
         Args:
-            tts (bool): Whether to use text to speech.
-            summarize (bool): Whether to summarize the news.
+            tts (bool): Whether to use text to speech. Default is True.
+            summarize (bool): Whether to summarize the news. Default is True.
         Returns:
             str: The latest news."""
         
@@ -149,9 +149,9 @@ class News(Skill):
     def news_in_category(self, category: str="science", tts: bool=True, summarize: bool=True)->str:
         """Get the news in a category.
         Args:
-            category (str): The category of the news.
-            tts (bool): Whether to use text to speech.
-            summarize (bool): Whether to summarize the news.
+            category (str): The category of the news. Default is "science".
+            tts (bool): Whether to use text to speech. Default is True.
+            summarize (bool): Whether to summarize the news. Default is True.
         Returns:
             str: The news in the category."""
         params = self.get_news_params(self.NEWS_API_KEY)
@@ -168,7 +168,7 @@ class News(Skill):
     def top_news(self, tts: bool=True) -> str:
         """Get the top news.
         Args:
-            tts (bool): Whether to use text to speech.
+            tts (bool): Whether to use text to speech. Default is True.
         Returns:
             str: The top news."""
         params = self.get_news_params(self.NEWS_API_KEY)

@@ -9,7 +9,13 @@ from hestia.tools.scheduler import SchedulerManager
 from hestia.automation.automation_handler import AutomationHandler
 from hestia.automation.event import Event, State
 from hestia.lib.hestia_logger import HestiaLogger
+from hestia.llm.grammar.pydantic_models_to_grammar import generate_gbnf_grammar_and_documentation, create_dynamic_model_from_function
+import json
+from llama_cpp.llama_grammar import LlamaGrammar
 import time
+from typing import Callable
+import inspect
+
 
 
 class Agent(metaclass=Singleton):
@@ -37,6 +43,27 @@ class Agent(metaclass=Singleton):
         # reset the last interaction time so that the agent can require the wake word to be detected
         self.last_interaction = None
 
+    def create_grammar(self, function: Callable):
+        model = create_dynamic_model_from_function(function)
+        tool = [model]
+        gbnf, documentation = generate_gbnf_grammar_and_documentation(
+        pydantic_model_list=tool, outer_object_name="function",
+        outer_object_content="params", model_prefix="Function", fields_prefix="Parameters"
+    )
+        gbnf = LlamaGrammar.from_string(gbnf)
+        return gbnf, documentation
+    
+    def param_feature_call(self, function: Callable, user_prompt: str):
+        gbnf, documentation = self.create_grammar(function)
+        system_prompt = f"""You are an advanced AI assistant. You are interacting with the user and with your environment by calling functions.
+        You can call functions by writing JSON objects, which represents specific function calls. Given a prompt, extract the relevant information and call the function.
+        Only use the information that is given in the prompt. Do not use any external information. If the prompt does not contain enough information to call a function, use the default value.
+        {documentation}"""
+        
+        output = self.llm.chat_completion(system_prompt=system_prompt, user_prompt=user_prompt, grammar=gbnf)
+        params = json.loads(output)
+        return function(**params['params'])  
+    
     def process_user_prompt(self, user_prompt):
         self.logger.debug(f"User prompt: {user_prompt}")
         self.automation_handler.state_machine.set_state(entity_id=self.agent_name, new_state="processing",
@@ -44,7 +71,16 @@ class Agent(metaclass=Singleton):
         intent, sub_intent = self.intent_recognition.get_intent(user_prompt)
         self.logger.debug(f"Intent: {intent}, Sub-intent: {sub_intent}")
         try:
-            self.skill_manager.call_feature(sub_intent)
+            skill = self.skill_manager.load_skill(intent)
+            feature = skill.load_feature(sub_intent)
+            
+            feature_args = inspect.getfullargspec(feature).args # check if the feature has arguments 
+            # remove the self argument
+            feature_args = [arg for arg in feature_args if arg != "self"]
+            if not feature_args:
+                self.skill_manager.call_feature(sub_intent)
+            else:
+                self.param_feature_call(feature, user_prompt)
         except Exception as e:
             self.logger.error(f"Error calling skill: {e}")
             output = self.llm.chat_completion(system_prompt=self.system_prompt,

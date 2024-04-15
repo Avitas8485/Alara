@@ -19,6 +19,16 @@ class Skill:
     def skill_feature(func):
         func.is_skill_feature = True
         return func
+    
+    def load_feature(self, feature_name: str) -> Any:
+        if hasattr(self, feature_name):
+            feature = getattr(self, feature_name)
+            if callable(feature):
+                return feature
+            else:
+                raise TypeError(f"Feature {feature_name} is not callable.")
+        else:
+            raise NotImplementError(feature_name)
 
     def call_feature(self, feature_name: str, *args, **kwargs) -> Any:
         if hasattr(self, feature_name):
