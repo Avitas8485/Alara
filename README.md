@@ -1,6 +1,6 @@
-# Hestia - AI Assistant Agent
+# Alara - AI Assistant Agent
 
-Hestia is an AI assistant agent that helps people with their daily tasks. It is built using various components and frameworks, including:
+Alara is an AI assistant that helps people with their daily tasks. It is built using various components and frameworks, including:
 
 1. **Speech-to-Text (STT)**: The agent uses the Whisper STT library for speech recognition.
 2. **Wake Word Detection**: The agent uses a wake word detection module to detect when the user is addressing it.
