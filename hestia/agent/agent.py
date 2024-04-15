@@ -19,6 +19,7 @@ import inspect
 
 
 class Agent(metaclass=Singleton):
+    
     def __init__(self):
         
         self.tts = PiperTTS()
