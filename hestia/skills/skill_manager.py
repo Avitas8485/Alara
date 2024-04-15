@@ -6,12 +6,24 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 class NotImplementError(Exception):
-    def __init__(self, feature_name):
+    """Exception raised for errors in the input.
+    Attributes:
+        feature_name -- feature name that has not been implemented
+        message -- explanation of the error"""
+    def __init__(self, feature_name: str):
         self.feature_name = feature_name
         self.message = f"Feature {feature_name} has not been implemented yet."
         super().__init__(self.message)
 
 class Skill:
+    """Base class for skills.
+    A skill are a set of plugins that allow the Agent to perform tasks beyond the basic functionality. For example, the Weather skill allows the Agent to fetch the current weather.
+    Skills are loaded dynamically from the skills directory.
+    Attributes:
+        name -- the name of the skill
+        skill_module_path -- the path to the skill module
+        skills -- a dictionary of skills
+        features -- a dictionary of features"""
     def __call__(self, *args, **kwargs) -> Any:
         return self.call_feature(*args, **kwargs)
 
@@ -45,6 +57,9 @@ class Skill:
             raise NotImplementError(feature_name)
 
 class FallBackSkill(Skill):
+    """Fallback skill for features that have not been implemented yet.
+    Attributes:
+        name -- the name of the skill"""
     def __init__(self) -> None:
         self.name = "fallback"
 
@@ -52,13 +67,22 @@ class FallBackSkill(Skill):
         return "I'm sorry, I don't know how to do that."
 
 class SkillManager:
+    """Class for managing skills.
+    Skill Manager is responsible for loading skills and calling features.
+    Attributes:
+        skill_module_path (str): the path to the skill module
+        skills (Dict[str, str]): a dictionary of skills
+        features (Dict[str, Any]): a dictionary of features"""
     def __init__(self) -> None:
         self.skill_module_path = "hestia.skills."
         self.skills: Dict[str, str] = {}
         self.features: Dict[str, Any] = {}
         self.dynamic_load_skill()
 
-    def dynamic_load_skill(self):
+    def dynamic_load_skill(self) -> None:
+        """Load skills dynamically from the skills directory.
+        Returns:
+            Dict[str, str]: a dictionary of skills"""
         self.skills_dir = Path("hestia/skills")
         logger.info(f"Loading skills from {self.skills_dir}")
         self.skill_mapping = {"skills": []}
@@ -84,6 +108,11 @@ class SkillManager:
         print(self.skill_mapping)
 
     def call_feature(self, feature_name: str, *args, **kwargs) -> Any:
+        """Call a feature.
+        Args:
+            feature_name (str): the name of the feature
+            *args: positional arguments
+            **kwargs: keyword arguments"""
         if feature_name in self.features:
             skill_name = self.features[feature_name]
             skill = self.load_skill(skill_name)
@@ -92,6 +121,11 @@ class SkillManager:
             raise NotImplementError(feature_name)
 
     def load_skill(self, skill_name: str) -> Skill:
+        """Load a skill.
+        Args:
+            skill_name (str): the name of the skill
+        Returns:
+            Skill: the skill object"""
         if skill_name not in self.skills:
             raise NotImplementError(skill_name)
         skill_module_path = self.skills[skill_name]
