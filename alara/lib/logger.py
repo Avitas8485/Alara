@@ -8,8 +8,6 @@ from rich.traceback import install as traceback_install
 from alara.lib.singleton import Singleton
 
 
-
-
 class Logger(metaclass=Singleton):
     def __init__(self, logger_name='Alara', log_level=logging.DEBUG):
         if not hasattr(self, 'logger'):

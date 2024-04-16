@@ -14,7 +14,7 @@ load_dotenv()
 
 
 class News(Skill):
-    """A class to represent a News.
+    """A class to represent News.
     Attributes:
         DIR_PATH: The path to the directory where the news report is stored.
         NEWS_API_KEY: The API key for the News API."""

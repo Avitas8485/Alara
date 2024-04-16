@@ -61,7 +61,7 @@ class Action:
                 skill_name = action.get('skill_name')
                 feature_name = action.get('feature_name')
                 if skill_name and feature_name:
-                    self.call_skill(skill_name, feature_name)
+                    self.call_skill(feature_name)
             elif action_type == 'check_condition':
                 conditions = action.get('conditions')
                 if conditions:

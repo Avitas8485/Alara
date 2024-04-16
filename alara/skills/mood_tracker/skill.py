@@ -16,8 +16,8 @@ class MoodTracker(Skill):
         self.conn = sqlite3.connect('./mood_tracker.db')
         self.cursor = self.conn.cursor()
         self.create_mood_table()
-        with open('hestia/skills/mood_tracker/emotions_advanced.yaml', 'r') as file:
-            self.emotions = yaml.load(file, Loader=yaml.FullLoader)['Emotions']
+        with open('alara/skills/mood_tracker/emotions_advanced.yaml', 'r') as file:
+            self.emotions = yaml.safe_load(file)['Emotions']
     
     def create_mood_table(self):
         """Create the mood table if it doesn't exist."""

@@ -1,15 +1,16 @@
-import requests
-#from hestia.lib.hestia_logger import logger
-import logging
-logger = logging.getLogger(__name__)
 from alara.skills.skill_manager import Skill
+import requests
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Advice(Skill):
     def __init__(self):
         self.skill_name = "advice"
-      
-    @Skill.skill_feature    
-    def get_advice(self)->str:
+
+    @Skill.skill_feature
+    def get_advice(self) -> str:
         """Get advice from the Advice Slip API.
         Returns:
             str: The advice."""
@@ -20,7 +21,8 @@ class Advice(Skill):
             logger.error(f"Error getting advice: {e}")
             raise
 
-def get_advice()->str:
+
+def get_advice() -> str:
     """Get advice from the Advice Slip API.
     Returns:
         str: The advice."""
@@ -35,6 +37,7 @@ def get_advice()->str:
 def main():
     """Get advice from the Advice Slip API."""
     print(get_advice())
-    
+
+
 if __name__ == "__main__":
     main()

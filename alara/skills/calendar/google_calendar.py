@@ -9,12 +9,10 @@ from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import InstalledAppFlow
 from alara.lib.logger import logger
 
-
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 TOKEN_FILE = "C:/Users/avity/Projects/credentials/googel_cal/token.json"
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
-CREDENTIALS_FILE = "C:/Users/avity/Projects/credentials/googel_cal/credentials.json"
 CREDENTIALS_FILE = "C:/Users/avity/Projects/credentials/googel_cal/credentials.json"
 CALENDAR_SERVICE = "calendar"
 CALENDAR_VERSION = "v3"
@@ -27,9 +25,7 @@ class GoogleCalendar:
         self.creds = self.get_credentials()
         if self.creds is not None:
             self.service = build(CALENDAR_SERVICE, CALENDAR_VERSION, credentials=self.creds)
-        #self.update_events()
-        
-        
+
     def load_credentials(self, file, scopes):
         try:
             if os.path.exists(file):
@@ -37,21 +33,21 @@ class GoogleCalendar:
         except (FileNotFoundError, OSError) as error:
             logger.error(f"Failed to load credentials: {error}")
             return None
-    
+
     def refresh_credentials(self, creds):
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
-            creds = flow.run_local_server(port=0) # type: ignore
+            creds = flow.run_local_server(port=0)  # type: ignore
         return creds
-    
+
     def get_credentials(self):
         creds = self.load_credentials(TOKEN_FILE, SCOPES)
 
         if not creds or not creds.valid:
             creds = self.refresh_credentials(creds)
-            
+
             try:
                 with open(TOKEN_FILE, "w") as token:
                     token.write(creds.to_json())
@@ -60,7 +56,7 @@ class GoogleCalendar:
                 return None
 
         return creds
-    
+
     def get_all_calendars(self):
         page_token = None
         while True:
@@ -71,7 +67,7 @@ class GoogleCalendar:
             page_token = calendar_list.get("nextPageToken")
             if not page_token:
                 break
-            
+
     def get_events(self):
         now = datetime.datetime.utcnow().isoformat() + "Z"
         logging.info("Getting the upcoming 10 events")
@@ -94,7 +90,7 @@ class GoogleCalendar:
                 logger.error(f"Failed to get events: {error}")
                 raise
         return all_events
-    
+
     def get_events_for_today(self):
         today = datetime.datetime.utcnow().date().isoformat() + "T00:00:00Z"
         tomorrow = (datetime.datetime.utcnow().date() + datetime.timedelta(days=1)).isoformat() + "T00:00:00Z"
@@ -118,9 +114,7 @@ class GoogleCalendar:
                 logging.error(f"Failed to get events: {error}")
                 raise
         return all_events
-        
-        
-    
+
     def print_events(self, events):
         if not events:
             logger.info("No upcoming events found.")
@@ -128,7 +122,7 @@ class GoogleCalendar:
         for event in events:
             start = event["start"].get("dateTime", event["start"].get("date"))
             logger.info(f"{start} - {event['summary']}")
-            
+
     def get_events_list(self):
         with self.lock:
             events = self.get_events()
@@ -136,17 +130,16 @@ class GoogleCalendar:
                 return events
             else:
                 return []
-            
-        
+
     def update_events(self):
         with self.lock:
             self.events = self.get_events_list()
-            
 
-    
+
 if __name__ == "__main__":
     calendar = GoogleCalendar()
     from datetime import timedelta
+
     events = calendar.get_events_list()
     for event in events:
         # check if the event has a time associated with it

@@ -60,7 +60,7 @@ class FallBackSkill(Skill):
     """Fallback skill for features that have not been implemented yet.
     Attributes:
         name -- the name of the skill"""
-    def __init__(self) -> None:
+    def __init__(self):
         self.name = "fallback"
 
     def call_feature(self, *args, **kwargs) -> str:
@@ -73,17 +73,17 @@ class SkillManager:
         skill_module_path (str): the path to the skill module
         skills (Dict[str, str]): a dictionary of skills
         features (Dict[str, Any]): a dictionary of features"""
-    def __init__(self) -> None:
-        self.skill_module_path = "hestia.skills."
+    def __init__(self):
+        self.skill_module_path = "alara.skills."
         self.skills: Dict[str, str] = {}
         self.features: Dict[str, Any] = {}
         self.dynamic_load_skill()
 
-    def dynamic_load_skill(self) -> None:
+    def dynamic_load_skill(self):
         """Load skills dynamically from the skills directory.
         Returns:
             Dict[str, str]: a dictionary of skills"""
-        self.skills_dir = Path("hestia/skills")
+        self.skills_dir = Path("alara/skills")
         logger.info(f"Loading skills from {self.skills_dir}")
         self.skill_mapping = {"skills": []}
         for skill_dir in self.skills_dir.iterdir():

@@ -1,5 +1,5 @@
 from alara.agent.agent import Agent
 
 agent = Agent()
-agent.run()
+agent.tts.synthesize("Hello, how are you?")
 

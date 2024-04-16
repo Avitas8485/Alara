@@ -1,19 +1,18 @@
+import logging
 import threading
+import time
+from ctypes import cast, POINTER
+
+import pythoncom
 import sounddevice as sd
 import soundfile as sf
-from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-import logging
-import time
-import pythoncom
+
 from alara.skills.skill_manager import Skill
-from alara.automation.entity import Entity
-
-
-
 
 logger = logging.getLogger(__name__)
+
 
 class VolumeMute:
     """Class to mute and unmute the volume of the system.
@@ -23,7 +22,7 @@ class VolumeMute:
         to support other operating systems.
     Attributes:
         volume: An instance of the IAudioEndpointVolume class."""
-    
+
     def __init__(self):
         pythoncom.CoInitialize()
         devices = AudioUtilities.GetSpeakers()
@@ -31,22 +30,22 @@ class VolumeMute:
             IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
         self.volume = cast(interface, POINTER(IAudioEndpointVolume))
 
-    def get_mute_status(self)-> bool:
+    def get_mute_status(self) -> bool:
         """Get the mute status of the system.
         Returns:
             bool: The mute status of the system."""
-        return self.volume.GetMute() # type: ignore
+        return self.volume.GetMute()  # type: ignore
 
-    def set_mute_status(self, mute_status: bool)-> None:
+    def set_mute_status(self, mute_status: bool) -> None:
         """Set the mute status of the system.
         Args:
             mute_status (bool): The mute status to set."""
         try:
-            self.volume.SetMute(mute_status, None) # type: ignore 
+            self.volume.SetMute(mute_status, None)  # type: ignore
         except Exception as e:
             logger.error(f"Error setting mute status: {e}")
             raise
-    
+
     def mute(self):
         """Mute the system volume."""
         self.set_mute_status(True)
@@ -56,7 +55,7 @@ class VolumeMute:
         self.set_mute_status(False)
 
 
-class Alarm(Entity, Skill):
+class Alarm(Skill):
     """An alarm clock skill that plays a sound when triggered.
     By itself, it can only play alarm and dismiss the alarm.
     However, it can be extended to include more features such as setting the alarm time, snoozing the alarm, etc.
@@ -69,7 +68,8 @@ class Alarm(Entity, Skill):
         lock: A lock to prevent 
         volume_mute: An instance of the VolumeMute class.
         output_device: The index of the output device to play the alarm sound on."""
-    def __init__(self, sound_path: str="hestia/tools/sounds/star-dust-alarm-clock-114194.wav"):
+
+    def __init__(self, sound_path: str = "hestia/tools/sounds/star-dust-alarm-clock-114194.wav"):
         self.sound_path = sound_path
         self.alarm_active = False
         self.alarm_thread = threading.Thread(target=self.trigger_alarm)
@@ -79,13 +79,12 @@ class Alarm(Entity, Skill):
         self.output_device = self.get_main_speaker()
         self.alarm_state = "off"
         self.alarm_attributes = {"volume": -20.0}
-                
 
-    def get_main_speaker(self) -> int|None:
+    def get_main_speaker(self) -> int | None:
         """Get the index of the main speaker device."""
         devices = sd.query_devices()
         for i, device in enumerate(devices):
-            if "Speakers" in device["name"]: # type: ignore
+            if "Speakers" in device["name"]:  # type: ignore
                 return i
         return None
 
@@ -99,18 +98,17 @@ class Alarm(Entity, Skill):
             logger.error(f"Sound file not found: {self.sound_path}")
             return
         print(f"Time to wake up!")
-        self.update_entity_state("on", {"volume": -20.0})
         increase_volume = 0
         sd.play(data, samplerate, device=self.output_device)
         if self.volume_mute.get_mute_status():
             self.volume_mute.unmute()
-        
+
         while self.alarm_active:
             new_volume_level = max(-20.0 + increase_volume, -20.0)
             if new_volume_level > 0.0:
                 new_volume_level = 0.0
             try:
-                self.volume_mute.volume.SetMasterVolumeLevel(new_volume_level, None) # type: ignore
+                self.volume_mute.volume.SetMasterVolumeLevel(new_volume_level, None)  # type: ignore
             except Exception as e:
                 logger.error(f"Error setting volume: {e}")
                 pass
@@ -121,7 +119,7 @@ class Alarm(Entity, Skill):
 
     def reset_volume(self):
         """Reset the volume of the system to the default level."""
-        self.volume_mute.volume.SetMasterVolumeLevel(-20.0, None) # type: ignore
+        self.volume_mute.volume.SetMasterVolumeLevel(-20.0, None)  # type: ignore
 
     def handle_input(self):
         """Handle user input to dismiss or snooze the alarm."""
@@ -141,17 +139,17 @@ class Alarm(Entity, Skill):
             self.alarm_thread.join()
             print("Alarm stopped. Good morning!")
             self.reset_volume()
-            
+
     @Skill.skill_feature
     def dismiss_alarm(self):
         """Dismiss the alarm."""
-        
+
         with self.lock:
             self.alarm_active = False
             sd.stop()
-            
+
     @Skill.skill_feature
-    def snooze_alarm(self, snooze_duration: int=5):
+    def snooze_alarm(self, snooze_duration: int = 5):
         """Snooze the alarm for a specified duration.
         Args:
             snooze_duration (int): The duration to snooze the alarm in minutes. Default is 5 minutes."""
@@ -170,7 +168,7 @@ class Alarm(Entity, Skill):
 
     def start(self):
         """Start the alarm."""
-        
+
         try:
             with self.lock:
                 self.alarm_active = True
@@ -180,7 +178,7 @@ class Alarm(Entity, Skill):
             logger.error(f"Error starting alarm: {e}")
             raise
 
-    def is_active(self)-> bool:
+    def is_active(self) -> bool:
         """Check if the alarm is active."""
         with self.lock:
             return self.alarm_active

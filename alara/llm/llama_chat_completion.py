@@ -5,13 +5,11 @@ from alara.config.config import cfg
 from alara.lib.singleton import Singleton
 
 
-
-    
 class LlamaChatCompletion(metaclass=Singleton):
     def __init__(self):
         self.llm = self.load_llama_model()
 
-    def load_llama_model(self, **kwargs)->Llama:
+    def load_llama_model(self, **kwargs) -> Llama:
         """Load the Llama model, and unload it when done."""
         logger.info("Loading LLM...")
         llm = Llama(
@@ -26,7 +24,7 @@ class LlamaChatCompletion(metaclass=Singleton):
     def chat_completion(self, system_prompt: str, user_prompt: str, max_retries=3, grammar=None, **kwargs) -> str:
         """Generate a chat completion from the Llama model."""
         for _ in range(max_retries):
-            
+
             logger.info("Generating chat completion...")
             output = self.llm.create_chat_completion(
                 messages=[
@@ -42,24 +40,24 @@ class LlamaChatCompletion(metaclass=Singleton):
             )
             logger.info("Generation complete.")
             # to prevent situations where the model outputs nothing
-            if output["choices"][0]["message"]["content"] != "": # type: ignore
-                return output["choices"][0]["message"]["content"] # type: ignore
+            if output["choices"][0]["message"]["content"] != "":  # type: ignore
+                return output["choices"][0]["message"]["content"]  # type: ignore
             logger.warning("Model failed to generate output. Retrying...")
         logger.error("Model failed to generate output after maximum retries.")
         return "Model failed to generate output after maximum retries."
-    
-    
+
+
 def load_prompt(prompt_name: str):
     """Load a prompt from prompts.yaml."""
     logger.info(f"Loading {prompt_name} prompt...")
-    with open("hestia/llm/prompts/prompts.yaml", "r") as file:
+    with open("alara/llm/prompts/prompts.yaml", "r") as file:
         prompts = yaml.load(file, Loader=yaml.FullLoader)
     return prompts[f"{prompt_name}"][0]
 
 
 def load_prompt_txt(prompt_name: str):
     logger.info(f"Loading {prompt_name} prompt...")
-    with open(f"hestia/llm/prompts/{prompt_name}.txt", "r") as file:
+    with open(f"alara/llm/prompts/{prompt_name}.txt", "r") as file:
         return file.read()
 
 

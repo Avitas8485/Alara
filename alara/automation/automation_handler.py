@@ -9,7 +9,6 @@ import os
 import yaml
 
 
-
 class AutomationHandler:
     """A class that is responsible for handling the automation workflow
     The handler is responsible for:
@@ -25,21 +24,23 @@ class AutomationHandler:
     condition: Condition: functions as a condition checker
     automations: List[dict]: a list of automations
     """
-    
+
     def __init__(self) -> None:
+        self.trigger = None
+        self.automations = None
         self.state_machine = StateMachine()
         self.event_bus = EventBus()
         self.state_machine = StateMachine()
         self.condition = Condition(self.state_machine)
         self.skill_manager = SkillManager()
-        self.action =  Action(self.event_bus, self.state_machine, self.condition, self.skill_manager)
+        self.action = Action(self.event_bus, self.state_machine, self.condition, self.skill_manager)
         self.load_automations()
-    
+
     def load_automations(self):
         """Load automations from a file"""
-        file_path = os.path.join('hestia', 'automation', 'automations.yaml')
+        file_path = os.path.join('alara', 'automation', 'automations.yaml')
         with open(file_path, 'r') as file:
-            self.automations = yaml.load(file, Loader=yaml.FullLoader)
+            self.automations = yaml.safe_load(file)
         logger.debug(f"Loaded automations: {self.automations}")
         self.trigger = Trigger(self, self.event_bus, self.state_machine)
         if not self.automations:
@@ -49,7 +50,7 @@ class AutomationHandler:
             for trigger in automation['triggers']:
                 trigger_args = {key: value for key, value in trigger.items() if key != 'type'}
                 trigger_type = trigger['type']
-                if trigger_type == 'interval':    
+                if trigger_type == 'interval':
                     self.trigger.interval_trigger(**trigger_args)
                 elif trigger_type == 'event':
                     self.trigger.event_trigger(**trigger_args)
@@ -57,11 +58,8 @@ class AutomationHandler:
                     self.trigger.state_trigger(**trigger_args)
                 elif trigger_type == 'cron':
                     self.trigger.cron_trigger(**trigger_args)
-                    
-        
-    
-    
-    def get_related_automations(self, trigger_type: str, trigger_data: dict)-> list[dict]:
+
+    def get_related_automations(self, trigger_type: str, trigger_data: dict) -> list[dict]:
         """Get automations related to the trigger
         Args:
         trigger_type: str: the type of trigger
@@ -69,15 +67,18 @@ class AutomationHandler:
         Returns:
         List[dict]: a list of automations related to the trigger"""
         filtered_automations = []
+        if self.automations is None:
+            return filtered_automations
         for automation in self.automations:
             for trigger in automation['triggers']:
-                if trigger['type'] == trigger_type and all(trigger_data.get(key) == value for key, value in trigger_data.items() if key != 'type'):
+                if trigger['type'] == trigger_type and all(
+                        trigger_data.get(key) == value for key, value in trigger_data.items() if key != 'type'):
                     logger.debug(f"Found related automation: {automation['alias']}")
                     filtered_automations.append(automation)
                     logger.debug(f"Filtered automations: ", [filtered['alias'] for filtered in filtered_automations])
         return filtered_automations
-    
-    def check_conditions(self, automation: dict)-> bool:
+
+    def check_conditions(self, automation: dict) -> bool:
         """Check the conditions of the automation
         Args:
         automation: dict: the automation to check conditions for
@@ -89,8 +90,7 @@ class AutomationHandler:
             logger.debug(f"No conditions found for automation: {automation['alias']}")
             return True
         return self.condition.check_condition(automation['conditions'])
-        
-           
+
     def execute_actions(self, automation: List[dict]):
         """A placeholder for executing the actions of the automation
             Args:
@@ -100,8 +100,7 @@ class AutomationHandler:
             logger.info(f"No actions found for automation: {automation}")
             return
         return self.action.choose_action(automation)
-            
-        
+
     def handle_trigger(self, trigger_type: str, trigger_data: dict):
         """Handle a trigger
         Args:
@@ -111,9 +110,8 @@ class AutomationHandler:
         for automation in automations:
             if self.check_conditions(automation):
                 self.execute_actions(automation['actions'])
-     
-   
-        
+
+
 class Trigger:
     """A class to handle triggers
     A trigger is anything that can cause an automation to run
@@ -127,11 +125,12 @@ class Trigger:
     event_bus: EventBus: the event bus to emit events
     state_machine: StateMachine: the state machine to change states
     """
+
     def __init__(self, handler: AutomationHandler, event_bus: EventBus, state_machine: StateMachine) -> None:
         self.handler = handler
         self.event_bus = event_bus
         self.state_machine = state_machine
-        
+
     def fire(self, trigger_type: str, **kwargs):
         """Fire a trigger
         Args:
@@ -140,35 +139,34 @@ class Trigger:
         """
         logger.debug(f"Trigger fired: {trigger_type} with data: {kwargs}")
         self.handler.handle_trigger(trigger_type, kwargs)
-                
-    def cron_trigger(self,**kwargs):
+
+    def cron_trigger(self, **kwargs):
         """Add a cron trigger
         Args:
         kwargs: dict: the data to pass to the cron trigger"""
         schedule_manager = SchedulerManager()
         schedule_manager.add_job(job_function=lambda: self.fire('cron', **kwargs), trigger='cron', **kwargs)
-        
+
     def interval_trigger(self, **kwargs):
         """Add an interval trigger
         Args:
         kwargs: dict: the data to pass to the interval trigger"""
         schedule_manager = SchedulerManager()
         schedule_manager.add_job(job_function=lambda: self.fire('interval', **kwargs), trigger='interval', **kwargs)
-        
+
     def event_trigger(self, event_name: str, **kwargs):
         """Add an event trigger
         Args:
         event_name: str: the name of the event to listen for"""
         self.event_bus.add_listener(event_name, lambda event: self.fire(event_name, **kwargs))
-        
+
     def state_trigger(self, entity_id: str, **kwargs):
         """Add a state trigger
         Args:
         entity_id: str: the id of the entity to listen for"""
         self.state_machine.listen_state(entity_id, lambda state: self.fire(entity_id, **kwargs))
-    
-    
-   
+
+
 class Integration:
     """A class to handle integrations
     An integration is a class that interacts with the hub
@@ -179,11 +177,12 @@ class Integration:
     state_machine: StateMachine: the state machine to change states
     event_bus: EventBus: the event bus to emit events
     """
+
     def __init__(self, state_machine: StateMachine, event_bus: EventBus) -> None:
         self.devices = {}
         self.state_machine = state_machine
         self.event_bus = event_bus
-        
+
     def add_device(self, device: dict):
         """Add a device to the integration
         Args:
@@ -191,7 +190,7 @@ class Integration:
         """
         self.devices[device['entity_id']] = device
         self.state_machine.add_state(State(device['entity_id'], device['state']))
-        
+
     def remove_device(self, entity_id: str):
         """Remove a device from the integration
         Args:
@@ -199,25 +198,24 @@ class Integration:
         if entity_id in self.devices:
             del self.devices[entity_id]
             self.state_machine.remove_state(entity_id)
-            
+
     def listen_state(self, entity_id: str, callback):
         """Add a listener to a device's state
         Args:
         entity_id: str: the id of the device
         callback: Callable[..., None]: the function to call when the device's state changes"""
         self.state_machine.listen_state(entity_id, callback)
-        
+
     def listen_event(self, event_type: str, callback):
         self.event_bus.add_listener(event_type, callback)
-        
-    
-    
+
 
 class Lights:
     """A class to handle lights
     Args:
     state_machine: StateMachine: the state machine to change states
     """
+
     def __init__(self, state_machine: StateMachine) -> None:
         self.state_machine = state_machine
         self.state_machine.add_state(State("light", "off"))
@@ -237,6 +235,7 @@ class Alarm:
     """A class to handle alarms
     Args:
     event_bus: EventBus: the event bus to emit events"""
+
     def __init__(self, event_bus: EventBus) -> None:
         self.event_bus = event_bus
 
@@ -247,13 +246,7 @@ class Alarm:
     def stop_alarm(self):
         """Stop the alarm"""
         self.event_bus.emit_event(Event("alarm_stopped", {"data": "some data"}))
-        
 
-
-
-
-     
-     
 
 if __name__ == "__main__":
     handler = AutomationHandler()
@@ -261,5 +254,3 @@ if __name__ == "__main__":
     alarm = Alarm(handler.event_bus)
     while True:
         pass
-    
-

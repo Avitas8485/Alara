@@ -10,10 +10,15 @@ class Condition:
     Args:
         state_machine (StateMachine): Instance of StateMachine class
         """
+
     def __init__(self, state_machine: StateMachine) -> None:
+        """
+
+        @type state_machine: StateMachine
+        """
         self.state_machine = state_machine
-    
-    def check_state(self, entity_id: str, required_state: dict)-> bool:
+
+    def check_state(self, entity_id: str, required_state: dict) -> bool:
         """Check the state of the entity
         Args:
             entity_id (str): Entity ID
@@ -25,8 +30,8 @@ class Condition:
         if value['state'] == required_state:
             return True
         return False
-    
-    def check_time(self, start_time: str|datetime, end_time: str|datetime)-> bool:
+
+    def check_time(self, start_time: str | datetime, end_time: str | datetime) -> bool:
         """Check if the current time is within the specified time range
         Args:
             start_time (datetime): Start time
@@ -41,7 +46,7 @@ class Condition:
         if end_time and now > end_time:
             return False
         return True
-    
+
     def check_condition(self, conditions: List[dict]) -> bool:
         """Check the conditions specified in the automation.
         Args:
@@ -65,7 +70,6 @@ class Condition:
             else:
                 logger.error(f"Warning: Invalid condition type '{condition_type}'")
         return True
-        
 
 
 class Lights:
@@ -73,12 +77,16 @@ class Lights:
         self.state_machine = state_machine
         self.state_machine.add_state(State("light", "off"))
 
-    def turn_on(self, data: dict={"data": "some data"}):
+    def turn_on(self, data=None):
+        if data is None:
+            data = {"data": "some data"}
         print("Turning on the light")
         self.state_machine.set_state("light", State("light", "on"))
         self.state_machine.fire_event(Event("light_turned_on", data))
 
-    def turn_off(self, data: dict={"data": "some data"}):
+    def turn_off(self, data=None):
+        if data is None:
+            data = {"data": "some data"}
         print("Turning off the light")
         self.state_machine.set_state("light", State("light", "off"))
         self.state_machine.fire_event(Event("light_turned_off", data))
@@ -88,12 +96,15 @@ class Alarm:
     def __init__(self, event_bus: EventBus) -> None:
         self.event_bus = event_bus
 
-    def trigger_alarm(self, data: dict={"data": "some data"}):
+    def trigger_alarm(self, data=None):
+        if data is None:
+            data = {"data": "some data"}
         self.event_bus.emit_event(Event("alarm_triggered", data))
 
-    def stop_alarm(self, data: dict={"data": "some data"}):
+    def stop_alarm(self, data=None):
+        if data is None:
+            data = {"data": "some data"}
         self.event_bus.emit_event(Event("alarm_stopped", data))
-        
 
 
 if __name__ == "__main__":
@@ -108,8 +119,3 @@ if __name__ == "__main__":
     print(condition.check_condition([{'condition': 'state', 'entity_id': 'light', 'state': 'off'}]))
     print(condition.check_condition([{'condition': 'time', 'start_time': '22:00:00', 'end_time': '23:00:00'}]))
     print(condition.check_condition([{'condition': 'time', 'start_time': '22:00:00', 'end_time': '23:00:00'}]))
-    
-    
-    
-    
-    

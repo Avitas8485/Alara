@@ -13,8 +13,8 @@ class PiperTTSError(Exception):
 
 class PiperTTS(BaseTTS):
     def __init__(self) -> None:
-        self.model_path = 'hestia\\tts\\piper\\models\\en_US-hestia-large-high.onnx'
-        self.output_file = f"hestia\\tts\\outputs\\temp.wav"
+        self.model_path = 'C:/Users/avity/Projects/models/tts/piper/models/hfc_female/medium/en_US-hfc_female-medium.onnx'
+        self.output_file = f"alara\\tts\\outputs\\temp.wav"
         self.params = {
             "active": True,
             "autoplay": True,
@@ -58,7 +58,7 @@ class PiperTTS(BaseTTS):
         cleaned_text = self.clean_text(text)
         process = subprocess.Popen(
             [
-                "hestia\\tts\\piper\\piper.exe",
+                "C:/Users/avity/Projects/models/tts/piper/piper.exe",
                 '--model', self.model_path,
                 '--output_file', self.output_file,
                 '--sentence_silence', str(self.params['sentence_silence']),
@@ -92,11 +92,11 @@ class PiperTTS(BaseTTS):
         process.wait()
         p.terminate()
         
-    def synthesize_to_file(self, output_dir: str='hestia\\tts\\outputs', output_filename: str='output', text: str=''):
+    def synthesize_to_file(self, output_dir: str='alara\\tts\\outputs', output_filename: str='output', text: str=''):
         cleaned_text = self.clean_text(text)
         process = subprocess.Popen(
             [
-                "hestia\\tts\\piper\\piper.exe",
+                "C:/Users/avity/Projects/models/tts/piper/piper.exe",
                 '--model', self.model_path,
                 '--output_file', f"{output_dir}\\{output_filename}.wav",
                 '--sentence_silence', str(self.params['sentence_silence']),
