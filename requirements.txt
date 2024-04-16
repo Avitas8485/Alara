@@ -12,7 +12,7 @@ python-dotenv~=1.0.1
 newspaper3k
 nltk~=3.8.1
 comtypes~=1.4.1
-pycaw~=20240210
+pycaw
 plyer~=2.1.0
 watchdog
 apscheduler~=3.10.4
@@ -44,4 +44,4 @@ num2words~=0.5.13
 psutil~=5.9.8
 iso8601~=1.1.0
 pandas~=1.5.3
-pytz~=2024.1
+pytz
