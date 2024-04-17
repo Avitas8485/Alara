@@ -1,4 +1,5 @@
 from abc import ABC, ABCMeta, abstractmethod
+import os
 
 
 class SingletonMeta(ABCMeta):
@@ -12,6 +13,9 @@ class SingletonMeta(ABCMeta):
 
 
 class BaseTTS(ABC, metaclass=SingletonMeta):
+    def __init__(self):
+        if not os.path.exists('alara/tts/outputs'):
+            os.makedirs('alara/tts/outputs')
     @abstractmethod
     def synthesize(self, text: str):
         pass
