@@ -27,6 +27,8 @@ class XttsTTS(BaseTTS):
         self.speaker_path = cfg.XTTS_SPEAKER_PATH
         self.model_dir = cfg.XTTS_MODEL_DIR
         logger.info("TextToSpeechSystem initialized.")
+        # make sure the output directory exists
+        
 
     def load_txt_from_file(self, file_path) -> str:
         """Load text from a file.

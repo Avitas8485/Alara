@@ -39,5 +39,7 @@ To use the Alara agent, you can run the `main.py` script. The agent will start l
 - Add agent Actions.
 
 ### Contributing
-If you'd like to contribute to the Alara project, please feel free to submit a pull request or open an issue on the project's GitHub repository.
+If you'd like to contribute to the Alara project, please feel free to submit a pull request or open an issue on the project's GitHub repository. 
+
+Go easy on me, I don't know what I'm doing
 
