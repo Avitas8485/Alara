@@ -1,3 +1,4 @@
+#TODO: This is no longer necessary with custom automation routines. Remove this code.
 import os
 import time
 from datetime import datetime

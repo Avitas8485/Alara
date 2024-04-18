@@ -166,7 +166,9 @@ class Trigger:
         entity_id: str: the id of the entity to listen for"""
         self.state_machine.listen_state(entity_id, lambda state: self.fire(entity_id, **kwargs))
 
+
 # NOTE: The following classes are not used in the codebase. They are for experimentation purposes only. ###
+
 class Integration:
     """A class to handle integrations
     An integration is a class that interacts with the hub

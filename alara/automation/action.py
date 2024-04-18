@@ -69,7 +69,9 @@ class Action:
             else:
                 logger.error(f"Invalid action type: {action_type}")
 
+
 # NOTE: The following classes are not used in the codebase. They are for experimentation purposes only. ###
+
 class Lights:
     """A class to handle lights
     Args:

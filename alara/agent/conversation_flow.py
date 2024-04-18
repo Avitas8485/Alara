@@ -1,3 +1,4 @@
+#NOTE: I am merely testing ideas here. This code is not part of the project.
 from llama_cpp import Llama, LlamaGrammar
 from pydantic import BaseModel, Field
 from enum import Enum
