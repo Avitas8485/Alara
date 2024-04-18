@@ -71,6 +71,7 @@ class Condition:
                 logger.error(f"Warning: Invalid condition type '{condition_type}'")
         return True
 
+### NOTE: The following classes are not used in the code snippet. They are sample classes for demonstration purposes only. ###
 
 class Lights:
     def __init__(self, state_machine: StateMachine) -> None:
