@@ -258,7 +258,10 @@ class StateMachine:
         callback: Callable[..., None]: the function to call when the event is triggered"""
         self.event_bus.add_listener(event_type, callback)
 
-### NOTE: The following classes are not used in the code snippet. They are sample classes for demonstration purposes only. ###
+
+
+# NOTE: The following classes are not used in the codebase. They are for experimentation purposes ###
+
 class Lights:
     """A class to handle lights
     Args:

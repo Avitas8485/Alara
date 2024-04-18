@@ -1,5 +1,4 @@
 import requests
-import sys
 from alara.tools.base_tool import Tool, ToolKit
 from alara.tools.internet_connection import InternetConnectionTool
 

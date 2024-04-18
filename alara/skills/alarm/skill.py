@@ -1,3 +1,6 @@
+import os
+if os.name != 'nt':
+    raise Exception("This code is only for non-Windows systems.")
 import logging
 import threading
 import time
