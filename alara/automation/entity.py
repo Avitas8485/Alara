@@ -25,7 +25,7 @@ class Entity:
         self.handler.state_machine.remove_state(entity_id=self.entity_id)
         self.handler.event_bus.emit_event(Event("entity_removed", {"entity_id": self.entity_id}))
 
-
+# NOTE: The following classes are not used in the codebase. They are provided as examples of how to create entities. ###
 class Lights(Entity):
     def __init__(self, automation_handler: AutomationHandler):
         super().__init__(automation_handler)

@@ -259,6 +259,7 @@ class StateMachine:
         self.event_bus.add_listener(event_type, callback)
 
 
+# NOTE: The following classes are not used in the codebase. They are for experimentation purposes ###
 class Lights:
     """A class to handle lights
     Args:
