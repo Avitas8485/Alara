@@ -1,11 +1,9 @@
-import platform
 import psutil
 import GPUtil
 import humanize
 import time
 from datetime import datetime
-from tabulate import tabulate
-from typing import List, Tuple, Any
+from typing import List, Tuple
 from base_tool import Tool, ToolKit
 
 class ScaleBytesTool(Tool):
