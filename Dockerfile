@@ -7,7 +7,11 @@ WORKDIR /alara
 RUN apt-get update && apt-get install -y \
     build-essential \
     portaudio19-dev \
+    libportaudio2 \
     && rm -rf /var/lib/apt/lists/*
+
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy requirements and install dependencies
 COPY requirements.txt .
@@ -25,8 +29,16 @@ WORKDIR /alara
 RUN useradd -m myuser
 USER myuser
 
-# Copy only necessary files from the builder stage
-COPY --from=builder /alara /alara
+# Copy the virtual environment from the builder stage
+COPY --from=builder /opt/venv /opt/venv
+
+# Update PATH environment variable
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy the application code
+COPY --from=builder /alara .
+
+
 
 # Set the command to run the application
 CMD ["python", "./main.py"]
