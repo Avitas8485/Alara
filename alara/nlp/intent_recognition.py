@@ -1,7 +1,4 @@
-from typing import Tuple, Any
-
 from transformers import pipeline
-import json
 from alara.lib.singleton import Singleton
 from alara.lib.logger import logger
 from alara.skills.skill_manager import SkillManager
