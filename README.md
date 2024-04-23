@@ -1,6 +1,8 @@
 # Alara - AI Assistant Agent
 
-Alara is an AI assistant that helps people with their daily tasks. It is built using various components and frameworks, including:
+Alara is an AI assistant that helps people with their daily tasks with more emphasis on AI part, at least thats the end goal, to make it more than a simple Assistant.
+
+It is built using various components and frameworks, including:
 
 1. **Speech-to-Text (STT)**: The agent uses the Whisper STT library for speech recognition.
 2. **Wake Word Detection**: The agent uses a wake word detection module to detect when the user is addressing it.
@@ -31,7 +33,7 @@ Alara is composed of the following main components:
 To use the Alara agent, you can run the `main.py` script. The agent will start listening for user input and respond accordingly.
 
 ### Roadmap
-
+- Make the setup process more user friendly (currently, most components need to be set up and installed beforehand)
 - Implement more skills and integrations
 - Improve the automation workflow
 - Enhance the natural language processing capabilities
