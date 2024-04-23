@@ -12,13 +12,6 @@ import yaml
 
 class AutomationHandler:
     """A class that is responsible for handling the automation workflow
-    The handler is responsible for:
-    - loading automations from a file
-    - handling triggers
-    - checking conditions
-    - executing actions
-    - interacting with the state machine
-    - interacting with the event bus
     Attributes:
     state_machine: StateMachine: the state machine to manage states of entities
     event_bus: EventBus: the event bus to emit and listen for events
