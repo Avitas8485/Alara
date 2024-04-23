@@ -4,6 +4,7 @@ from alara.automation.action import Action
 from alara.tools.scheduler import SchedulerManager
 from alara.automation.event import Event, EventBus, StateMachine, State
 from alara.lib.logger import logger
+from alara.llm.llama_chat_completion import LlamaChatCompletion
 from typing import List
 import os
 import yaml
@@ -11,13 +12,6 @@ import yaml
 
 class AutomationHandler:
     """A class that is responsible for handling the automation workflow
-    The handler is responsible for:
-    - loading automations from a file
-    - handling triggers
-    - checking conditions
-    - executing actions
-    - interacting with the state machine
-    - interacting with the event bus
     Attributes:
     state_machine: StateMachine: the state machine to manage states of entities
     event_bus: EventBus: the event bus to emit and listen for events
@@ -33,6 +27,8 @@ class AutomationHandler:
         self.state_machine = StateMachine()
         self.condition = Condition(self.state_machine)
         self.skill_manager = SkillManager()
+        self.llm = LlamaChatCompletion()
+        self.scheduler = SchedulerManager()
         self.action = Action(self.event_bus, self.state_machine, self.condition, self.skill_manager)
         self.load_automations()
 
@@ -144,16 +140,15 @@ class Trigger:
         """Add a cron trigger
         Args:
         kwargs: dict: the data to pass to the cron trigger"""
-        schedule_manager = SchedulerManager()
-        schedule_manager.add_job(job_function=lambda: self.fire('cron', **kwargs), trigger='cron', **kwargs)
+        handler.scheduler.add_job(job_function=lambda: self.fire('cron', **kwargs), trigger='cron', **kwargs)
 
     def interval_trigger(self, **kwargs):
         """Add an interval trigger
         Args:
         kwargs: dict: the data to pass to the interval trigger"""
-        schedule_manager = SchedulerManager()
-        schedule_manager.add_job(job_function=lambda: self.fire('interval', **kwargs), trigger='interval', **kwargs)
-
+        handler.scheduler.add_job(job_function=lambda: self.fire('interval', **kwargs), trigger='interval', **kwargs)
+        
+        
     def event_trigger(self, event_name: str, **kwargs):
         """Add an event trigger
         Args:

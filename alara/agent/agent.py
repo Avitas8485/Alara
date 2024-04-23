@@ -1,11 +1,9 @@
 from alara.stt.whisper_stt import StreamHandler
 from alara.stt.wakeword import WakeWord
 from alara.nlp.intent_recognition import IntentRecognition
-from alara.skills.skill_manager import SkillManager
 from alara.lib.singleton import Singleton
 from alara.tts.piper_tts import PiperTTS
 from alara.llm.llama_chat_completion import LlamaChatCompletion
-from alara.tools.scheduler import SchedulerManager
 from alara.automation.automation_handler import AutomationHandler
 from alara.automation.event import Event, State
 from alara.lib.logger import Logger
@@ -38,10 +36,8 @@ class Agent(metaclass=Singleton):
         self.wake_word = WakeWord()
         self.intent_recognition = IntentRecognition()
         self.system_prompt = "Your name is Alara. You are an AI assistant that helps people with their daily tasks."
-        self.skill_manager = SkillManager()
         self.llm = LlamaChatCompletion()
         self.running = True
-        self.scheduler = SchedulerManager()
         self.automation_handler = AutomationHandler()
         self.last_interaction = None
         self.agent_name = "Alara"
@@ -74,17 +70,20 @@ class Agent(metaclass=Singleton):
         intent, sub_intent = self.intent_recognition.get_intent(user_prompt)
         self.logger.debug(f"Intent: {intent}, Sub-intent: {sub_intent}")
         try:
-            skill = self.skill_manager.load_skill(intent)
+            skill = self.automation_handler.skill_manager.load_skill(intent)
+            #skill = self.skill_manager.load_skill(intent)
             feature = skill.load_feature(sub_intent)
             if hasattr(feature, "requires_prompt"):
                 self.logger.debug("Feature requires prompt.")
-                self.skill_manager.call_feature(sub_intent, user_prompt)
+                self.automation_handler.skill_manager.call_feature(sub_intent, user_prompt)
+                #self.skill_manager.call_feature(sub_intent, user_prompt)
 
             feature_args = inspect.getfullargspec(feature).args  # check if the feature has arguments
             # remove the self argument
             feature_args = [arg for arg in feature_args if arg != "self"]
             if not feature_args:
-                self.skill_manager.call_feature(sub_intent)
+                self.automation_handler.skill_manager.call_feature(sub_intent)
+                #self.skill_manager.call_feature(sub_intent)
             else:
                 self.param_feature_call(feature, user_prompt)
         except Exception as e:

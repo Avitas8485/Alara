@@ -1,4 +1,13 @@
 from typing import Dict, List, Any 
+from enum import Enum
+from datetime import datetime as dt
+
+
+class ToolStatus(Enum):
+    """An enumeration of possible tool statuses."""
+    HEALTHY = "healthy"
+    UNHEALTHY = "unhealthy"
+    UNKNOWN = "unknown"
 
 class Tool:
     def __init__(self, name: str, description: str, usage: str):
@@ -15,7 +24,7 @@ class Tool:
         self.description = description
         self.usage = usage
         self.dependencies: Dict[str, Tool] = {}
-        self.healthy = self.check_health()
+        self.status = ToolStatus.UNKNOWN
         
     def add_dependency(self, tool: 'Tool'):
         """Add a dependency to the tool.
@@ -30,22 +39,40 @@ class Tool:
         if tool_name in self.dependencies:
             del self.dependencies[tool_name]
             
-    def check_health(self)-> bool:
-        """Check the health of the tool.
-        Returns:
-            bool: True if the tool is healthy, False otherwise."""
-        raise NotImplementedError("Subclasses must implement this method")
-
+    def check_status(self)-> ToolStatus:
+        """Check the health status of the tool."""
+        if all(dependency.check_status() == ToolStatus.HEALTHY for dependency in self.dependencies.values()):
+            try:
+                self._run()
+                self.status = ToolStatus.HEALTHY
+            except Exception as e:
+                self.status = ToolStatus.UNHEALTHY
+                print(f"Error running tool: {self.name}, setting status to unhealthy.")
+                print(e)
+        else:
+            self.status = ToolStatus.UNHEALTHY
+        return self.status
     
     def run(self,*args, **kwargs):
-        """Run the tool.
+        """Run the tool. This method checks the health status of the tool before running it.
+        Always call this method to run the tool, rather than calling the _run method directly to properly handle the health status.
         Args:
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments."""
+        if self.check_status() == ToolStatus.UNHEALTHY:
+            raise Exception(f"Cannot run tool {self.name} because it is unhealthy")
+        else:
+            return self._run(*args, **kwargs)
+                
+    def _run(self, *args, **kwargs):
+        """The actual implementation of running the tool.
+    This method is intended to be private and should not be directly called.
+    Instead, use the run method to run the tool.
+    This method should be implemented by subclasses."""
         raise NotImplementedError()
     
     def __str__(self)-> str:
-        return f"{self.name}: {self.description}"
+        return f"Tool Name: {self.name} Status: {self.status} @ {dt.now()}"
     
     
 class ToolKit:
@@ -77,8 +104,8 @@ class ToolKit:
             tool_name (str): The name of the tool to check dependencies for."""
         if tool_name in self.tools:
             for dependency in self.tools[tool_name].dependencies:
-                if dependency not in self.tools or not self.tools[dependency].healthy:
-                    print(f"Error: {tool_name} depends on {dependency} but the tool is not available or healthy")
+                if dependency not in self.tools or self.tools[dependency].status != ToolStatus.HEALTHY:
+                    print(f"Error: {tool_name} depends on {dependency} but the tool is not available or healthy.")
                     return False
             return True
         

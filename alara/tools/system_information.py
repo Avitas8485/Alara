@@ -4,7 +4,7 @@ import humanize
 import time
 from datetime import datetime
 from typing import List, Tuple
-from base_tool import Tool, ToolKit
+from base_tool import Tool, ToolKit, ToolStatus
 
 class ScaleBytesTool(Tool):
     def __init__(self):
@@ -12,18 +12,9 @@ class ScaleBytesTool(Tool):
         self.description = "Scale bytes to its proper format"
         self.usage = "scale_bytes [bytes] [suffix]"
         self.dependencies = {}
-        self.healthy = self.check_health()
-        
-    def check_health(self, bytes: float=0, suffix: str="B")-> bool:
-        try:
-            self.run(bytes, suffix)
-            return True
-        except Exception as e:
-            print(f"Error checking health of scale_bytes: {e}")
-            return False
-        
-        
-    def run(self, bytes: float, suffix: str = "B")-> str:
+        self.status = ToolStatus.UNKNOWN
+           
+    def _run(self, bytes: float, suffix: str = "B")-> str:
         factor = 1024
         for unit in ["", "K", "M", "G", "T", "P"]:
             if bytes < factor:
@@ -37,17 +28,9 @@ class HumanizeSecondsTool(Tool):
         self.description = "Convert seconds to human readable string"
         self.usage = "humanize_seconds [seconds]"
         self.dependencies = {}
-        self.healthy = self.check_health()
+        self.status = ToolStatus.UNKNOWN
         
-    def check_health(self, seconds: int=0)-> bool:
-        try:
-            self.run(seconds)
-            return True
-        except Exception as e:
-            print(f"Error checking health of humanize_seconds: {e}")
-            return False
-        
-    def run(self, seconds: int)-> str:
+    def _run(self, seconds: int)-> str:
         return humanize.precisedelta(seconds)
     
 class SystemUptimeTool(Tool):
@@ -56,17 +39,9 @@ class SystemUptimeTool(Tool):
         self.description = "Get system uptime"
         self.usage = "system_uptime"
         self.dependencies = {}
-        self.healthy = self.check_health()
+        self.status = ToolStatus.UNKNOWN
         
-    def check_health(self)-> bool:
-        try:
-            self.run()
-            return True
-        except Exception as e:
-            print(f"Error checking health of system_uptime: {e}")
-            return False
-        
-    def run(self)-> str:
+    def _run(self)-> str:
         uptime = int(time.time() - psutil.boot_time())
         return humanize.precisedelta(uptime)
     
@@ -76,17 +51,10 @@ class CurrentTimeTool(Tool):
         self.description = "Get current time"
         self.usage = "current_time"
         self.dependencies = {}
-        self.healthy = self.check_health()
+        self.status = ToolStatus.UNKNOWN
         
-    def check_health(self)-> bool:
-        try:
-            self.run()
-            return True
-        except Exception as e:
-            print(f"Error checking health of current_time: {e}")
-            return False
         
-    def run(self)-> str:
+    def _run(self)-> str:
         return time.strftime("%H:%M:%S")
     
 class CurrentDateTool(Tool):
@@ -95,17 +63,9 @@ class CurrentDateTool(Tool):
         self.description = "Get current date"
         self.usage = "current_date"
         self.dependencies = {}
-        self.healthy = self.check_health()
+        self.status = ToolStatus.UNKNOWN
         
-    def check_health(self)-> bool:
-        try:
-            self.run()
-            return True
-        except Exception as e:
-            print(f"Error checking health of current_date: {e}")
-            return False
-        
-    def run(self)-> str:
+    def _run(self)-> str:
         return time.strftime("%d/%m/%Y")
     
 class CurrentDatetimeTool(Tool):
@@ -114,18 +74,10 @@ class CurrentDatetimeTool(Tool):
         self.description = "Get current datetime"
         self.usage = "current_datetime"
         self.dependencies = {}
-        self.healthy = self.check_health()
-        
-    def check_health(self)-> bool:
-        try:
-            self.run()
-            return True
-        except Exception as e:
-            print(f"Error checking health of current_datetime: {e}")
-            return False
+        self.status = ToolStatus.UNKNOWN
         
         
-    def run(self)-> str:
+    def _run(self)-> str:
         return time.strftime("%d/%m/%Y %H:%M:%S")
     
 class CurrentTimezoneTool(Tool):
@@ -134,17 +86,9 @@ class CurrentTimezoneTool(Tool):
         self.description = "Get current timezone"
         self.usage = "current_timezone"
         self.dependencies = {}
-        self.healthy = self.check_health()
-        
-    def check_health(self)-> bool:
-        try:
-            self.run()
-            return True
-        except Exception as e:
-            print(f"Error checking health of current_timezone: {e}")
-            return False
-        
-    def run(self)-> str:
+        self.status = ToolStatus.UNKNOWN
+            
+    def _run(self)-> str:
         return time.tzname[0]
     
 class BootTimeTool(Tool):
@@ -153,17 +97,9 @@ class BootTimeTool(Tool):
         self.description = "Get boot time"
         self.usage = "boot_time"
         self.dependencies = {}
-        self.healthy = self.check_health()
+        self.status = ToolStatus.UNKNOWN
         
-    def check_health(self)-> bool:
-        try:
-            self.run()
-            return True
-        except Exception as e:
-            print(f"Error checking health of boot_time: {e}")
-            return False
-        
-    def run(self)-> str:
+    def _run(self)-> str:
         boot_time_timestamp = psutil.boot_time()
         bt = datetime.fromtimestamp(boot_time_timestamp)
         return f"{bt.year}/{bt.month}/{bt.day} {bt.hour}:{bt.minute}:{bt.second}"
@@ -174,17 +110,9 @@ class CpuInfoTool(Tool):
         self.description = "Get CPU information"
         self.usage = "cpu_info"
         self.dependencies = {}
-        self.healthy = self.check_health()
+        self.status = ToolStatus.UNKNOWN
         
-    def check_health(self)-> bool:
-        try:
-            self.run()
-            return True
-        except Exception as e:
-            print(f"Error checking health of cpu_info: {e}")
-            return False
-        
-    def run(self)-> Tuple[str, str, str]:
+    def _run(self)-> Tuple[str, str, str]:
         cpu_freq = str(psutil.cpu_freq())
         cpu_usage = str(psutil.cpu_percent())
         cpu_cores = str(psutil.cpu_count())
@@ -196,16 +124,9 @@ class MemoryInfoTool(Tool):
         self.description = "Get memory information"
         self.usage = "memory_info"
         self.dependencies = {"scale_bytes": ScaleBytesTool()}
+        self.status = ToolStatus.UNKNOWN
         
-    def check_health(self)-> bool:
-        try:
-            self.run()
-            return True
-        except Exception as e:
-            print(f"Error checking health of memory_info: {e}")
-            return False
-        
-    def run(self)-> Tuple[str, str, str]:
+    def _run(self)-> Tuple[str, str, str]:
         memory = psutil.virtual_memory()
         memory_total = self.dependencies['scale_bytes'].run(memory.total, "B")
         memory_available = self.dependencies['scale_bytes'].run(memory.available, "B")
@@ -218,17 +139,9 @@ class DiskInfoTool(Tool):
         self.description = "Get disk information"
         self.usage = "disk_info"
         self.dependencies = {"scale_bytes": ScaleBytesTool()}
-        self.healthy = self.check_health()
+        self.status = ToolStatus.UNKNOWN
         
-    def check_health(self)-> bool:
-        try:
-            self.run()
-            return True
-        except Exception as e:
-            print(f"Error checking health of disk_info: {e}")
-            return False
-        
-    def run(self)-> Tuple[str, str, str]:
+    def _run(self)-> Tuple[str, str, str]:
         disk = psutil.disk_usage("/")
         disk_total = self.dependencies['scale_bytes'].run(disk.total, "B")
         disk_used = self.dependencies['scale_bytes'].run(disk.used, "B")
@@ -241,17 +154,9 @@ class NetworkInfoTool(Tool):
         self.description = "Get network information"
         self.usage = "network_info"
         self.dependencies = {"scale_bytes": ScaleBytesTool()}
-        self.healthy = self.check_health()
+        self.status = ToolStatus.UNKNOWN
         
-    def check_health(self)-> bool:
-        try:
-            self.run()
-            return True
-        except Exception as e:
-            print(f"Error checking health of network_info: {e}")
-            return False
-        
-    def run(self)-> Tuple[str, str]:
+    def _run(self)-> Tuple[str, str]:
         network = psutil.net_io_counters()
         network_bytes_sent = self.dependencies['scale_bytes'].run(network.bytes_sent, "B")
         network_bytes_recv = self.dependencies['scale_bytes'].run(network.bytes_recv, "B")
@@ -263,17 +168,9 @@ class GpuInfoTool(Tool):
         self.description = "Get GPU information"
         self.usage = "gpu_info"
         self.dependencies = {}
-        self.healthy = self.check_health()
+        self.status = ToolStatus.UNKNOWN
         
-    def check_health(self)-> bool:
-        try:
-            self.run()
-            return True
-        except Exception as e:
-            print(f"Error checking health of gpu_info: {e}")
-            return False
-        
-    def run(self)-> List[Tuple[int, str, str, str, str, str, str, str]]:
+    def _run(self)-> List[Tuple[int, str, str, str, str, str, str, str]]:
         gpus = GPUtil.getGPUs()
         list_gpus = []
         for gpu in gpus:
@@ -297,17 +194,9 @@ class ProcessesInfoTool(Tool):
         self.description = "Get process information"
         self.usage = "processes_info"
         self.dependencies = {}
-        self.healthy = self.check_health()
+        self.status = ToolStatus.UNKNOWN
         
-    def check_health(self)-> bool:
-        try:
-            self.run()
-            return True
-        except Exception as e:
-            print(f"Error checking health of processes_info: {e}")
-            return False
-        
-    def run(self)-> List[Tuple[int, str, str, datetime]]:
+    def _run(self)-> List[Tuple[int, str, str, datetime]]:
         processes = []
         for process in psutil.process_iter():
             pid = process.pid
@@ -325,17 +214,9 @@ class UsersInfoTool(Tool):
         self.description = "Get users information"
         self.usage = "users_info"
         self.dependencies = {}
-        self.healthy = self.check_health()
+        self.status = ToolStatus.UNKNOWN
         
-    def check_health(self)-> bool:
-        try:
-            self.run()
-            return True
-        except Exception as e:
-            print(f"Error checking health of users_info: {e}")
-            return False
-        
-    def run(self)-> List[Tuple[str, str, str]]:
+    def _run(self)-> List[Tuple[str, str, str]]:
         users = []
         for user in psutil.users():
             username = user.name
@@ -363,7 +244,14 @@ class SystemInfoToolkit(ToolKit):
         self.add_tool(GpuInfoTool())
         self.add_tool(ProcessesInfoTool())
         self.add_tool(UsersInfoTool())
-        
+    
+    def run(self, tool_name: str, *args, **kwargs):
+        if self.check_dependencies(tool_name):
+            tool = self.tools[tool_name]
+            return tool.run(*args, **kwargs)
+        else:
+            print(f"Error running tool: {tool_name}")
+            
     def __str__(self)-> str:
         return "\n".join([str(tool) for tool in self.tools.values()])
     

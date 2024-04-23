@@ -1,5 +1,5 @@
 import requests
-from alara.tools.base_tool import Tool, ToolKit
+from alara.tools.base_tool import Tool, ToolKit, ToolStatus
 
 class InternetConnectionTool(Tool):
     """Tool to check the internet connection
@@ -13,16 +13,11 @@ class InternetConnectionTool(Tool):
         self.description = "Check the internet connection"
         self.usage = "internet_connection"
         self.dependencies = {}
-        self.healthy = self.check_health()
+        self.status = ToolStatus.UNKNOWN
         
-    def check_health(self)-> bool:
-        try:
-            requests.request("GET", "https://www.google.com")
-            return True
-        except requests.exceptions.ConnectionError:
-            return False
+            
         
-    def run(self)-> bool:
+    def _run(self)-> bool:
         """Returns True if the internet connection is available, False otherwise
         Returns:
             bool: True if the internet connection is available, False otherwise"""
