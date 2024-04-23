@@ -76,6 +76,9 @@ class Agent(metaclass=Singleton):
         try:
             skill = self.skill_manager.load_skill(intent)
             feature = skill.load_feature(sub_intent)
+            if hasattr(feature, "requires_prompt"):
+                self.logger.debug("Feature requires prompt.")
+                self.skill_manager.call_feature(sub_intent, user_prompt)
 
             feature_args = inspect.getfullargspec(feature).args  # check if the feature has arguments
             # remove the self argument

@@ -29,7 +29,17 @@ class Skill:
 
     @staticmethod
     def skill_feature(func):
+        """Decorator to mark a function as a skill feature.
+        This allows the SkillManager to identify the function as a feature of the skill and the Agent to call the function."""
         func.is_skill_feature = True
+        return func
+    
+    @staticmethod
+    def requires_prompt(func):
+        """Some functions require the original prompt to be passed as an argument. This decorator marks the function as requiring the prompt.
+        NOTE: Adding this decorator means that the agent won't use the param_feature_call method to generate args"""
+        
+        func.requires_prompt = True
         return func
     
     def load_feature(self, feature_name: str) -> Any:
