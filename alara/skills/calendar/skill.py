@@ -6,6 +6,7 @@ from dateutil.rrule import rrulestr
 from dateutil.parser import parse
 from dateutil.tz import gettz, tzlocal
 from typing import List, Dict, Optional, Any
+import os
 
 class CalendarEvent:
     """A class to represent a calendar event.
@@ -29,6 +30,10 @@ class CalendarEvent:
         self.rrule = rrule
         self.location = location
         self.description = description
+    
+    
+                
+        
         
     def _validate_event(self)->bool:
         required_fields = ["summary", "dtstart", "dtend"]
@@ -86,6 +91,19 @@ class CalendarEvent:
 class Calendar:
     def __init__(self):
         self.calendars = Icalendar()
+        
+        
+        
+    def load_links_from_file(self, file_path: str='alara/skills/calendar/ics_links.txt'):
+        """Load calendar links from a file.
+        Args:
+            file_path (str): The path to the file containing calendar links."""
+        if not os.path.exists(file_path):
+            print(f"Error: File {file_path} does not exist.")
+            return
+        with open(file_path, "r") as file:
+            for line in file:
+                self.load_ics_calendar(line.strip())
         
     def load_ics_calendar(self, url: str):
         """Load an ics calendar from a URL.

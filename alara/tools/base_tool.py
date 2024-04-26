@@ -1,6 +1,8 @@
 from typing import Dict, List, Any 
 from enum import Enum
 from datetime import datetime as dt
+from pydantic import BaseModel, Field
+
 
 
 class ToolStatus(Enum):
@@ -73,6 +75,35 @@ class Tool:
     
     def __str__(self)-> str:
         return f"Tool Name: {self.name} Status: {self.status} @ {dt.now()}"
+
+class ToolModel(BaseModel):
+    name: str = Field(..., title="Tool Name", description="The name of the tool.")
+    description: str = Field(..., title="Tool Description", description="A description of the tool.")
+    usage: str = Field(..., title="Tool Usage", description="How to use the tool.")
+    dependencies: List[str] = Field([], title="Tool Dependencies", description="The dependencies of the tool.")
+    status: ToolStatus = Field(ToolStatus.UNKNOWN, title="Tool Status", description="The health status of the tool.")
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "tool1",
+                "description": "This is a tool",
+                "usage": "Use this tool to do something",
+                "dependencies": ["tool2", "tool3"],
+                "status": "unknown"
+            }
+        }
+        
+    def to_tool(self)-> Tool:
+        tool = Tool(self.name, self.description, self.usage)
+        tool.status = self.status
+        return tool
+    
+    @classmethod
+    def from_tool(cls, tool: Tool)-> 'ToolModel':
+        return cls(name=tool.name, description=tool.description, usage=tool.usage, dependencies=list(tool.dependencies.keys()), status=tool.status)
+    
+    
     
     
 class ToolKit:

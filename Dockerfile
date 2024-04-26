@@ -42,4 +42,5 @@ COPY --from=builder /alara .
 
 
 # Set the command to run the application
-CMD ["python", "./main.py"]
+# for debugging purposes
+CMD ["bash"]
