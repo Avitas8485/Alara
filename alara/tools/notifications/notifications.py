@@ -1,8 +1,14 @@
 from plyer import notification
+from typing import Optional
+from enum import Enum
 
-def notify(title: str, message: str, notification_type="reminder"):
-    if notification_type == "reminder":
-        app_icon = "hestia/tools/system_and_utility/notifications/icons/reminder.ico"
+class NotificationType(Enum):
+    REMINDER = "reminder"
+    
+
+def notify(title: str, message: str, notification_type: Optional[NotificationType] = NotificationType.REMINDER)-> None:
+    if notification_type == NotificationType.REMINDER:
+        app_icon = "alara/tools/notifications/icons/reminder.ico"
     notification.notify( # type: ignore
         title=title,
         message=message,
