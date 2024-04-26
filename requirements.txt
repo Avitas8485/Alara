@@ -41,3 +41,4 @@ iso8601
 pandas
 pytz
 numpy
+lxml-html-clean
