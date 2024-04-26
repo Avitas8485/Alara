@@ -5,25 +5,29 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+
 class NotImplementError(Exception):
     """Exception raised for errors in the input.
     Attributes:
         feature_name -- feature name that has not been implemented
         message -- explanation of the error"""
+
     def __init__(self, feature_name: str):
         self.feature_name = feature_name
         self.message = f"Feature {feature_name} has not been implemented yet."
         super().__init__(self.message)
 
+
 class Skill:
     """Base class for skills.
     A skill are a set of plugins that allow the Agent to perform tasks beyond the basic functionality. For example, the Weather skill allows the Agent to fetch the current weather.
-    Skills are loaded dynamically from the skills directory.
+    Skills are loaded dynamically from the skills' directory.
     Attributes:
         name -- the name of the skill
         skill_module_path -- the path to the skill module
         skills -- a dictionary of skills
         features -- a dictionary of features"""
+
     def __call__(self, *args, **kwargs) -> Any:
         return self.call_feature(*args, **kwargs)
 
@@ -33,15 +37,15 @@ class Skill:
         This allows the SkillManager to identify the function as a feature of the skill and the Agent to call the function."""
         func.is_skill_feature = True
         return func
-    
+
     @staticmethod
     def requires_prompt(func):
         """Some functions require the original prompt to be passed as an argument. This decorator marks the function as requiring the prompt.
         NOTE: Adding this decorator means that the agent won't use the param_feature_call method to generate args"""
-        
+
         func.requires_prompt = True
         return func
-    
+
     def load_feature(self, feature_name: str) -> Any:
         if hasattr(self, feature_name):
             feature = getattr(self, feature_name)
@@ -60,21 +64,25 @@ class Skill:
                 if all(arg in feature_args for arg in kwargs):
                     return feature(*args, **kwargs)
                 else:
-                    raise TypeError(f"Feature {feature_name} does not accept arguments {kwargs.keys()}. Expected {feature_args}.")
+                    raise TypeError(
+                        f"Feature {feature_name} does not accept arguments {kwargs.keys()}. Expected {feature_args}.")
             else:
                 raise TypeError(f"Feature {feature_name} is not callable.")
         else:
             raise NotImplementError(feature_name)
 
+
 class FallBackSkill(Skill):
     """Fallback skill for features that have not been implemented yet.
     Attributes:
         name -- the name of the skill"""
+
     def __init__(self):
         self.name = "fallback"
 
     def call_feature(self, *args, **kwargs) -> str:
         return "I'm sorry, I don't know how to do that."
+
 
 class SkillManager:
     """Class for managing skills.
@@ -83,6 +91,7 @@ class SkillManager:
         skill_module_path (str): the path to the skill module
         skills (Dict[str, str]): a dictionary of skills
         features (Dict[str, Any]): a dictionary of features"""
+
     def __init__(self):
         self.skill_module_path = "alara.skills."
         self.skills: Dict[str, str] = {}
@@ -104,13 +113,19 @@ class SkillManager:
                 try:
                     module = importlib.import_module(skill_module_path)
                     skills = [getattr(module, attr_name)() for attr_name in dir(module)
-                              if isinstance(getattr(module, attr_name), type) and issubclass(getattr(module, attr_name), Skill) and getattr(module, attr_name) != Skill]
+                              if isinstance(getattr(module, attr_name), type) and issubclass(getattr(module, attr_name),
+                                                                                             Skill) and getattr(module,
+                                                                                                                attr_name) != Skill]
                     for skill in skills:
-                        feature_names = [feature_name for feature_name in dir(skill) if callable(getattr(skill, feature_name)) and hasattr(getattr(skill, feature_name), "is_skill_feature")]
+                        feature_names = [feature_name for feature_name in dir(skill) if
+                                         callable(getattr(skill, feature_name)) and hasattr(
+                                             getattr(skill, feature_name), "is_skill_feature")]
                         self.features.update({feature_name: skill_dir.name for feature_name in feature_names})
-                        self.skill_mapping["skills"].append({"name": skill_dir.name, "features": [{"name": feature_name} for feature_name in feature_names]})
-                except ImportError:
-                    logger.warning(f"Failed to import skill {skill_dir.name}.")
+                        self.skill_mapping["skills"].append({"name": skill_dir.name,
+                                                             "features": [{"name": feature_name} for feature_name in
+                                                                          feature_names]})
+                except ImportError as e:
+                    logger.warning(f"Failed to import skill {skill_dir.name}: {e}")
                 except AttributeError:
                     logger.warning(f"Skill {skill_dir.name} not found in module.")
         logger.info(f"Loaded skills: {self.skills}")
@@ -146,7 +161,8 @@ class SkillManager:
                 return attr()
         logger.info(f"Skill {skill_name} not found in module {skill_module_path}")
         return FallBackSkill()
-    
+
+
 if __name__ == "__main__":
     skill_manager = SkillManager()
     skill_manager.call_feature("current_weather")

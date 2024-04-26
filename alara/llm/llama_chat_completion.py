@@ -1,4 +1,5 @@
 from llama_cpp import Llama
+from llama_cpp.llama_grammar import LlamaGrammar
 import yaml
 from alara.lib.logger import logger
 from alara.config.config import cfg
@@ -22,7 +23,15 @@ class LlamaChatCompletion(metaclass=Singleton):
         return llm
 
     def chat_completion(self, system_prompt: str, user_prompt: str, max_retries=3, grammar=None, **kwargs) -> str:
+        
         """Generate a chat completion from the Llama model."""
+        if grammar:
+            if isinstance(grammar, str):
+                grammar = LlamaGrammar.from_string(grammar)       
+            elif isinstance(grammar, LlamaGrammar):
+                pass
+            else:
+                raise ValueError("Invalid grammar type. Currently only str and LlamaGrammar are supported.")
         for _ in range(max_retries):
 
             logger.info("Generating chat completion...")

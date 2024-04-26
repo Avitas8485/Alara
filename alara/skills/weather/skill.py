@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 from alara.tools.ip_geolocation import IpInfoTool
 from alara.config.config import cfg
 from alara.skills.skill_manager import Skill
-from alara.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt
+from alara.llm.llm_engine import LlmEngine
+from alara.llm.llama_chat_completion import load_prompt_txt
 from alara.tts.piper_tts import PiperTTS
 
 load_dotenv()
@@ -24,7 +25,7 @@ class Weather(Skill):
             simplified_weather_path: The path to the simplified weather.
             weather_report_path: The path to the weather report."""
 
-        self.llm = LlamaChatCompletion()
+        self.llm = LlmEngine.load_llm()
         self.weather_prompt = load_prompt_txt("weather_report")
         self.tts = PiperTTS()
         self.city = self.get_city()

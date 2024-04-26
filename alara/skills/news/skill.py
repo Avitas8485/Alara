@@ -9,7 +9,8 @@ from typing import List
 from alara.skills.skill_manager import Skill
 from alara.tts.piper_tts import PiperTTS
 from alara.lib.logger import logger
-from alara.llm.llama_chat_completion import LlamaChatCompletion, load_prompt_txt as load_prompt
+from alara.llm.llm_engine import LlmEngine
+from alara.llm.llama_chat_completion import load_prompt_txt as load_prompt
 load_dotenv()
 
 
@@ -29,7 +30,7 @@ class News(Skill):
         self.NEWS_API_KEY = os.getenv("NEWS_API_KEY", '')
         nltk.download('punkt', quiet=True)
         self.tts = PiperTTS()
-        self.llm = LlamaChatCompletion()
+        self.llm = LlmEngine.load_llm()
         self.news_prompt = load_prompt("news_debrief")
         
     

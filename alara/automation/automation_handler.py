@@ -4,7 +4,6 @@ from alara.automation.action import Action
 from alara.tools.scheduler import SchedulerManager
 from alara.automation.event import Event, EventBus, StateMachine, State
 from alara.lib.logger import logger
-from alara.llm.llama_chat_completion import LlamaChatCompletion
 from typing import List
 import os
 import yaml
@@ -27,7 +26,6 @@ class AutomationHandler:
         self.state_machine = StateMachine()
         self.condition = Condition(self.state_machine)
         self.skill_manager = SkillManager()
-        self.llm = LlamaChatCompletion()
         self.scheduler = SchedulerManager()
         self.action = Action(self.event_bus, self.state_machine, self.condition, self.skill_manager)
         self.load_automations()

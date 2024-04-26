@@ -3,7 +3,7 @@ from alara.stt.wakeword import WakeWord
 from alara.nlp.intent_recognition import IntentRecognition
 from alara.lib.singleton import Singleton
 from alara.tts.piper_tts import PiperTTS
-from alara.llm.llama_chat_completion import LlamaChatCompletion
+from alara.llm.llm_engine import LlmEngine
 from alara.automation.automation_handler import AutomationHandler
 from alara.automation.event import Event, State
 from alara.lib.logger import Logger
@@ -23,7 +23,6 @@ def create_grammar(function: Callable):
         pydantic_model_list=tool, outer_object_name="function",
         outer_object_content="params", model_prefix="Function", fields_prefix="Parameters"
     )
-    gbnf = LlamaGrammar.from_string(gbnf)
     return gbnf, documentation
 
 
@@ -36,7 +35,7 @@ class Agent(metaclass=Singleton):
         self.wake_word = WakeWord()
         self.intent_recognition = IntentRecognition()
         self.system_prompt = "Your name is Alara. You are an AI assistant that helps people with their daily tasks."
-        self.llm = LlamaChatCompletion()
+        self.llm = LlmEngine.load_llm()
         self.running = True
         self.automation_handler = AutomationHandler()
         self.last_interaction = None
@@ -57,7 +56,7 @@ class Agent(metaclass=Singleton):
         environment by calling functions. You can call functions by writing JSON objects, which represents specific 
         function calls. Given a prompt, extract the relevant information and call the function. Only use the 
         information that is given in the prompt. Do not use any external information. If the prompt does not contain 
-        enough information to call a function, use the default value. {documentation}"""
+        enough information to call a function, use the default values. {documentation}"""
 
         output = self.llm.chat_completion(system_prompt=system_prompt, user_prompt=user_prompt, grammar=gbnf)
         params = json.loads(output)
