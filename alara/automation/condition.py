@@ -17,6 +17,7 @@ class Condition:
         @type state_machine: StateMachine
         """
         self.state_machine = state_machine
+        logger.info("Condition checker initialized.")
 
     def check_state(self, entity_id: str, required_state: dict) -> bool:
         """Check the state of the entity
@@ -110,8 +111,9 @@ class Alarm:
 
 
 if __name__ == "__main__":
-    state_machine = StateMachine()
+    
     event_bus = EventBus()
+    state_machine = StateMachine(event_bus)
     condition = Condition(state_machine)
     light = Lights(state_machine)
     print(condition.check_condition([{'condition': 'state', 'entity_id': 'light', 'state': 'off'}]))

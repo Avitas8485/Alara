@@ -51,6 +51,7 @@ class EventBus:
 
     def __init__(self) -> None:
         self.listeners: dict[str, list[Callable[..., None]]] = {}
+        logger.info('Event bus initialized')
 
     def add_listener(self, event_type: str, callback: Callable[..., None]):
         """Add a listener to an event type
@@ -143,9 +144,10 @@ class StateMachine:
     states: dict: a dictionary of entity ids and their states
     event_bus: EventBus: an instance of the EventBus class"""
 
-    def __init__(self):
+    def __init__(self, event_bus: EventBus):
         self.states: Dict[str, State] = {}
-        self.event_bus = EventBus()
+        self.event_bus = event_bus
+        logger.info('State machine initialized')
 
     @staticmethod
     def to_state(state_dict: dict[str, Any]) -> State:
@@ -309,7 +311,8 @@ class Alarm:
 
 
 if __name__ == '__main__':
-    state_machine = StateMachine()
+    
     event_bus = EventBus()
+    state_machine = StateMachine(event_bus)
     lights = Lights(state_machine)
     alarm = Alarm(event_bus)

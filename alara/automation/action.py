@@ -14,6 +14,7 @@ class Action:
         self.state_machine = state_machine
         self.condition = condition
         self.skill_manager = skill_manager
+        logger.info("Action initialized.")
 
     def change_state(self, entity_id: str, state: State):
         """Change the state of an entity.
@@ -111,8 +112,9 @@ class Alarm:
 
 
 if __name__ == "__main__":
-    state_machine = StateMachine()
+    
     event_bus = EventBus()
+    state_machine = StateMachine(event_bus)
     condition = Condition(state_machine)
     skill_manager = SkillManager()
     action = Action(event_bus, state_machine, condition, skill_manager)

@@ -116,9 +116,10 @@ def conversational_prompt(input_text: str):
 
 
 def task_oriented_prompt(input_text: str):
-    intent_recognition = IntentRecognition()
-    intent, sub_intent = intent_recognition.get_intent(input_text)
     skill_manager = SkillManager()
+    intent_recognition = IntentRecognition(skill_manager=skill_manager)
+    intent, sub_intent = intent_recognition.get_intent(input_text)
+    
     try:
         skill_manager.call_feature(sub_intent)
     except Exception as e:

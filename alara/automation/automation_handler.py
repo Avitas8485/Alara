@@ -18,17 +18,17 @@ class AutomationHandler:
     automations: List[dict]: a list of automations
     """
 
-    def __init__(self) -> None:
+    def __init__(self, skill_manager: SkillManager) -> None:
         self.trigger = None
         self.automations = None
-        self.state_machine = StateMachine()
         self.event_bus = EventBus()
-        self.state_machine = StateMachine()
+        self.state_machine = StateMachine(self.event_bus)
         self.condition = Condition(self.state_machine)
-        self.skill_manager = SkillManager()
+        self.skill_manager = skill_manager
         self.scheduler = SchedulerManager()
         self.action = Action(self.event_bus, self.state_machine, self.condition, self.skill_manager)
         self.load_automations()
+        logger.info("Automation handler initialized")
 
     def load_automations(self):
         """Load automations from a file"""
@@ -244,7 +244,8 @@ class Alarm:
 
 
 if __name__ == "__main__":
-    handler = AutomationHandler()
+    skill_manager = SkillManager()
+    handler = AutomationHandler(skill_manager=skill_manager)
     light = Lights(handler.state_machine)
     alarm = Alarm(handler.event_bus)
     while True:
