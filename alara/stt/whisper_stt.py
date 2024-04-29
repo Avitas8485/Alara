@@ -3,14 +3,14 @@ import threading
 
 import numpy as np
 import sounddevice as sd
-import whisper
+from faster_whisper import WhisperModel
 from scipy.io.wavfile import write
 
 
 class StreamHandler:
-    MODEL = 'small'
-    ENGLISH = True
-    TRANSLATE = False
+    MODEL = 'small.en'
+    #ENGLISH = True # No longer needed
+    #TRANSLATE = False # No longer needed
     SAMPLE_RATE = 44100  # Stream device recording frequency
     BLOCK_SIZE = 110  # Block size in milliseconds
     THRESHOLD = 0.01  # Minimum volume threshold to activate listening
@@ -23,7 +23,7 @@ class StreamHandler:
         self.prevblock = self.buffer = np.zeros((0, 1))
         self.fileready = False
         print("\033[96mLoading Whisper Model..\033[0m", end='', flush=True)
-        self.model = whisper.load_model(f'{self.MODEL}')
+        self.model = WhisperModel(f'{self.MODEL}', device="cpu", compute_type="int8")
         print("\033[90m Done.\033[0m")
         self.timeout = timeout
         self.timer = None
@@ -87,16 +87,14 @@ class StreamHandler:
             while self.asst['running']:
                 if self.fileready:
                     print("\n\033[90mTranscribing..\033[0m")
-                    result = self.model.transcribe('dictate.wav', fp16=False, language='en' if self.ENGLISH else '',
-                                                   task='translate' if self.TRANSLATE else 'transcribe')
-                    print(f"\033[1A\033[2K\033[0G{result['text']}")
-                    transcription = result['text']
-                    if self.asst['analyze']: self.asst['analyze'](result['text'])
+                    results, _ = self.model.transcribe('dictate.wav', beam_size=5)
+                    results = ' '.join([result.text for result in results])
+                    print(f"\033[1A\033[2K\033[0G{results}")
+                    if self.asst['analyze']: self.asst['analyze'](results)
                     self.fileready = False
                     os.remove('dictate.wav')
-                    if isinstance(transcription, list):
-                        transcription = ' '.join(transcription)
-                    return transcription
+                    return results
+                    
         return None
 
 
