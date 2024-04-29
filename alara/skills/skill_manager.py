@@ -97,6 +97,7 @@ class SkillManager:
         self.skills: Dict[str, str] = {}
         self.features: Dict[str, Any] = {}
         self.dynamic_load_skill()
+        logger.info("Skill Manager initialized.")
 
     def dynamic_load_skill(self):
         """Load skills dynamically from the skills directory.
@@ -112,7 +113,7 @@ class SkillManager:
                 logger.info(f"Loaded skill {skill_dir.name} from {skill_module_path}")
                 try:
                     module = importlib.import_module(skill_module_path)
-                    skills = [getattr(module, attr_name)() for attr_name in dir(module)
+                    skills = [getattr(module, attr_name) for attr_name in dir(module)
                               if isinstance(getattr(module, attr_name), type) and issubclass(getattr(module, attr_name),
                                                                                              Skill) and getattr(module,
                                                                                                                 attr_name) != Skill]
@@ -161,7 +162,6 @@ class SkillManager:
                 return attr()
         logger.info(f"Skill {skill_name} not found in module {skill_module_path}")
         return FallBackSkill()
-
 
 if __name__ == "__main__":
     skill_manager = SkillManager()
