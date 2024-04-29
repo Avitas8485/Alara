@@ -14,7 +14,6 @@ nltk
 comtypes
 pycaw
 plyer
-watchdog
 apscheduler
 GPUtil
 humanize
@@ -24,7 +23,6 @@ sentence-transformers
 beautifulsoup4
 huggingface-hub
 onnxruntime
-openai-whisper
 pydantic
 rich
 docstring-parser
@@ -42,3 +40,5 @@ pandas
 pytz
 numpy
 lxml-html-clean
+
+faster-whisper
