@@ -5,12 +5,13 @@ from alara.skills.skill_manager import SkillManager
 
 
 class IntentRecognition(metaclass=Singleton):
-    def __init__(self):
+    def __init__(self, skill_manager: SkillManager):
         """Initialize the intent recognition pipeline.
         The pipeline uses the zero-shot-classification model from the transformers library."""
-        self.classifier = pipeline(task="zero-shot-classification", model="facebook/bart-large-mnli")
-        self.skill_manager = SkillManager()
+        self.classifier = pipeline(task="zero-shot-classification", model="MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli")
+        self.skill_manager = skill_manager
         self.intents = self.skill_manager.skill_mapping
+        logger.info("Intent recognition initialized.")
 
     def classify_intent(self, text: str, intents, current_intent: dict, parent_intent=None) -> str:
         """Classify the intent of a given text.
