@@ -5,7 +5,7 @@ from alara.config.config import cfg
 from alara.skills.skill_manager import Skill
 from alara.llm.llm_engine import LlmEngine
 from alara.llm.llama_chat_completion import load_prompt_txt
-from alara.tts.piper_tts import PiperTTS
+from alara.tts.tts_engine import TTSEngine
 
 load_dotenv()
 
@@ -27,7 +27,7 @@ class Weather(Skill):
 
         self.llm = LlmEngine.load_llm()
         self.weather_prompt = load_prompt_txt("weather_report")
-        self.tts = PiperTTS()
+        self.tts = TTSEngine.load_tts()
         self.city = self.get_city()
         self.dependencies = {"IpInfoTool": IpInfoTool()}
 

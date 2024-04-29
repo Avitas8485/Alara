@@ -7,7 +7,7 @@ from datetime import datetime
 import nltk
 from typing import List
 from alara.skills.skill_manager import Skill
-from alara.tts.piper_tts import PiperTTS
+from alara.tts.tts_engine import TTSEngine
 from alara.lib.logger import logger
 from alara.llm.llm_engine import LlmEngine
 from alara.llm.llama_chat_completion import load_prompt_txt as load_prompt
@@ -29,10 +29,18 @@ class News(Skill):
             news_summary_speech_path: The path to the news summary speech."""
         self.NEWS_API_KEY = os.getenv("NEWS_API_KEY", '')
         nltk.download('punkt', quiet=True)
-        self.tts = PiperTTS()
+        self.tts = TTSEngine.load_tts()
         self.llm = LlmEngine.load_llm()
         self.news_prompt = load_prompt("news_debrief")
-        
+        self.config = self.get_config()
+    
+    def get_config(self)->Config:
+        """Get the config for the news request."""
+        user_agent = """Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) """
+        config = Config()
+        config.browser_user_agent = user_agent
+        config.request_timeout = 10
+        return config    
     
     def encode_to_ascii(self, text: str)->str:
         """Encode text to ascii.
@@ -63,7 +71,7 @@ class News(Skill):
         try:
             return requests.get("https://newsapi.org/v2/top-headlines", params=params)
         except Exception as e:
-            #logger.error(f"Error making news request: {e}")
+            logger.error(f"Error making news request: {e}")
             raise
         
     def parse_news_response(self, response: requests.Response):
@@ -72,60 +80,41 @@ class News(Skill):
             response (requests.Response): The response from the news request.
         Returns:
             list: The news articles."""
-        return response.json()['articles']  
+        articles = response.json()['articles']
+        for article in articles:
+            yield article
         
-    def get_config(self)->Config:
-        """Get the config for the news request."""
-        user_agent = """Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) """
-        config = Config()
-        config.browser_user_agent = user_agent
-        config.request_timeout = 10
-        return config
+        
     
     
-    def download_and_parse_article(self, article_info: dict, config: Config)->Article:
+    
+    def download_and_parse_article(self, article_info: dict):
         """Download and parse the article.
         Args:
             article_info: The information about the article.
             config: The config for the news request.
         Returns:
             Article: The article."""
-        article = Article(article_info['url'], config=config)
+        article = Article(article_info['url'], config=self.config)
         article.download()
         article.parse()
-        return article
-    
-    def get_article_info(self, article_info: dict, article: Article)->dict:
-        """Get the article information.
-        Args:
-            article_info (dict): The information about the article.
-            article (Article): The article.
-        Returns:
-            dict: The article information."""
-        self.todays_date = datetime.now().strftime("%b %d, %Y")
         article.nlp()
-        summary = self.encode_to_ascii(article.summary.replace("\n", ""))
-        title = self.encode_to_ascii(article_info["title"])
-        return {"title": title, "summary": summary, "url": article_info["url"], "date": f"{self.todays_date}"}
+        symmary = article.summary.replace("\n", "")
+        title = article_info["title"]
+        yield f"{title}: {symmary}"
+        
     
-    def get_articles(self, params: dict)->dict:
+    
+    def get_articles(self, params: dict):
         """Get the articles.
         Args:
             params (dict): The parameters for the news request.
         Returns:
             dict: The articles."""
-        articles_dict = dict()
         response = self.make_news_request(params)
-        news_articles = self.parse_news_response(response)
-        for articles in news_articles:
-            try:
-                article = self.download_and_parse_article(articles, self.get_config())
-            except Exception as e:
-                logger.error(f"Error downloading article: {e}")
-                continue
-            articles = self.get_article_info(articles, article)
-            articles_dict[articles["title"]] = articles
-        return articles_dict
+        for article in self.parse_news_response(response):
+            yield from self.download_and_parse_article(article)
+        
     
     @Skill.skill_feature
     def latest_news(self, tts: bool=True, summarize: bool=True) -> str:
@@ -138,8 +127,7 @@ class News(Skill):
         
         params = self.get_news_params(self.NEWS_API_KEY)
         params["sortBy"] = "publishedAt"
-        latest_news = self.get_articles(params)
-        news_information = "\n".join([value["title"] + "." for value in latest_news.values()])
+        news_information = "\n".join(self.get_articles(params))
         if summarize:
             news_information = self.llm.chat_completion(self.news_prompt, news_information)    
         if tts:
@@ -157,8 +145,7 @@ class News(Skill):
             str: The news in the category."""
         params = self.get_news_params(self.NEWS_API_KEY)
         params["category"] = category
-        news_in_category = self.get_articles(params)
-        news_information = "\n".join([value["title"] + "." for value in news_in_category.values()])
+        news_information = "\n".join(self.get_articles(params))
         if summarize:
             news_information = self.llm.chat_completion(self.news_prompt, news_information)
         if tts:
@@ -173,30 +160,8 @@ class News(Skill):
         Returns:
             str: The top news."""
         params = self.get_news_params(self.NEWS_API_KEY)
-        top_news = self.get_articles(params)
-        news_information = "\n".join([value["title"] + "." for value in top_news.values()])
+        news_information = "\n".join(self.get_articles(params))
         if tts:
             self.tts.synthesize(f"Heres the top news for today: {news_information}")
         return news_information
-    
-    
-    
-        
-
-
-    def parse_information(self, news: dict)->str:
-        """Parse the news information.
-        Args:
-            news (dict): The news information.
-        Returns:
-            str: The parsed news information."""
-        
-        news = {k: v for k, v in news.items() if k != "[Removed]"}
-        for key, value in news.items():
-            value.pop("url", None)
-            value.pop("date", None)
-            value["title"] = self.encode_to_ascii(value.get("title", ""))
-            value["summary"] = self.encode_to_ascii(value.get("summary", ""))
-        news_information = [value["title"] + "." for value in news.values()]
-        return "\n".join(news_information)
 

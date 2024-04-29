@@ -2,6 +2,7 @@ import subprocess
 import re
 from .base_tts import BaseTTS
 from alara.tools.text_parser.format_en import Converter
+from alara.lib.logger import logger
 
 class PiperTTSError(Exception):
     def __init__(self, message: str) -> None:
@@ -27,6 +28,7 @@ class PiperTTS(BaseTTS):
             "noise_w": 0.8,
             "sentence_silence": 0.1,
         }
+        logger.info("Piper TTS initialized.")
         
     def clean_text(self, text: str):
         converter = Converter()
