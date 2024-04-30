@@ -4,10 +4,13 @@ from enum import Enum
 from alara.tools.base_tool import Tool, ToolStatus
 import pyaudio
 import wave
+from typing import Optional, Dict
 
         
 class NotificationType(Enum):
     REMINDER = "reminder"
+    ALARM_CLOCK = "alarm_clock"
+    CALENDAR = "calendar"
     
 class NotificationTool(Tool):
     """Tool to send a notification to the user
@@ -24,20 +27,26 @@ class NotificationTool(Tool):
         self.usage = "notification [title] [message] [type]"
         self.status = ToolStatus.UNKNOWN
         self.dependencies = {}
+        self.icon_mapping: Dict[NotificationType, str] = {
+            NotificationType.REMINDER: "alara/tools/notifications/icons/reminder.ico",
+            NotificationType.ALARM_CLOCK: "alara/tools/notifications/icons/alarm_clock.ico",
+            NotificationType.CALENDAR: "alara/tools/notifications/icons/calendar.ico"
+        }
         
-    def _run(self, title: str='', message: str='', notification_type: Optional[NotificationType] = NotificationType.REMINDER)-> None:
+        
+    def _run(self, title: str='', message: str='', notification_type: Optional[NotificationType]= NotificationType.REMINDER)-> None:
         """Send a notification to the user
         Args:
             title: str: The title of the notification
             message: str: The message of the notification
             notification_type: NotificationType: The type of the notification"""
-        if notification_type == NotificationType.REMINDER:
-            app_icon = "alara/tools/notifications/icons/reminder.ico"
+        app_icon = self.icon_mapping.get(notification_type if notification_type else NotificationType.REMINDER)
         notification.notify( # type: ignore
             title=title,
             message=message,
             app_icon=app_icon,
             app_name="Alara",
+            ticker=title,
             timeout=30
         )
         self.play_audio("alara/tools/sounds/system-notification-199277.wav")
