@@ -31,6 +31,14 @@ class Skill:
     def __call__(self, *args, **kwargs) -> Any:
         return self.call_feature(*args, **kwargs)
 
+    @classmethod
+    def eager_load(cls, SkillClass):
+        """Decorator to mark a skill for eager loading.
+        This allows the SkillManager to immediately load the skill when the SkillManager is initialized.
+        Useful for skills that run in the background. eg Calendar"""
+        SkillClass.eager_load = True
+        return SkillClass
+    
     @staticmethod
     def skill_feature(func):
         """Decorator to mark a function as a skill feature.
@@ -96,6 +104,7 @@ class SkillManager:
         self.skill_module_path = "alara.skills."
         self.skills: Dict[str, str] = {}
         self.features: Dict[str, Any] = {}
+        self.loaded_skills: Dict[str, Skill] = {}
         self.dynamic_load_skill()
         logger.info("Skill Manager initialized.")
 
@@ -114,17 +123,17 @@ class SkillManager:
                 try:
                     module = importlib.import_module(skill_module_path)
                     skills = [getattr(module, attr_name) for attr_name in dir(module)
-                              if isinstance(getattr(module, attr_name), type) and issubclass(getattr(module, attr_name),
-                                                                                             Skill) and getattr(module,
-                                                                                                                attr_name) != Skill]
+                              if isinstance(getattr(module, attr_name), type) and issubclass(getattr(module, attr_name), Skill) and getattr(module, attr_name) != Skill]
                     for skill in skills:
+                        if hasattr(skill, "eager_load") and skill.eager_load == True:
+                            self.load_skill(skill_dir.name) # eager load the skill
                         feature_names = [feature_name for feature_name in dir(skill) if
                                          callable(getattr(skill, feature_name)) and hasattr(
                                              getattr(skill, feature_name), "is_skill_feature")]
                         self.features.update({feature_name: skill_dir.name for feature_name in feature_names})
                         self.skill_mapping["skills"].append({"name": skill_dir.name,
-                                                             "features": [{"name": feature_name} for feature_name in
-                                                                          feature_names]})
+                                                             "features": [
+                                                                 {"name": feature_name} for feature_name in feature_names]})
                 except ImportError as e:
                     logger.warning(f"Failed to import skill {skill_dir.name}: {e}")
                 except AttributeError:
@@ -154,12 +163,17 @@ class SkillManager:
             Skill: the skill object"""
         if skill_name not in self.skills:
             raise NotImplementError(skill_name)
+        if skill_name in self.loaded_skills:
+            return self.loaded_skills[skill_name]
         skill_module_path = self.skills[skill_name]
         module = importlib.import_module(skill_module_path)
         for attr_name in dir(module):
             attr = getattr(module, attr_name)
             if isinstance(attr, type) and issubclass(attr, Skill) and attr != Skill:
-                return attr()
+                skill = attr()
+                self.loaded_skills[skill_name] = skill
+                return skill
+
         logger.info(f"Skill {skill_name} not found in module {skill_module_path}")
         return FallBackSkill()
 
