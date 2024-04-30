@@ -93,7 +93,7 @@ class Calendar(Skill, metaclass=Singleton):
         self.scheduler_manager = SchedulerManager()
         self.refresh_interval = 60
         self.calendar_links = []
-        self.runtime_events = []
+        self.runtime_events: List[CalendarEvent] = []
         self.load_links_from_file()
         self.scheduler_manager.add_job(
             job_function=self.refresh_calendars,
@@ -117,18 +117,6 @@ class Calendar(Skill, metaclass=Singleton):
                 
     def refresh_calendars(self):
         """Refresh the calendars by loading the calendar links from the file."""
-        for link in self.calendar_links:
-            self.load_ics_calendar(link)
-        self.update_scheduled_events()
-        for event in self.runtime_events:
-            self.schedule_event(event)
-        
-        
-        
-            
-    def update_scheduled_events(self):
-        """Update the scheduled events based on the current calendar data."""
-        # Remove all previously scheduled events
         scheduled_events = self.scheduler_manager.get_jobs()
         for event in scheduled_events:
             event_id = event.id
@@ -140,11 +128,21 @@ class Calendar(Skill, metaclass=Singleton):
                 except Exception as e:
                     logger.error(f"Error: {e}")
                     pass
-    
-        # reschedule today's events
-        today_events = self.get_today_events()
-        for event in today_events:
-            self.schedule_event(CalendarEvent.from_dict(event))
+        self.calendars = Icalendar()
+        for link in self.calendar_links:
+            self.load_ics_calendar(link)
+        self.update_scheduled_events()
+        
+                 
+    def update_scheduled_events(self):
+        """Update the scheduled events based on the current calendar data."""
+        for event in self.runtime_events:
+            self.scheduler_manager.remove_job(job_id=f"CAL_{event.summary} @ {event.dtstart}")
+            self.scheduler_manager.remove_job(job_id=f"CAL_TTS_NOTIFICATION_{event.summary} @ {event.dtstart}")
+            self.schedule_event(event)
+        
+        
+            
         
     
     def load_ics_calendar(self, url: str):
@@ -167,10 +165,7 @@ class Calendar(Skill, metaclass=Singleton):
         try:
             today_events = self.get_today_events()
             for event in today_events:
-                # schedule only future events
-                dtstart = parse(event["dtstart"]).replace(tzinfo=tzlocal())
-                if dtstart > datetime.now(tzlocal()):
-                    self.schedule_event(CalendarEvent.from_dict(event))
+                self.schedule_event(CalendarEvent.from_dict(event))
                 
                 
         except Exception as e:
@@ -265,8 +260,13 @@ class Calendar(Skill, metaclass=Singleton):
             dtend = dtstart + (event.dtend.astimezone(gettz()) - event.dtstart.astimezone(gettz()))
         else:
             dtend = event.dtend.astimezone(gettz())
+            if dtstart < now:
+                logger.info(f"Event {event.summary} is in the past and cannot be scheduled")
+                return
         for interval in notification_intervals:
             notification_time = dtstart - timedelta(minutes=interval)
+            if notification_time < now:
+                continue
             self.scheduler_manager.add_job(
                 job_function=self.notify_event,
                 job_id=f"CAL_{event.summary} @ {dtstart} - {interval} minutes",

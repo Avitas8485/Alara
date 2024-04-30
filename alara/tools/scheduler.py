@@ -54,9 +54,11 @@ class SchedulerManager(metaclass=Singleton):
         Args:
             job_id: The id of the job."""
         try:
-            self.scheduler.remove_job(job_id)
+            self.scheduler.remove_job(job_id=job_id)
+            logger.info(f"Job {job_id} removed")
         except Exception as e:
             logger.error(f"Error removing job: {e}")
+            return
         
     def get_jobs(self) -> List[Any]:
         """Get all jobs from the scheduler.
