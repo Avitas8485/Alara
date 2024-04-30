@@ -6,7 +6,6 @@ from dateutil.rrule import rrulestr
 from dateutil.parser import parse
 from dateutil.tz import gettz, tzlocal
 from typing import List, Dict, Optional, Any
-import pytz
 import os
 from alara.lib.singleton import Singleton
 from alara.lib.logger import logger
@@ -122,7 +121,6 @@ class Calendar(Skill, metaclass=Singleton):
             event_id = event.id
             if event_id.startswith("CAL_") or event_id.startswith("CAL_TTS_NOTIFICATION_"):
                 try:
-                    logger.info(f"Removing job: {event_id}")
                     if self.scheduler_manager.get_job(event_id):
                         self.scheduler_manager.remove_job(job_id=event_id)
                 except Exception as e:
@@ -140,10 +138,7 @@ class Calendar(Skill, metaclass=Singleton):
             self.scheduler_manager.remove_job(job_id=f"CAL_{event.summary} @ {event.dtstart}")
             self.scheduler_manager.remove_job(job_id=f"CAL_TTS_NOTIFICATION_{event.summary} @ {event.dtstart}")
             self.schedule_event(event)
-        
-        
             
-        
     
     def load_ics_calendar(self, url: str):
         """Load an ics calendar from a URL.
@@ -151,7 +146,6 @@ class Calendar(Skill, metaclass=Singleton):
             url (str): The URL of the calendar.
             Returns:
                 None."""
-        logger.info(f"Loading calendar from {url}")
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -181,7 +175,6 @@ class Calendar(Skill, metaclass=Singleton):
         if not event._validate_event():
             return
         self.calendars.add_component(event.to_event())   
-        logger.info(f"Event added: {event}")
         self.schedule_event(event) 
         self.runtime_events.append(event)        
     
@@ -220,7 +213,6 @@ class Calendar(Skill, metaclass=Singleton):
             self.scheduler_manager.remove_job(job_id=f"CAL_{event.summary} @ {event.dtstart}")
             self.scheduler_manager.remove_job(job_id=f"CAL_TTS_NOTIFICATION_{event.summary} @ {event.dtstart}")
             self.schedule_event(event)
-            logger.info(f"Event updated: {event}")
     
     def delete_event(self, event: CalendarEvent):
         """Delete an event from the calendar.
@@ -230,7 +222,6 @@ class Calendar(Skill, metaclass=Singleton):
         component = self.fetch_event(event.summary)
         if component:
             self.calendars.subcomponents.remove(component)
-            logger.info(f"Event deleted: {event}")
             self.scheduler_manager.remove_job(job_id=f"CAL_{event.summary} @ {event.dtstart}")
             self.scheduler_manager.remove_job(job_id=f"CAL_TTS_NOTIFICATION_{event.summary} @ {event.dtstart}")
         
@@ -243,18 +234,15 @@ class Calendar(Skill, metaclass=Singleton):
         )
         
         
-    from dateutil.tz import gettz
 
     def schedule_event(self, event: CalendarEvent):
         notification_intervals = [30, 15]
         dtstart = event.dtstart.astimezone(gettz())
         rrule = rrulestr(event.rrule, dtstart=dtstart) if event.rrule else None
-
         now = datetime.now(gettz())
         if rrule:
             next_occurrence = rrule.after(now)
             if next_occurrence is None:
-                logger.info(f"No more occurrences for {event.summary}")
                 return
             dtstart = next_occurrence
             dtend = dtstart + (event.dtend.astimezone(gettz()) - event.dtstart.astimezone(gettz()))

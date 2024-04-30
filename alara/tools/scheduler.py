@@ -55,7 +55,6 @@ class SchedulerManager(metaclass=Singleton):
             job_id: The id of the job."""
         try:
             self.scheduler.remove_job(job_id=job_id)
-            logger.info(f"Job {job_id} removed")
         except Exception as e:
             logger.error(f"Error removing job: {e}")
             return
