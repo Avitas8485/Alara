@@ -167,7 +167,12 @@ class Calendar(Skill, metaclass=Singleton):
         try:
             today_events = self.get_today_events()
             for event in today_events:
-                self.schedule_event(CalendarEvent.from_dict(event))
+                # schedule only future events
+                dtstart = parse(event["dtstart"]).replace(tzinfo=tzlocal())
+                if dtstart > datetime.now(tzlocal()):
+                    self.schedule_event(CalendarEvent.from_dict(event))
+                
+                
         except Exception as e:
             logger.error(f"Error: {e}")
     
@@ -246,7 +251,7 @@ class Calendar(Skill, metaclass=Singleton):
     from dateutil.tz import gettz
 
     def schedule_event(self, event: CalendarEvent):
-        notification_intervals = [30, 15, 5, 1]
+        notification_intervals = [30, 15]
         dtstart = event.dtstart.astimezone(gettz())
         rrule = rrulestr(event.rrule, dtstart=dtstart) if event.rrule else None
 
