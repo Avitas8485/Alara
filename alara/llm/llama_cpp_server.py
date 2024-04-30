@@ -2,10 +2,10 @@ import requests
 from requests.exceptions import ConnectionError
 from alara.lib.logger import logger
 from alara.lib.singleton import Singleton
-
+from alara.config.config import cfg
 
 class LlmServer(metaclass=Singleton):
-    def __init__(self, url: str='http://localhost:8080/v1/chat/completions'):
+    def __init__(self, url: str=cfg.LLMSERVER_URL):
         self.url = url
         logger.info("Using Llama server, ensure that the server is running and supports Llama Grammar.")
     
@@ -24,7 +24,7 @@ class LlmServer(metaclass=Singleton):
                             'content': user_prompt
                         }
                     ],
-                    'max_tokens': 3072,
+                    'max_tokens': cfg.LLAMA_MAX_TOKENS,
                     'grammar': grammar
                 }
                 response = requests.post(self.url, json=data)

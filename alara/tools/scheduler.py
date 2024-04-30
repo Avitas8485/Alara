@@ -46,25 +46,7 @@ class SchedulerManager(metaclass=Singleton):
             self.scheduler.add_job(func=job_function, trigger=trigger, id=job_id,replace_existing=True, **kwargs)
         except Exception as e:
             logger.error(f"Error adding job: {e}")
-    '''def add_job(self, job_function: Callable, job_id: Optional[str] = None, trigger: Optional[str] = None, **kwargs: Any) -> None:
-        """Add a job to the scheduler.
-        Args:
-            job_function: The function to run.
-            job_id: The id of the job.
-            trigger: The trigger for the job.
-            kwargs: The keyword arguments for the job."""
-        if job_id is None:
-            function_name = job_function.__name__
-            sorted_kwargs = str(sorted(kwargs.items()))
-            job_id = hashlib.md5(f"{function_name}{sorted_kwargs}".encode()).hexdigest()
-        if self.scheduler.get_job(job_id=job_id):
-            logger.info(f"Job {function_name} with parameters {sorted_kwargs} already exists")
-            return 
-        # add the job to the scheduler
-        try:
-            self.scheduler.add_job(job_function, trigger=trigger, id=job_id,replace_existing=True, **kwargs)
-        except Exception as e:
-            logger.error(f"Error adding job: {e}")'''
+            return
 
      
     def remove_job(self, job_id: str) -> None:
@@ -72,9 +54,10 @@ class SchedulerManager(metaclass=Singleton):
         Args:
             job_id: The id of the job."""
         try:
-            self.scheduler.remove_job(job_id)
+            self.scheduler.remove_job(job_id=job_id)
         except Exception as e:
             logger.error(f"Error removing job: {e}")
+            return
         
     def get_jobs(self) -> List[Any]:
         """Get all jobs from the scheduler.
@@ -85,22 +68,6 @@ class SchedulerManager(metaclass=Singleton):
         except Exception as e:
             logger.error(f"Error getting jobs: {e}")
             return []
-        
-    '''def get_job(self, job_function: Callable, **kwargs) -> Any:
-        """Get a job from the scheduler.
-        Args:
-            job_function (Callable): The function to run.
-            kwargs: The keyword arguments for the job.
-        Returns:
-            Any: The job."""
-        try:
-            function_name = job_function.__name__
-            sorted_kwargs = str(sorted(kwargs.items()))
-            job_id = hashlib.md5(f"{function_name}{sorted_kwargs}".encode()).hexdigest()
-            return self.scheduler.get_job(job_id)
-        except Exception as e:
-            logger.error(f"Error getting job: {e}")
-            return None'''
         
     def get_job(self, job_id: str) -> Any:
         """Get a job from the scheduler.
