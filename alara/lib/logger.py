@@ -9,6 +9,10 @@ from alara.lib.singleton import Singleton
 
 
 class Logger(metaclass=Singleton):
+    """Class to manage the logger.
+    Attributes:
+        logger_name: str: The name of the logger. Default is 'Alara'.
+        log_level: int: The log level. Default is logging.DEBUG."""
     def __init__(self, logger_name='Alara', log_level=logging.DEBUG):
         if not hasattr(self, 'logger'):
             self.logger = logging.getLogger(logger_name)
@@ -17,6 +21,11 @@ class Logger(metaclass=Singleton):
 
     def setup_logging(self, log_level=logging.DEBUG,
                       log_time_format='%Y-%m-%d %H:%M:%S', theme=None):
+        """Setup the logging.
+        Args:
+            log_level: int: The log level. Default is logging.DEBUG.
+            log_time_format: str: The log time format. Default is '%Y-%m-%d %H:%M:%S'.
+            theme: dict: The theme for the console. Default is None."""
         if theme is None:
             theme = {
                 "traceback.border": "black",
@@ -41,6 +50,11 @@ class Logger(metaclass=Singleton):
 
 
 class RingBuffer(logging.StreamHandler):
+    """Class to manage the ring buffer.
+    Attributes:
+        capacity: int: The capacity of the buffer.
+        buffer: deque: The buffer.
+        formatter: logging.Formatter: The formatter."""
     def __init__(self, capacity):
         super().__init__()
         self.capacity = capacity
@@ -52,6 +66,9 @@ class RingBuffer(logging.StreamHandler):
             "func":"%(funcName)s", "msg":"%(message)s" }')
 
     def emit(self, record):
+        """Emit the record.
+        Args:
+            record: The record to emit."""
         msg = self.format(record)
         self.buffer.append(msg)
 

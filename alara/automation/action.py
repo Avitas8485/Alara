@@ -6,7 +6,13 @@ from alara.lib.logger import logger
 
 
 class Action:
-    """A class to represent an Action that the AI assistant can take."""
+    """A class to represent an Action that the AI assistant can take.
+    Attributes:
+        event_bus: EventBus: The event bus to emit events.
+        state_machine: StateMachine: The state machine to change states.
+        condition: Condition: The condition to check before taking an action.
+        skill_manager: SkillManager: The skill manager to call skills.
+    """
 
     def __init__(self, event_bus: EventBus, state_machine: StateMachine, condition: Condition,
                  skill_manager: SkillManager) -> None:
@@ -19,8 +25,8 @@ class Action:
     def change_state(self, entity_id: str, state: State):
         """Change the state of an entity.
         Args:
-            entity_id: The ID of the entity to change the state of.
-            state: The state to change the entity to."""
+            entity_id: (str) The id of the entity (e.g. light, alarm, etc.
+            state: (State) The state to change to."""
         if self.state_machine:
             obj = self.state_machine.get_state(entity_id)
             if obj is None:
@@ -33,7 +39,7 @@ class Action:
     def check_condition(self, conditions: List[dict]) -> bool:
         """Check the conditions specified in the automation.
         Args:
-            conditions: List of conditions.
+            conditions: List[dict]: List of conditions to check.
         Returns:
             bool: True if all the conditions are met, else False."""
         return self.condition.check_condition(conditions)
@@ -41,7 +47,7 @@ class Action:
     def call_skill(self, skill_name: str, *args, **kwargs):
         """Call a skill.
         Args:
-            skill_name: The name of the skill to call.
+            skill_name: str: The name of the skill to call.
             args: The arguments to pass to the skill.
             kwargs: The keyword arguments to pass to the skill."""
         return self.skill_manager.call_feature(skill_name, *args, **kwargs)
@@ -49,7 +55,7 @@ class Action:
     def choose_action(self, actions: List[dict]):
         """Take the action specified in the automation.
         Args:
-            actions: List of actions."""
+            actions: List[dict]: List of actions to take."""
         print(f"Taking actions: {actions}")
         for action in actions:
             action_type = action.get('action')

@@ -7,11 +7,17 @@ from alara.lib.singleton import Singleton
 
 
 class LlamaChatCompletion(metaclass=Singleton):
+    """A wrapper around llama_cpp for generating chat completions.
+    Attributes:
+        llm: Llama: The Llama model."""
+    
     def __init__(self):
         self.llm = self.load_llama_model()
 
     def load_llama_model(self, **kwargs) -> Llama:
-        """Load the Llama model, and unload it when done."""
+        """Load the Llama model, and unload it when done.
+        Args:
+            kwargs: dict: Additional keyword arguments to pass to the model."""
         logger.info("Loading LLM...")
         llm = Llama(
             # todo: better model with the similar performance
@@ -24,7 +30,15 @@ class LlamaChatCompletion(metaclass=Singleton):
 
     def chat_completion(self, system_prompt: str, user_prompt: str, max_retries=3, grammar=None, **kwargs) -> str:
         
-        """Generate a chat completion from the Llama model."""
+        """Generate a chat completion from the LLM
+        Args:
+            system_prompt: str: The system prompt.
+            user_prompt: str: The user prompt.
+            max_retries: int: The maximum number of retries to generate a completion.
+            grammar: str or LlamaGrammar: The grammar to use for the completion.
+            kwargs: dict: Additional keyword arguments to pass to the model.
+        Returns:
+            str: The generated chat completion."""
         if grammar:
             if isinstance(grammar, str):
                 grammar = LlamaGrammar.from_string(grammar)       
@@ -48,7 +62,6 @@ class LlamaChatCompletion(metaclass=Singleton):
                 ], max_tokens=cfg.LLAMA_MAX_TOKENS, grammar=grammar, **kwargs
             )
             logger.info("Generation complete.")
-            # to prevent situations where the model outputs nothing
             if output["choices"][0]["message"]["content"] != "":  # type: ignore
                 return output["choices"][0]["message"]["content"]  # type: ignore
             logger.warning("Model failed to generate output. Retrying...")
@@ -57,21 +70,18 @@ class LlamaChatCompletion(metaclass=Singleton):
 
 
 def load_prompt(prompt_name: str):
-    """Load a prompt from prompts.yaml."""
+    """Load a prompt from prompts.yaml.
+    Args:
+        prompt_name: str: The name of the prompt."""
     logger.info(f"Loading {prompt_name} prompt...")
     with open("alara/llm/prompts/prompts.yaml", "r") as file:
         prompts = yaml.load(file, Loader=yaml.FullLoader)
     return prompts[f"{prompt_name}"][0]
 
-
 def load_prompt_txt(prompt_name: str):
+    """Load a prompt from a text file.
+    Args:
+        prompt_name: str: The name of the prompt."""
     logger.info(f"Loading {prompt_name} prompt...")
     with open(f"alara/llm/prompts/{prompt_name}.txt", "r") as file:
         return file.read()
-
-
-if __name__ == "__main__":
-    system_prompt = "You are an AI assistant that helps people with their daily tasks."
-    user_prompt = "What is your name?"
-    llm = LlamaChatCompletion()
-    print(llm.chat_completion(system_prompt, user_prompt))

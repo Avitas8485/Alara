@@ -12,10 +12,14 @@ import yaml
 class AutomationHandler:
     """A class that is responsible for handling the automation workflow
     Attributes:
-    state_machine: StateMachine: the state machine to manage states of entities
-    event_bus: EventBus: the event bus to emit and listen for events
-    condition: Condition: functions as a condition checker
+    trigger: Trigger: the trigger to handle triggers
     automations: List[dict]: a list of automations
+    event_bus: EventBus: the event bus to emit events
+    state_machine: StateMachine: the state machine to manage states
+    condition: Condition: the condition to check before taking an action
+    skill_manager: SkillManager: the skill manager to call skills
+    scheduler: SchedulerManager: the scheduler to schedule jobs
+    
     """
 
     def __init__(self, skill_manager: SkillManager) -> None:
