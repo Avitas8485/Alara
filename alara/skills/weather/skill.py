@@ -63,7 +63,7 @@ class Weather(Skill):
         return response.json()
 
     @Skill.skill_feature
-    def current_weather(self, city: str = '', tts: bool = True) -> str:
+    def current_weather(self, city: str = '') -> str:
         """Get the current weather.
         Args:
             city (str): The city to get the current weather for. If not provided, the city is fetched based on the IP address.
@@ -95,6 +95,5 @@ class Weather(Skill):
         for key, value in report_items.items():
             weather_report += f"{key}: {value}\n"
         summary = self.llm.chat_completion(self.weather_prompt, weather_report)
-        if tts:
-            self.tts.synthesize(summary)
+        self.tts.synthesize(summary)
         return summary
