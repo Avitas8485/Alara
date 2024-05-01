@@ -25,6 +25,7 @@ class InternetConnectionTool(Tool):
             requests.request("GET", "https://www.google.com")
             return True
         except requests.exceptions.ConnectionError:
+            self.status = ToolStatus.UNHEALTHY
             return False
 
     

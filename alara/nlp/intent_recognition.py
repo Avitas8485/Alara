@@ -7,7 +7,9 @@ from alara.skills.skill_manager import SkillManager
 class IntentRecognition(metaclass=Singleton):
     def __init__(self, skill_manager: SkillManager):
         """Initialize the intent recognition pipeline.
-        The pipeline uses the zero-shot-classification model from the transformers library."""
+        The pipeline uses the zero-shot-classification model from the transformers library.
+        Args:
+            skill_manager (SkillManager): The skill manager to use for intent recognition."""
         self.classifier = pipeline(task="zero-shot-classification", model="MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli")
         self.skill_manager = skill_manager
         self.intents = self.skill_manager.skill_mapping
