@@ -63,8 +63,34 @@ class Agent(metaclass=Singleton):
         output = self.llm.chat_completion(system_prompt=system_prompt, user_prompt=user_prompt, grammar=gbnf)
         params = json.loads(output)
         return function(**params['params'])
-
+    
     def process_user_prompt(self, user_prompt):
+        self.logger.debug(f"User prompt: {user_prompt}")
+        self.automation_handler.state_machine.set_state(entity_id=self.agent_name, new_state="processing",
+                                                        attributes={"last_interaction": self.last_interaction})
+        intent, sub_intent = self.intent_recognition.get_intent(user_prompt)
+        try:
+            skill = self.automation_handler.skill_manager.load_skill(intent)
+            features = skill.get_features()
+            models = [create_dynamic_model_from_function(getattr(skill, feature)) for feature in features]
+            gbnf, documentation = generate_gbnf_grammar_and_documentation(
+                pydantic_model_list=models, outer_object_name="function",
+                outer_object_content="params", model_prefix="Function", fields_prefix="Parameters"
+            )
+            system_prompt = f"""You are an advanced AI assistant tasked with generating JSON objects. These objects represent function calls that you can make to fulfill the user's request. Given a prompt, extract the relevant information and call a function. Should the prompt not contain enough information to call a function, use the default values. Below is a list of your available function calls, only one function can be called at a time so choose wisely:\n\n{documentation}"""
+            output = self.llm.chat_completion(system_prompt=system_prompt, user_prompt=user_prompt, grammar=gbnf)
+            params = json.loads(output)
+            function = getattr(skill, params['function'])
+            return function(**params['params'])
+        except Exception as e:
+            self.logger.error(f"Error calling skill: {e}")
+            output = self.llm.chat_completion(system_prompt=self.system_prompt,
+                                              user_prompt=f"Notify the user that the feature {sub_intent} has not "
+                                                          f"been implemented yet.")
+            self.tts.synthesize(output)
+        self.last_interaction = time.time()
+        
+    '''def process_user_prompt(self, user_prompt):
         self.logger.debug(f"User prompt: {user_prompt}")
         self.automation_handler.state_machine.set_state(entity_id=self.agent_name, new_state="processing",
                                                         attributes={"last_interaction": self.last_interaction})
@@ -90,7 +116,7 @@ class Agent(metaclass=Singleton):
                                               user_prompt=f"Notify the user that the feature {sub_intent} has not "
                                                           f"been implemented yet.")
             self.tts.synthesize(output)
-        self.last_interaction = time.time()
+        self.last_interaction = time.time()'''
 
     def handle_wakeword(self):
         self.last_interaction = time.time()

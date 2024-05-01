@@ -78,6 +78,9 @@ class Skill:
                 raise TypeError(f"Feature {feature_name} is not callable.")
         else:
             raise NotImplementError(feature_name)
+        
+    def get_features(self):
+        return [feature_name for feature_name in dir(self) if callable(getattr(self, feature_name)) and hasattr(getattr(self, feature_name), "is_skill_feature")]
 
 
 class FallBackSkill(Skill):
