@@ -5,12 +5,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Advice(Skill):
+class Quotes(Skill):
     def __init__(self):
         self.skill_name = "advice"
 
     @Skill.skill_feature
-    def get_advice(self) -> str:
+    def get_quote(self) -> str:
         """Get advice from the Advice Slip API.
         Returns:
             str: The advice."""
@@ -25,6 +25,3 @@ class Advice(Skill):
 
 
 
-if __name__ == "__main__":
-    advice = Advice()
-    print(advice.get_advice())
