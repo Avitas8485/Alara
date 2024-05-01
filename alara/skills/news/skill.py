@@ -113,14 +113,18 @@ class News(Skill):
             dict: The articles."""
         response = self.make_news_request(params)
         for article in self.parse_news_response(response):
-            yield from self.download_and_parse_article(article)
+            try:
+                yield from self.download_and_parse_article(article)
+            except Exception as e:
+                logger.error(f"Error getting articles: {e}")
+                continue
+            
         
     
     @Skill.skill_feature
-    def latest_news(self, tts: bool=True, summarize: bool=True) -> str:
+    def latest_news(self, summarize: bool=True) -> str:
         """Get the latest news.
         Args:
-            tts (bool): Whether to use text to speech. Default is True.
             summarize (bool): Whether to summarize the news. Default is True.
         Returns:
             str: The latest news."""
@@ -130,16 +134,14 @@ class News(Skill):
         news_information = "\n".join(self.get_articles(params))
         if summarize:
             news_information = self.llm.chat_completion(self.news_prompt, news_information)    
-        if tts:
-            self.tts.synthesize(f"Here are the latest news: {news_information}")
+        self.tts.synthesize(f"Here are the latest news: {news_information}")
         return news_information
         
     @Skill.skill_feature
-    def news_in_category(self, category: str="science", tts: bool=True, summarize: bool=True)->str:
+    def news_in_category(self, category: str="science", summarize: bool=True)->str:
         """Get the news in a category.
         Args:
             category (str): The category of the news. Default is "science".
-            tts (bool): Whether to use text to speech. Default is True.
             summarize (bool): Whether to summarize the news. Default is True.
         Returns:
             str: The news in the category."""
@@ -148,12 +150,11 @@ class News(Skill):
         news_information = "\n".join(self.get_articles(params))
         if summarize:
             news_information = self.llm.chat_completion(self.news_prompt, news_information)
-        if tts:
-            self.tts.synthesize(f"Here are the latest news in {category}: {news_information}")
+        self.tts.synthesize(f"Here are the latest news in the {category} category: {news_information}")
         return news_information
     
     @Skill.skill_feature
-    def top_news(self, tts: bool=True) -> str:
+    def top_news(self) -> str:
         """Get the top news.
         Args:
             tts (bool): Whether to use text to speech. Default is True.
@@ -161,7 +162,6 @@ class News(Skill):
             str: The top news."""
         params = self.get_news_params(self.NEWS_API_KEY)
         news_information = "\n".join(self.get_articles(params))
-        if tts:
-            self.tts.synthesize(f"Heres the top news for today: {news_information}")
+        self.tts.synthesize(f"Heres the top news for today: {news_information}")
         return news_information
 

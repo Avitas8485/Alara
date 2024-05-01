@@ -4,6 +4,7 @@ import os
 load_dotenv('.env')
 
 class Config:
+    """Config class to store all the environment variables."""
     def __init__(self):
         self.OPEN_WEATHER_API_KEY = os.getenv('OPEN_WEATHER_API_KEY')
         self.VISUAL_CROSSING_API_KEY = os.getenv('VISUAL_CROSSING_API_KEY')
