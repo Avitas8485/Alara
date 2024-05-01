@@ -113,7 +113,12 @@ class News(Skill):
             dict: The articles."""
         response = self.make_news_request(params)
         for article in self.parse_news_response(response):
-            yield from self.download_and_parse_article(article)
+            try:
+                yield from self.download_and_parse_article(article)
+            except Exception as e:
+                logger.error(f"Error getting articles: {e}")
+                continue
+            
         
     
     @Skill.skill_feature
