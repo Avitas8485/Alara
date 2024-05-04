@@ -32,7 +32,6 @@ docstring_parser
 transformers
 
 scipy
-spacy
 python-dateutil
 num2words
 iso8601
