@@ -1,3 +1,4 @@
+spacy
 llama-cpp-python
 pyyaml
 contextlib2
