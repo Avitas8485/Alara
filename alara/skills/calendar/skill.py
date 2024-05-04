@@ -276,7 +276,6 @@ class Calendar(Skill, metaclass=Singleton):
                 run_date=notification_time,
                 kwargs={"text": f"Event: {event.summary} starts in {interval} minutes"}
             )
-        logger.info(f"Event scheduled: {event.summary} @ {dtstart}")
                
     def save_ics_calendar(self, file_path: str):
         """Save the calendar to an ics file.

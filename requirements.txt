@@ -42,3 +42,4 @@ numpy
 lxml-html-clean
 
 faster-whisper
+icalendar
