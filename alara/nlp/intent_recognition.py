@@ -10,7 +10,7 @@ class IntentRecognition(metaclass=Singleton):
         The pipeline uses the zero-shot-classification model from the transformers library.
         Args:
             skill_manager (SkillManager): The skill manager to use for intent recognition."""
-        self.classifier = pipeline(task="zero-shot-classification", model="MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli")
+        self.classifier = pipeline(task="zero-shot-classification", model="MoritzLaurer/deberta-v3-large-zeroshot-v2.0") # TODO: Get better model
         self.skill_manager = skill_manager
         self.intents = self.skill_manager.skill_mapping
         logger.info("Intent recognition initialized.")

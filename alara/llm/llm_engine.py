@@ -10,7 +10,7 @@ class LlmType(Enum):
 
 class LlmEngine(metaclass=Singleton):
     @staticmethod
-    def load_llm(llm_type: LlmType=LlmType.llama_server):
+    def load_llm(llm_type: LlmType=LlmType.llama_cpp):
         if llm_type == LlmType.llama_server:
             return LlmServer()
         elif llm_type == LlmType.llama_cpp:
