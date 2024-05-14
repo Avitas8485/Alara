@@ -13,7 +13,7 @@ class StreamHandler:
     #TRANSLATE = False # No longer needed
     SAMPLE_RATE = 44100  # Stream device recording frequency
     BLOCK_SIZE = 110  # Block size in milliseconds
-    THRESHOLD = 0.01  # Minimum volume threshold to activate listening
+    THRESHOLD = 0.05  # Minimum volume threshold to activate listening
     VOCALS = [50, 1000]  # Frequency range to detect sounds that could be speech
     END_BLOCKS = 30  # Number of blocks to wait before sending to Whisper
 

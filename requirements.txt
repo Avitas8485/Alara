@@ -1,4 +1,5 @@
 spacy
+fastapi==0.110
 llama-cpp-python
 pyyaml
 contextlib2
@@ -14,6 +15,7 @@ newspaper3k
 nltk
 comtypes
 pycaw
+pywin32
 plyer
 apscheduler
 GPUtil
