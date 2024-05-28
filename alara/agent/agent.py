@@ -50,7 +50,7 @@ class Agent(metaclass=Singleton):
                 pydantic_model_list=models, outer_object_name="function",
                 outer_object_content="params", model_prefix="Function", fields_prefix="Parameters"
             )
-            system_prompt = f"""You are an advanced AI assistant tasked with generating JSON objects. These objects represent function calls that you can make to fulfill the user's request. Given a prompt, extract the relevant information and call a function. Should the prompt not contain enough information to call a function, use the default values. Below is a list of your available function calls, only one function can be called at a time so choose wisely:\n\n{documentation}"""
+            system_prompt = f"""You are an advanced AI assistant tasked with generating JSON objects. These objects represent function calls that you can make to fulfill the user's request. Given a prompt, extract the relevant information and call a function. Should the prompt not contain enough information to call a function, use default values provided in the documentation. Below is a list of your available function calls, only one function can be called at a time so choose wisely:\n\n{documentation}"""
             output = self.llm.chat_completion(system_prompt=system_prompt, user_prompt=user_prompt, grammar=gbnf)
             params = json.loads(output)
             function = getattr(skill, params['function'])

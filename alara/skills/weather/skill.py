@@ -66,11 +66,11 @@ class Weather(Skill):
     def current_weather(self, city: str = '') -> str:
         """Get the current weather.
         Args:
-            city (str): The city to get the current weather for. If not provided, the city is fetched based on the IP address.
+            city (str): The city to get the current weather for. Default value is 'no_city'.
             tts (bool): Whether to use text-to-speech. Default is True.
         Returns:
                 str: The current weather."""
-        if not city:
+        if city == 'no_city':
             city = self.city
         weather_data = self.fetch_weather(city)
         if not weather_data:
