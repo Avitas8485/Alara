@@ -4,6 +4,8 @@ from .base_tts import BaseTTS
 from alara.config.config import cfg
 from alara.tools.text_parser.format_en import Converter
 from alara.lib.logger import logger
+import sounddevice as sd
+import numpy as np
 
 class PiperTTSError(Exception):
     def __init__(self, message: str) -> None:
@@ -79,23 +81,21 @@ class PiperTTS(BaseTTS):
         if process.stdin is None or process.stdout is None:
             raise PiperTTSError("Failed to create subprocess")
         
-        import pyaudio
-        chunk = 1024
-        p = pyaudio.PyAudio()
-        stream = p.open(format=pyaudio.paInt16,
-                        channels=1,
-                        rate=22050,
-                        output=True)
+        
+        stream = sd.OutputStream(samplerate=22050, channels=1, dtype=np.int16)
+        stream.start()
         process.stdin.write(cleaned_text.encode())
         process.stdin.close()
-        data = process.stdout.read(chunk)
+        data = process.stdout.read(1024)
         while len(data) > 0:
+            data = np.frombuffer(data, dtype=np.int16)
             stream.write(data)
-            data = process.stdout.read(chunk)
+            data = process.stdout.read(1024)
+        stream.stop()
         stream.close()
         process.wait()
-        p.terminate()
         
+    
     def synthesize_to_file(self, output_dir: str='alara/tts/outputs', output_filename: str='output', text: str=''):
         cleaned_text = self.clean_text(text)
         process = subprocess.Popen(
